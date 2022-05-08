@@ -1321,7 +1321,14 @@ json_string_t json::encode_json() const {
                         ret += "\\v";
                         break;
                     default:
-                        /*if( isprint(*i) )*/ ret += i;
+                        if( iscntrl(i) ) {
+                            char buf[8];
+                            sprintf(buf, "\\u00%02x", 0x00FF&i);
+                            ret += buf;
+                        } else {
+                            ret += i;
+                        }
+                        /*if( isprint(*i) )*/
                         /*else if( *(i+1) != '\0' ) {
                             char buf[8];
                             sprintf(buf,"%02x%02x", 0x00FF&*(i+1), 0x00FF&*i );

@@ -14,7 +14,8 @@ OS      =Linux
 VERSION =1.0.0-build1
 
 CC = g++
-CPPFLAGS = -Iinc -Iinc/basis -std=gnu++17 -D__ARCH=\"$(ARCH)\" -D__OS=\"$(OS)\" -D__VERSION=\"$(VERSION)\"
+CPPFLAGS = -g -Iinc -Iinc/basis -std=gnu++20 -D__ARCH=\"$(ARCH)\" -D__OS=\"$(OS)\" -D__VERSION=\"$(VERSION)\"
+LIBRARIES = -lstdc++fs
 
 bin/alioth: $(OBJ)
 	$(CC) $(CPPFLAGS) -o $@ $(OBJ)

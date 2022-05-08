@@ -4,8 +4,14 @@
 #include "utils.hpp"
 
 #include <stdexcept>
-
 namespace alioth {
+
+std::string interlog(const std::string& message, const std::source_location& location) {
+    using namespace std::string_literals;
+
+    return "[ "s + location.file_name() + ":" + std::to_string(location.line()) + " ] " + message;
+}
+
 one_shot_flag::operator bool() const { return buf; }
 
 one_shot_flag& one_shot_flag::operator=(bool v) {

@@ -1,0 +1,12 @@
+{
+    "logging": {
+        "templates": {
+            "english": {
+                "EPERM": {
+                    "sev": "INFO",
+
+                }
+            }
+        }
+    }
+}

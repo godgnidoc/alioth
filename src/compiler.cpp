@@ -8,6 +8,8 @@
 #include <set>
 #include <type_traits>
 
+#include "logging.hpp"
+
 #ifndef __ARCH
 #define __ARCH "undefined"
 #endif
@@ -39,16 +41,26 @@ compiler::compiler() {
         entry : std::bind(&compiler::compile, this, std::placeholders::_1)
     });
 
-    preprocess = std::bind(&compiler::common_entry, this, std::placeholders::_1, std::placeholders::_2);
+    interrupter = std::bind(&compiler::common_entry, this, std::placeholders::_1, std::placeholders::_2);
 }
 
-int compiler::compile(cli::commandline cmd) { return 0; }
+int compiler::compile(cli::commandline cmd) {
+    using namespace logging;
+    auto& logger = logger::root().child("test");
+    auto& tmpl = templating::instance();
+    tmpl.style(JSON);
+    tmpl.format(ERROR, "$1[ $(.month). $(.mday), $(.year) $(.hour):$(.minute):$(.sec) $rERROR $c$(?.scope){$(.scope)}$(?.begl){:$(.begl)}$(?.begc){:$(.begc)} $0$1]$0 $(.msg)");
+    logger.set_scope(__FILE__);
+    // logger.error("Hello", {});
+    logger.error( {.begin={.line=1,.column=2}, .end={.line=3, .column=4}}, "file $c$(file)$0 not found", {{"file", "test.alioth"}});
+    return 0;
+}
 
 int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry) {
-    if( cmd.more().size() == 0 ) {
+    return entry(cmd);
+    if (cmd.more().size() == 0) {
         return 1;
     }
-    return entry(cmd);
 }
 
 }  // namespace alioth

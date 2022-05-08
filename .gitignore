@@ -4,3 +4,4 @@ arc
 lib
 obj
 .vscode/launch.json
+.vscode/*.log

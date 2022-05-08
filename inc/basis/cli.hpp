@@ -19,57 +19,16 @@ namespace alioth {
 namespace cli {
 
 /**
- * @enum color_mode_t : 颜色模式 */
-enum class color_mode {
-
-    /**
-     * @enum SEQUENCE : 通过转义序列改变颜色 */
-    SEQUENCE,
-
-    /**
-     * @enum SYSTEMCALL : 通过系统调用改变颜色 */
-    SYSTEMCALL
-};
-
-struct rich_string {
-    std::string s;
-    int c;
-    int b;
-};
-
-rich_string bolb(const std::string& str);
-rich_string bolb(const rich_string& str);
-rich_string black(const std::string& str, bool b = false);
-rich_string black(const rich_string& str);
-rich_string red(const std::string& str, bool b = false);
-rich_string red(const rich_string& str);
-rich_string green(const std::string& str, bool b = false);
-rich_string green(const rich_string& str);
-rich_string yellow(const std::string& str, bool b = false);
-rich_string yellow(const rich_string& str);
-rich_string blue(const std::string& str, bool b = false);
-rich_string blue(const rich_string& str);
-rich_string purple(const std::string& str, bool b = false);
-rich_string purple(const rich_string& str);
-rich_string cyan(const std::string& str, bool b = false);
-rich_string cyan(const rich_string& str);
-rich_string white(const std::string& str, bool b = false);
-rich_string white(const rich_string& str);
-
-/**
  * @struct opt : 选项
  * @brief
- *  描述命令行参数传入的选项 */
-struct opt {
+ *  描述命令行参数传入的选项，其内容是选先所携带的参数
+ *   */
+struct opt : public chainz<std::string> {
     /**
      * @field id : 选项id
      * @brief
      *  0被用作其他未定义选项，其它数值可以自由使用 */
     int id;
-
-    /**
-     * @field args : 选项的参数 */
-    chainz<std::string> args;
 };
 
 /**
@@ -187,7 +146,7 @@ class application {
      * @brief
      *  全局选项格式为<id,opt>
      *  全局选项会被注入每一个功能的命令行 */
-    std::map<int, option> m_opts;
+    std::map<int, option> m_gopts;
 
     /**
      * @member m_binds : 功能开关绑定<switch,id> */
@@ -227,8 +186,8 @@ class application {
     std::string brief;
 
     /**
-     * @member m_preprocess : 预处理器，若设置则此函数拦截执行流 */
-    std::function<int(commandline, std::function<int(commandline)>)> preprocess;
+     * @member interrupter : 预处理器，若设置则此函数拦截执行流 */
+    std::function<int(commandline, std::function<int(commandline)>)> interrupter;
 
    public:
     /**
@@ -284,12 +243,6 @@ class application {
      * @param bool : 添加成功与否 */
     bool regist_global_option(int id, const option& opt);
 
-    /**
-     * @method set_color_mode : 设置颜色模式
-     * @brief
-     *  为输出设置颜色模式 */
-    static void set_color_mode(color_mode);
-
    protected:
     /**
      * @method regist_function : 注册功能
@@ -334,10 +287,6 @@ class application {
      * @method default_version : 默认版本页 */
     int default_version(commandline);
 };
-
-/**
- * @operator : 修改控制台字体颜色 */
-std::ostream& operator<<(std::ostream&, const rich_string&);
 
 }  // namespace cli
 }  // namespace alioth

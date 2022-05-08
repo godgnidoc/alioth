@@ -3,14 +3,15 @@
 
 #include <functional>
 #include <map>
+#include <source_location>
 #include <string>
 
 namespace alioth {
 
-using std::map;
-using std::string;
-using std::vector;
-using binary = vector<unsigned char>;
+/** 生成一条内部日志 */
+std::string interlog(const std::string& message, const std::source_location& location = std::source_location::current());
+
+using binary = std::vector<unsigned char>;
 
 /** 只允许设置不允许复位的标记 */
 class one_shot_flag {
@@ -25,17 +26,22 @@ class one_shot_flag {
 };
 
 /** 使用分割符将字符串分割 */
-vector<string> split(const string&, const char);
+std::vector<std::string> split(const std::string&, const char);
 
 /** 寻找字符串中的内容，按照顺序替换
  *  替换内容不会重叠，不会重复替换 */
-string replace(const string&, const map<string, string>& job);
+std::string replace(const std::string&, const std::map<std::string, std::string>& job);
 
 /** 将字符串重复factor次 */
-string operator*(const string& str, int factor);
+std::string operator*(const std::string& str, int factor);
 
 /** 将字符串重复factor次 */
-string operator*(int factor, const string& str);
+std::string operator*(int factor, const std::string& str);
+
+template <typename T>
+inline std::string strify(T&& val) {
+    return std::to_string(std::forward<T>(val));
+}
 
 }  // namespace alioth
 
