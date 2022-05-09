@@ -150,42 +150,40 @@ class templating {
 
    private:
     /** 各严重性格式 */
-    node* fmt[4] = {};
+    static node* fmt[4];
 
     /** 各错误号消息格式 */
-    std::map<int, node*> msgs;
+    static std::map<int, node*> msgs;
 
     /** 渲染样式，封闭后依然可以修改 */
-    style_t m_style = COLORED_TEXT;
+    static style_t m_style;
 
     /** 封闭标记 */
-    bool sealed = false;
+    static bool sealed;
 
    public:
-    /** 获取单例 */
-    static templating& instance();
 
     /** 进入多线程使用场景前封闭模板库，确保数据结构不再被修改 */
-    void seal();
+    static void seal();
 
     /**
      * 尝试设置一种严重性对应的格式，失败则抛出 invalid_argument 异常
      * @param sev 严重性
      * @param format 对应格式
      */
-    void format(severity sev, const std::string& format);
+    static void format(severity sev, const std::string& format);
 
     /**
      * 尝试设置一条消息的格式，失败则抛出 invalid_argument 异常，若对应消息号已存在则覆盖
      * @param eno 错误号
      */
-    void message(int eno, const std::string& format);
+    static void message(int eno, const std::string& format);
 
     /**
      * 设置渲染样式，封闭后不影响此操作
      * @param style_t 欲设置的样式
      */
-    void style(logging::style_t style);
+    static void style(logging::style_t style);
 
     /**
      * 根据错误号寻找，模板并渲染消息，若错误号不对应模板则抛出异常
@@ -194,7 +192,7 @@ class templating {
      * @param style 预期渲染样式，省略则取当前样式
      * @return 渲染完毕的消息
      */
-    std::string render(int eno, const record::arguments& args, style_t style = UNSET);
+    static std::string render(int eno, const record::arguments& args, style_t style = UNSET);
 
     /**
      * 编译模板并渲染消息，编译失败则抛出异常
@@ -203,7 +201,7 @@ class templating {
      * @param style 预期渲染样式，省略则取当前样式
      * @return 渲染完毕的消息
      */
-    std::string render(const std::string& tmpl, const record::arguments& args, style_t style = UNSET);
+    static std::string render(const std::string& tmpl, const record::arguments& args, style_t style = UNSET);
 
     /**
      * 渲染日志
@@ -211,7 +209,7 @@ class templating {
      * @param message 提前渲染完毕的日志消息文本
      * @return 渲染完毕的完整日志文本
      */
-    std::string render(const record& record, const std::string& message);
+    static std::string render(const record& record, const std::string& message);
 
    private:
     /** 将一个模板编译成为模板节点失败则返回空指针，失败则抛出异常 invalid_argument */
@@ -229,7 +227,7 @@ class templating {
     static std::string _render(node* n, const record::arguments& args, style_t s, std::string& suffix, int depth);
 
     /** 检查封装标记，若已封装则抛出异常 */
-    void watchdog();
+    static void watchdog();
 };
 
 /** 日志器 */
@@ -260,6 +258,9 @@ class logger {
      * @param the_handler 日志处理器 */
     logger(const std::string& name, logger* parent = nullptr);
 
+    logger( const logger& ) = delete;
+    logger( logger&& ) = delete;
+
    public:
     /** 产生调试信息，并格式化后送往处理器 */
     void debug(const record::message& msg, const record::arguments& args);
@@ -281,8 +282,11 @@ class logger {
     void error(const record::message& msg, const record::arguments& args);
     void error(const range& rng, const record::message& msg, const record::arguments& args);
 
-    /** 获取根日志器 */
-    static logger& root();
+    /** 
+     * 获取根日志器
+     * @param name 设置根日志器的名称，只有首次设置有效，后续设置会被忽略
+     */
+    static logger& root(const std::string& name);
 
     /** 获取子日志器，若不存在则创建 */
     logger& child(const std::string& name);

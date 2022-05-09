@@ -3,6 +3,7 @@
 
 #include "compiler.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -11,31 +12,34 @@
 #include "logging.hpp"
 
 #ifndef __ARCH
-#define __ARCH "undefined"
+#define __ARCH undefined
 #endif
 
 #ifndef __VERSION
-#define __VERSION "undefined"
+#define __VERSION undefined
 #endif
 
 #ifndef __OS
-#define __OS "undefined"
+#define __OS undefined
 #endif
+
+#define __QUOT2(X) #X
+#define __QUOT(X) __QUOT2(X)
 
 namespace alioth {
 
-compiler::compiler() {
+compiler::compiler() : logger(logging::logger::root("alioth")) {
     name = "alioth";
-    version = __VERSION;
+    version = __QUOT(__VERSION);
     author = "godgnidoc";
     email = "godgnidoc@gmail.com";
     brief = "compiler of the Alioth programming language";
-    arch = __ARCH;
-    os = __OS;
+    arch = __QUOT(__ARCH);
+    os = __QUOT(__OS);
     cert = "MIT";
 
     regist_main_function((cli::function){
-        name : "compile",
+        name : "build",
         brief : "compile source code into module",
         accept_more : true,
         entry : std::bind(&compiler::compile, this, std::placeholders::_1)
@@ -44,19 +48,30 @@ compiler::compiler() {
     interrupter = std::bind(&compiler::common_entry, this, std::placeholders::_1, std::placeholders::_2);
 }
 
-int compiler::compile(cli::commandline cmd) {
-    using namespace logging;
-    auto& logger = logger::root().child("test");
-    auto& tmpl = templating::instance();
-    tmpl.style(JSON);
-    tmpl.format(ERROR, "$1[ $(.month). $(.mday), $(.year) $(.hour):$(.minute):$(.sec) $rERROR $c$(?.scope){$(.scope)}$(?.begl){:$(.begl)}$(?.begc){:$(.begc)} $0$1]$0 $(.msg)");
-    logger.set_scope(__FILE__);
-    // logger.error("Hello", {});
-    logger.error( {.begin={.line=1,.column=2}, .end={.line=3, .column=4}}, "file $c$(file)$0 not found", {{"file", "test.alioth"}});
-    return 0;
-}
+int compiler::compile(cli::commandline cmd) { return 0; }
 
 int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry) {
+    m_configure_home = std::filesystem::path("/etc/alioth");
+    m_workspace_path = std::filesystem::current_path();
+
+    /** begin-code-gen-mark:global-options */
+    regist_global_option(LOGGING_TEMPLATE, (cli::option){
+        name : "--logging-template",
+        brief : "usage: --logging-template <path/to/logging.json>\ndefault: \"${configure_home}/logging.json\"specify the loggin template file\nnothing affected except an warning when failed",
+        args : 1,
+        times : 1,
+        required : false
+    });
+    
+    regist_global_option(WORKSPACE_PATH, (cli::option){
+        name : "--workspace",
+        brief : "usage: --workspace <path/to/workspace>\ndefault: \"${current_path}\"specify the workspace path",
+        args : 1,
+        times : 1,
+        required : false
+    });
+    /** end-code-gen-mark:global-options */
+
     return entry(cmd);
     if (cmd.more().size() == 0) {
         return 1;

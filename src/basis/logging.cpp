@@ -11,18 +11,17 @@
 
 namespace alioth::logging {
 
+templating::node* templating::fmt[4] = {};
+std::map<int, templating::node*> templating::msgs;
+style_t templating::m_style = COLORED_TEXT;
+bool templating::sealed = false;
+
 point::operator bool() const { return line > 0 && column > 0; }
 
 range::operator bool() const { return begin && end; }
 
 templating::node::~node() {
     for (auto n : children) delete n;
-}
-
-templating& templating::instance() {
-    static templating* inst = nullptr;
-    if (!inst) inst = new templating();
-    return *inst;
 }
 
 void templating::seal() { sealed = true; }
@@ -355,9 +354,20 @@ void logger::warn(const range& rng, const record::message& msg, const record::ar
 void logger::error(const record::message& msg, const record::arguments& args) { emit(ERROR, range(), msg, args); }
 void logger::error(const range& rng, const record::message& msg, const record::arguments& args) { emit(ERROR, rng, msg, args); }
 
-logger& logger::root() {
+logger& logger::root(const std::string& name) {
     static logger* root_logger = nullptr;
-    if (!root_logger) root_logger = new logger("alioth");
+    if (!root_logger) {
+        templating::format(ERROR,
+                           "$1[ $rERROR $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)");
+        templating::format(WARN, "$1[ $pWARN $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)");
+        templating::format(INFO, "$1[ $bINFO $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)");
+        templating::format(HINT, "$1[ $cHINT $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)");
+        templating::format(
+            DEBUG,
+            "$1[ $(.month). $(.mday), $(.year) $(.hour):$(.minute):$(.sec) DEBUG "
+            "$c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(?.path){$(.path): }$(.msg)");
+        root_logger = new logger(name);
+    }
     return *root_logger;
 }
 
@@ -391,9 +401,8 @@ void logger::emit(severity sev, const range& rng, const record::message& msg, co
 }
 
 std::string logger::format(const record& record) {
-    auto te = templating::instance();
-    auto message = std::visit([&](auto&& v) { return te.render(v, record.args); }, record.msg);
-    return te.render(record, message);
+    auto message = std::visit([&](auto&& v) { return templating::render(v, record.args); }, record.msg);
+    return templating::render(record, message);
 }
 
 void logger::handle(const record& record, const std::string& rendered) {
