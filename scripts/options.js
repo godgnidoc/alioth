@@ -25,25 +25,30 @@ for (let line of source.split('\n')) {
             state = 3
         } break
         case 3: {
+            let opt = global_options[global_options.length-1]
             if (line == "*/") {
                 state = 4
             } else if (line.startsWith("* @default ")) {
-                global_options[global_options.length - 1].required = false
-                global_options[global_options.length - 1].brief += "default: " + line.slice("* @default ".length)
+                opt.required = false
+                let def = line.slice("* @default ".length)
+                opt.brief += "default: ".padStart(41) + def + '\n'
             } else if (line.startsWith("* @brief ")) {
-                global_options[global_options.length - 1].brief += line.slice("* @brief ".length)
+                opt.brief += " ".repeat(32) + line.slice("* @brief ".length) + "\n"
             } else {
-                global_options[global_options.length - 1].brief += "\n" + line.slice("* ".length)
+                opt.brief += " ".repeat(32) + line.slice("* ".length) + "\n"
             }
         } break
         case 4: {
-            global_options[global_options.length - 1].ID = line.match(/((?:\w|_)+)/)[1]
+            let opt = global_options[global_options.length - 1]
+            opt.ID = line.match(/((?:\w|_)+)/)[1]
             state = 1
         } break
     }
 }
 
 let code = ''
+
+global_options = global_options.sort((a,b)=>a.name>b.name?1:-1)
 
 for (let go of global_options) {
     code += `

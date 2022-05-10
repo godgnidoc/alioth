@@ -28,6 +28,12 @@ class compiler : public cli::application {
          * @brief specify the workspace path
          */
         WORKSPACE_PATH,
+        /**
+         * --global-repository <path/to/global/repository>
+         * @default "/lib/alioth/packages"
+         * @brief specify the location where to find global packages
+         */
+        GLOBAL_REPOSITORY
     };
 
    protected:

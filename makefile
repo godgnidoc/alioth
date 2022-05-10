@@ -38,6 +38,9 @@ $(LSRC):src/%.cpp:syntax/%.fl
 $(SSRC):src/%.cpp:syntax/%.yy
 	bison $<
 
+src/compiler.cpp:inc/compiler.hpp scripts/options.js
+	node scripts/options.js inc/compiler.hpp src/compiler.cpp
+
 clean:
 	rm $(SSRC) $(LSRC) $(OBJ) $(DEP)
 

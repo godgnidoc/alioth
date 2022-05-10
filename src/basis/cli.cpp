@@ -163,10 +163,9 @@ int application::regist_function(int id, const function& func, const chainz<std:
 
 int application::describe_binds(int id, std::ostream& os) {
     std::map<int, chainz<std::string>> raw_binds;
-    for (auto& bind : m_binds) {
-        if (bind.second == id) {
-            raw_binds[bind.first.size()] << bind.first;
-        }
+    auto linear_binds = look_up_binds(id);
+    for (auto bind : linear_binds) {
+        raw_binds[bind.size()] << bind;
     }
     std::string binds;
     for (auto& bs : raw_binds)
@@ -228,48 +227,50 @@ int application::describe_function(int id, std::ostream& os) {
     return ret;
 }
 
+chainz<std::string> application::look_up_binds(int id) {
+    chainz<std::string> raw_binds;
+    for (auto& bind : m_binds) {
+        if (bind.second == id) {
+            raw_binds << bind.first;
+        }
+    }
+    return raw_binds;
+}
+
 int application::default_help(commandline cmd) {
     if (cmd.opts.size() == 0) {
         std::cout << name << ": " << brief << std::endl << std::endl;
         if (m_funcs.count(0)) {
             auto& major = m_funcs[0];
-            if (!major.options.empty()) {
-                if (major.accept_more)
-                    std::cout << "USAGE"
-                              << ": " << name << " [OPTIONS] ..." << std::endl
-                              << std::endl;
-                else
-                    std::cout << "USAGE"
-                              << ": " << name << " [OPTIONS]" << std::endl
-                              << std::endl;
+            std::cout << "USAGE: " << name;
+            if (!major.options.empty()) std::cout << " [OPTIONS]" << std::endl;
+            if (major.accept_more) std::cout << " ...";
+            std::cout << std::endl;
 
+            if (!major.options.empty()) {
                 std::cout << "OPTIONS"
                           << ": " << std::endl;
-                for (auto& opt : major.options) {
+                std::map<std::string, option> remap;
+                for (auto& opt : major.options) remap[opt.second.name] = opt.second;
+                for (auto& opt : remap) {
                     describe_option(opt.second, std::cout);
                     std::cout << std::endl;
                 }
-
-                if (!m_gopts.empty()) {
-                    std::cout << "OPTIONS[GLOBAL]"
-                              << ": " << std::endl;
-                    for (auto& opt : m_gopts) {
-                        describe_option(opt.second, std::cout);
-                        std::cout << std::endl;
-                    }
-                }
-            } else {
-                if (major.accept_more)
-                    std::cout << "USAGE"
-                              << ": " << name << " ..." << std::endl
-                              << std::endl;
-                else
-                    std::cout << "USAGE"
-                              << ": " << name << std::endl
-                              << std::endl;
             }
             std::cout << std::endl;
         }
+
+        if (!m_gopts.empty()) {
+            std::cout << "OPTIONS[GLOBAL]"
+                      << ": " << std::endl;
+            std::map<std::string, option> remap;
+            for (auto& opt : m_gopts) remap[opt.second.name] = opt.second;
+            for (auto& opt : remap) {
+                describe_option(opt.second, std::cout);
+                std::cout << std::endl;
+            }
+        }
+
         std::cout << "FUNCTIONS"
                   << ": " << std::endl;
         for (auto& func : m_funcs) {
@@ -286,6 +287,12 @@ int application::default_help(commandline cmd) {
         auto& func = m_funcs[fid->second];
         std::cout << name << " -- " << func.name << std::endl << std::endl;
 
+        auto bind = look_up_binds(fid->second)[0];
+        std::cout << "USAGE: " << name << " " << bind;
+        if (!func.options.empty()) std::cout << " [OPTIONS]";
+        if (func.accept_more) std::cout << " ...";
+        std::cout << std::endl << std::endl;
+
         std::cout << func.brief << std::endl << std::endl;
 
         std::cout << "SWITCHS"
@@ -293,11 +300,15 @@ int application::default_help(commandline cmd) {
         describe_binds(fid->second, std::cout);
         std::cout << std::endl << std::endl;
 
-        std::cout << "OPTIONS"
-                  << ":" << std::endl;
-        for (auto opt : func.options) {
-            describe_option(opt.second, std::cout);
-            std::cout << std::endl;
+        if (!func.options.empty()) {
+            std::cout << "OPTIONS"
+                      << ":" << std::endl;
+            std::map<std::string, option> remap;
+            for (auto& opt : func.options) remap[opt.second.name] = opt.second;
+            for (auto opt : remap) {
+                describe_option(opt.second, std::cout);
+                std::cout << std::endl;
+            }
         }
     }
     return 0;

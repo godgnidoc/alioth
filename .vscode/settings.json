@@ -66,6 +66,7 @@
         "syntactic": "yacc",
         "source_location": "cpp",
         "list": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "codecvt": "cpp"
     }
 }

@@ -53,7 +53,7 @@ struct commandline {
 
     /**
      * 返回未被识别为已知选项的命令行参数 */
-    chainz<std::string> more()const;
+    chainz<std::string> more() const;
 };
 
 /**
@@ -279,6 +279,11 @@ class application {
     int describe_function(int id, std::ostream& os);
 
    private:
+    /**
+     * @method look_up_binds : 查找功能开关
+     * @param id : 功能id
+     * @return chainz<std::string> 功能开关列表 */
+    chainz<std::string> look_up_binds(int id);
     /**
      * @method default_help : 默认帮助页 */
     int default_help(commandline);

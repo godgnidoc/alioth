@@ -55,9 +55,17 @@ int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandl
     m_workspace_path = std::filesystem::current_path();
 
     /** begin-code-gen-mark:global-options */
+    regist_global_option(GLOBAL_REPOSITORY, (cli::option){
+        name : "--global-repository",
+        brief : "usage: --global-repository <path/to/global/repository>\n                                default: \"/lib/alioth/packages\"\n                                specify the location where to find global packages\n",
+        args : 1,
+        times : 1,
+        required : false
+    });
+    
     regist_global_option(LOGGING_TEMPLATE, (cli::option){
         name : "--logging-template",
-        brief : "usage: --logging-template <path/to/logging.json>\ndefault: \"${configure_home}/logging.json\"specify the loggin template file\nnothing affected except an warning when failed",
+        brief : "usage: --logging-template <path/to/logging.json>\n                                default: \"${configure_home}/logging.json\"\n                                specify the loggin template file\n                                nothing affected except an warning when failed\n",
         args : 1,
         times : 1,
         required : false
@@ -65,7 +73,7 @@ int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandl
     
     regist_global_option(WORKSPACE_PATH, (cli::option){
         name : "--workspace",
-        brief : "usage: --workspace <path/to/workspace>\ndefault: \"${current_path}\"specify the workspace path",
+        brief : "usage: --workspace <path/to/workspace>\n                                default: \"${current_path}\"\n                                specify the workspace path\n",
         args : 1,
         times : 1,
         required : false
