@@ -263,24 +263,24 @@ class logger {
 
    public:
     /** 产生调试信息，并格式化后送往处理器 */
-    void debug(const record::message& msg, const record::arguments& args);
-    void debug(const range& rng, const record::message& msg, const record::arguments& args);
+    void debug(const record::message& msg, const record::arguments& args = {});
+    void debug(const range& rng, const record::message& msg, const record::arguments& args = {});
 
     /** 产生提示信息，并格式化后送往处理器 */
-    void hint(const record::message& msg, const record::arguments& args);
-    void hint(const range& rng, const record::message& msg, const record::arguments& args);
+    void hint(const record::message& msg, const record::arguments& args = {});
+    void hint(const range& rng, const record::message& msg, const record::arguments& args = {});
 
     /** 产生提示信息，并格式化后送往处理器 */
-    void info(const record::message& msg, const record::arguments& args);
-    void info(const range& rng, const record::message& msg, const record::arguments& args);
+    void info(const record::message& msg, const record::arguments& args = {});
+    void info(const range& rng, const record::message& msg, const record::arguments& args = {});
 
     /** 产生警告信息，并格式化后送往处理器 */
-    void warn(const record::message& msg, const record::arguments& args);
-    void warn(const range& rng, const record::message& msg, const record::arguments& args);
+    void warn(const record::message& msg, const record::arguments& args = {});
+    void warn(const range& rng, const record::message& msg, const record::arguments& args = {});
 
     /** 产生错误信息，并格式化后送往处理器 */
-    void error(const record::message& msg, const record::arguments& args);
-    void error(const range& rng, const record::message& msg, const record::arguments& args);
+    void error(const record::message& msg, const record::arguments& args = {});
+    void error(const range& rng, const record::message& msg, const record::arguments& args = {});
 
     /** 
      * 获取根日志器

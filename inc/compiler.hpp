@@ -16,24 +16,24 @@ class compiler : public cli::application {
     /** 全局选项ID */
     enum global_options {
         /** 
-         * --logging-template <path/to/logging.json>
+         * --logging-config <path/to/logging.json>
          * @default "${configure_home}/logging.json"
-         * @brief specify the loggin template file
+         * @brief specify the loggin config file
          * nothing affected except an warning when failed
          */
-        LOGGING_TEMPLATE = 1024,
+        OPTION_LOGGING_CONFIG = 1024,
         /**
          * --workspace <path/to/workspace>
          * @default "${current_path}"
          * @brief specify the workspace path
          */
-        WORKSPACE_PATH,
+        OPTION_WORKSPACE_PATH,
         /**
          * --global-repository <path/to/global/repository>
          * @default "/lib/alioth/packages"
          * @brief specify the location where to find global packages
          */
-        GLOBAL_REPOSITORY
+        OPTION_GLOBAL_REPOSITORY
     };
 
    protected:
@@ -49,6 +49,9 @@ class compiler : public cli::application {
 
     /** 当前工作空间 */
     std::filesystem::path m_workspace_path;
+
+    /** 当前日志配置文件路径 */
+    std::filesystem::path m_logging_config;
 };
 
 }  // namespace alioth

@@ -28,6 +28,8 @@
 
 namespace alioth {
 
+using namespace std::string_literals;
+
 compiler::compiler() : logger(logging::logger::root("alioth")) {
     name = "alioth";
     version = __QUOT(__VERSION);
@@ -37,6 +39,37 @@ compiler::compiler() : logger(logging::logger::root("alioth")) {
     arch = __QUOT(__ARCH);
     os = __QUOT(__OS);
     cert = "MIT";
+
+    /** begin-code-gen-mark:global-options */
+    regist_global_option(OPTION_GLOBAL_REPOSITORY, (cli::option){
+        name : "--global-repository",
+        brief :
+            "usage: --global-repository <path/to/global/repository>\n                                default: "
+            "\"/lib/alioth/packages\"\n                                specify the location where to find global packages\n",
+        args : 1,
+        times : 1,
+        required : false
+    });
+
+    regist_global_option(OPTION_LOGGING_CONFIG, (cli::option){
+        name : "--logging-config",
+        brief : "usage: --logging-config <path/to/logging.json>\n                                default: "
+                "\"${configure_home}/logging.json\"\n                                specify the loggin config file\n          "
+                "                      nothing affected except an warning when failed\n",
+        args : 1,
+        times : 1,
+        required : false
+    });
+
+    regist_global_option(OPTION_WORKSPACE_PATH, (cli::option){
+        name : "--workspace",
+        brief : "usage: --workspace <path/to/workspace>\n                                default: \"${current_path}\"\n        "
+                "                        specify the workspace path\n",
+        args : 1,
+        times : 1,
+        required : false
+    });
+    /** end-code-gen-mark:global-options */
 
     regist_main_function((cli::function){
         name : "build",
@@ -51,39 +84,20 @@ compiler::compiler() : logger(logging::logger::root("alioth")) {
 int compiler::compile(cli::commandline cmd) { return 0; }
 
 int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry) {
-    m_configure_home = std::filesystem::path("/etc/alioth");
+    m_configure_home = std::filesystem::absolute(std::filesystem::path("/etc/alioth")).lexically_normal();
     m_workspace_path = std::filesystem::current_path();
 
-    /** begin-code-gen-mark:global-options */
-    regist_global_option(GLOBAL_REPOSITORY, (cli::option){
-        name : "--global-repository",
-        brief : "usage: --global-repository <path/to/global/repository>\n                                default: \"/lib/alioth/packages\"\n                                specify the location where to find global packages\n",
-        args : 1,
-        times : 1,
-        required : false
-    });
-    
-    regist_global_option(LOGGING_TEMPLATE, (cli::option){
-        name : "--logging-template",
-        brief : "usage: --logging-template <path/to/logging.json>\n                                default: \"${configure_home}/logging.json\"\n                                specify the loggin template file\n                                nothing affected except an warning when failed\n",
-        args : 1,
-        times : 1,
-        required : false
-    });
-    
-    regist_global_option(WORKSPACE_PATH, (cli::option){
-        name : "--workspace",
-        brief : "usage: --workspace <path/to/workspace>\n                                default: \"${current_path}\"\n                                specify the workspace path\n",
-        args : 1,
-        times : 1,
-        required : false
-    });
-    /** end-code-gen-mark:global-options */
+    if (cmd[OPTION_LOGGING_CONFIG].size()) {
+        m_logging_config = cmd[OPTION_LOGGING_CONFIG][0][0];
+    } else {
+        m_logging_config = m_configure_home / std::filesystem::path("logging.json"s);
+    }
+    logger.debug(std::filesystem::absolute(m_logging_config).lexically_normal());
+    logger.debug(std::filesystem::absolute(m_configure_home).lexically_normal());
+    logger.debug(m_workspace_path);
+
 
     return entry(cmd);
-    if (cmd.more().size() == 0) {
-        return 1;
-    }
 }
 
 }  // namespace alioth
