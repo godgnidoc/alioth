@@ -9,13 +9,25 @@ SRC := $(shell echo $(SRC) | tr " " "\n" | sort -u | xargs )
 OBJ := $(SRC:src/%.cpp=obj/%.o)
 DEP := $(SRC:src/%.cpp=temp/%.d)
 
-ARCH    =x86_64
-OS      =Linux
-VERSION =1.0.0-build1
+NAME	="$(shell node scripts/about.js name)"
+VERSION	="$(shell node scripts/about.js version)"
+AUTHOR  ="$(shell node scripts/about.js publisher.name)"
+EMAIL	="$(shell node scripts/about.js publisher.email)"
+BRIEF	="$(shell node scripts/about.js brief)"
+ARCH    ="$(shell node scripts/about.js arch)"
+OS      ="$(shell node scripts/about.js os)"
+LICENSE	="$(shell node scripts/about.js license)"
 
 CC = g++
-CPPFLAGS = -g -Iinc -Iinc/basis -std=gnu++20 -D__ARCH=$(ARCH) -D__OS=$(OS) -D__VERSION=$(VERSION)
+CPPFLAGS = -g -Iinc -Iinc/basis -std=gnu++20 
+CPPFLAGS += -D__NAME=$(NAME) -D__VERSION=$(VERSION) -D__BRIEF=$(BRIEF)
+CPPFLAGS += -D__ARCH=$(ARCH) -D__OS=$(OS)
+CPPFLAGS += -D__AUTHOR=$(AUTHOR) -D__EMAIL=$(EMAIL) -D__LICENSE=$(LICENSE)
 LIBRARIES = -lstdc++fs
+
+build:
+	node scripts/about.js build
+	make bin/alioth
 
 bin/alioth: $(OBJ)
 	$(CC) $(CPPFLAGS) -o $@ $(OBJ)
@@ -38,10 +50,10 @@ $(LSRC):src/%.cpp:syntax/%.fl
 $(SSRC):src/%.cpp:syntax/%.yy
 	bison $<
 
-src/compiler.cpp:inc/compiler.hpp scripts/options.js
-	node scripts/options.js inc/compiler.hpp src/compiler.cpp
+src/compiler.options.cpp:inc/compiler.hpp scripts/options.js
+	node scripts/options.js inc/compiler.hpp src/compiler.options.cpp
 
 clean:
 	rm $(SSRC) $(LSRC) $(OBJ) $(DEP)
 
-.PHONY:clean
+.PHONY:clean build

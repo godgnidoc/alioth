@@ -25,7 +25,7 @@ for (let line of source.split('\n')) {
             state = 3
         } break
         case 3: {
-            let opt = global_options[global_options.length-1]
+            let opt = global_options[global_options.length - 1]
             if (line == "*/") {
                 state = 4
             } else if (line.startsWith("* @default ")) {
@@ -48,7 +48,7 @@ for (let line of source.split('\n')) {
 
 let code = ''
 
-global_options = global_options.sort((a,b)=>a.name>b.name?1:-1)
+global_options = global_options.sort((a, b) => a.name > b.name ? 1 : -1)
 
 for (let go of global_options) {
     code += `

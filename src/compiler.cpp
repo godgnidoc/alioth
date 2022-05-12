@@ -11,16 +11,29 @@
 
 #include "logging.hpp"
 
-#ifndef __ARCH
-#define __ARCH undefined
+#ifndef __NAME
+#define __NAME undefined
 #endif
-
 #ifndef __VERSION
 #define __VERSION undefined
 #endif
-
+#ifndef __BRIEF
+#define __BRIEF undefined
+#endif
+#ifndef __ARCH
+#define __ARCH undefined
+#endif
 #ifndef __OS
 #define __OS undefined
+#endif
+#ifndef __AUTHOR
+#define __AUTHOR undefined
+#endif
+#ifndef __EMAIL
+#define __EMAIL undefined
+#endif
+#ifndef __LICENSE
+#define __LICENSE undefined
 #endif
 
 #define __QUOT2(X) #X
@@ -30,46 +43,17 @@ namespace alioth {
 
 using namespace std::string_literals;
 
-compiler::compiler() : logger(logging::logger::root("alioth")) {
-    name = "alioth";
+compiler::compiler() : logger(logging::logger::root(__QUOT(__NAME))) {
+    name = __QUOT(__NAME);
     version = __QUOT(__VERSION);
-    author = "godgnidoc";
-    email = "godgnidoc@gmail.com";
-    brief = "compiler of the Alioth programming language";
+    author = __QUOT(__AUTHOR);
+    email = __QUOT(__EMAIL);
+    brief = __QUOT(__BRIEF);
     arch = __QUOT(__ARCH);
     os = __QUOT(__OS);
-    cert = "MIT";
+    cert = __QUOT(__LICENSE);
 
-    /** begin-code-gen-mark:global-options */
-    regist_global_option(OPTION_GLOBAL_REPOSITORY, (cli::option){
-        name : "--global-repository",
-        brief :
-            "usage: --global-repository <path/to/global/repository>\n                                default: "
-            "\"/lib/alioth/packages\"\n                                specify the location where to find global packages\n",
-        args : 1,
-        times : 1,
-        required : false
-    });
-
-    regist_global_option(OPTION_LOGGING_CONFIG, (cli::option){
-        name : "--logging-config",
-        brief : "usage: --logging-config <path/to/logging.json>\n                                default: "
-                "\"${configure_home}/logging.json\"\n                                specify the loggin config file\n          "
-                "                      nothing affected except an warning when failed\n",
-        args : 1,
-        times : 1,
-        required : false
-    });
-
-    regist_global_option(OPTION_WORKSPACE_PATH, (cli::option){
-        name : "--workspace",
-        brief : "usage: --workspace <path/to/workspace>\n                                default: \"${current_path}\"\n        "
-                "                        specify the workspace path\n",
-        args : 1,
-        times : 1,
-        required : false
-    });
-    /** end-code-gen-mark:global-options */
+    register_global_options();
 
     regist_main_function((cli::function){
         name : "build",

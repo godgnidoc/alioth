@@ -39,6 +39,7 @@ class compiler : public cli::application {
    protected:
     int compile(cli::commandline cmd);
     int common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry);
+    void register_global_options();
 
    protected:
     /** 日志器 */

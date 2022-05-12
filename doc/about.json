@@ -1,0 +1,21 @@
+{
+    "name": "alioth",
+    "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "build": 3
+    },
+    "publisher": {
+        "name": "godgnidoc",
+        "email": "godgnidoc@gmail.com"
+    },
+    "authors": [
+        {
+            "name": "godgnidoc",
+            "email": "godgnidoc@gmail.com"
+        }
+    ],
+    "brief": "compiler of the Alioth programming language",
+    "license": "MIT"
+}
