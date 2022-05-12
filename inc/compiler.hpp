@@ -33,13 +33,20 @@ class compiler : public cli::application {
          * @default "/lib/alioth/packages"
          * @brief specify the location where to find global packages
          */
-        OPTION_GLOBAL_REPOSITORY
+        OPTION_GLOBAL_REPOSITORY,
+        /**
+         * --logging-level <LEVEL>
+         * @default "HINT"
+         * @brief specify the logging filtering level
+         */
+        OPTION_LOGGING_LEVEL,
     };
 
    protected:
     int compile(cli::commandline cmd);
     int common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry);
     void register_global_options();
+    bool load_logging_config(const std::filesystem::path& fpath );
 
    protected:
     /** 日志器 */
@@ -50,9 +57,6 @@ class compiler : public cli::application {
 
     /** 当前工作空间 */
     std::filesystem::path m_workspace_path;
-
-    /** 当前日志配置文件路径 */
-    std::filesystem::path m_logging_config;
 };
 
 }  // namespace alioth

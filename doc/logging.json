@@ -1,18 +1,12 @@
 {
     "logging": {
-        "templates": {
-            "english": {
-                "formats": {
-                    "ERROR": "$1[ $rERROR $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
-                    "WARN": "$1[ $pWARN $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
-                    "INFO": "$1[ $bINFO $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
-                    "HINT": "$1[ $cHINT $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
-                    "DEBUG": "$1[ $(.month). $(.mday), $(.year) $(.hour):$(.minute):$(.sec) DEBUG $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(?.path){$(.path): }$(.msg)"
-                },
-                "messages": {
-
-                }
-            }
-        }
+        "formats": {
+            "ERROR": "$1[ $rERROR $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
+            "WARN": "$1[ $pWARN $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
+            "INFO": "$1[ $bINFO $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
+            "HINT": "$1[ $cHINT $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
+            "DEBUG": "$1[ $(.month). $(.mday), $(.year) $(.hour):$(.minute):$(.sec) DEBUG $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(?.path){$(.path): }$(.msg)"
+        },
+        "templates": {}
     }
 }

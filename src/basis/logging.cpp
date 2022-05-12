@@ -386,6 +386,8 @@ void logger::set_scope(const std::string& scope) { m_scope = scope; }
 
 void logger::set_handler(handler hdlr) { m_handler = hdlr; }
 
+void logger::set_level(severity sev) { m_level = sev; }
+
 void logger::emit(severity sev, const range& rng, const record::message& msg, const record::arguments& args) {
     if (sev > m_level) return;
     auto log = record{.tim = time(nullptr),

@@ -70,18 +70,42 @@ int compiler::compile(cli::commandline cmd) { return 0; }
 int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry) {
     m_configure_home = std::filesystem::absolute(std::filesystem::path("/etc/alioth")).lexically_normal();
     m_workspace_path = std::filesystem::current_path();
+    logger.set_level(logging::HINT);
 
-    if (cmd[OPTION_LOGGING_CONFIG].size()) {
-        m_logging_config = cmd[OPTION_LOGGING_CONFIG][0][0];
-    } else {
-        m_logging_config = m_configure_home / std::filesystem::path("logging.json"s);
+    if (cmd[OPTION_LOGGING_LEVEL].size()) {
+        auto level = cmd[OPTION_LOGGING_LEVEL][0][0];
+        if (level == "ERROR")
+            logger.set_level(logging::ERROR);
+        else if (level == "WARN")
+            logger.set_level(logging::WARN);
+        else if (level == "INFO")
+            logger.set_level(logging::INFO);
+        else if (level == "HINT")
+            logger.set_level(logging::HINT);
+        else if (level == "DEBUG")
+            logger.set_level(logging::DEBUG);
+        else
+            logger.warn("unsupported logging level '$1$c$(l)$0', ignored", {{"l", level}});
     }
-    logger.debug(std::filesystem::absolute(m_logging_config).lexically_normal());
+
+    auto logging_config_path = m_configure_home / std::filesystem::path("logging.json"s);
+    if (cmd[OPTION_LOGGING_CONFIG].size()) logging_config_path = cmd[OPTION_LOGGING_CONFIG][0][0];
+
+    load_logging_config(logging_config_path);
     logger.debug(std::filesystem::absolute(m_configure_home).lexically_normal());
     logger.debug(m_workspace_path);
 
-
     return entry(cmd);
+}
+
+bool compiler::load_logging_config(const std::filesystem::path& fpath) {
+    logger.debug(std::filesystem::absolute(fpath).lexically_normal());
+    auto is = std::ifstream(fpath);
+    if (!is) {
+        logger.error("error loading logging config: cannot open file '$1$c$(p)$0'", {{"p", fpath}});
+        return false;
+    }
+    return true;
 }
 
 }  // namespace alioth
