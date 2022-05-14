@@ -286,7 +286,7 @@ class logger {
      * 获取根日志器
      * @param name 设置根日志器的名称，只有首次设置有效，后续设置会被忽略
      */
-    static logger& root(const std::string& name);
+    static logger& root(const std::string& name = "");
 
     /** 获取子日志器，若不存在则创建 */
     logger& child(const std::string& name);
@@ -313,9 +313,7 @@ class logger {
     /** 获取日志器路径 */
     std::string get_path();
 
-   public:
-    /** @mark:logging-functions:start **/
-    /** @mark:logging-functions:end **/
+    friend class helper;
 };
 
 }  // namespace alioth::logging

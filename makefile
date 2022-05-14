@@ -51,7 +51,10 @@ $(SSRC):src/%.cpp:syntax/%.yy
 	bison $<
 
 src/compiler.options.cpp:inc/compiler.hpp scripts/options.js
-	node scripts/options.js inc/compiler.hpp src/compiler.options.cpp
+	node scripts/options.js
+
+src/logger.cpp inc/logger.helper.hpp src/logger.helper.cpp:doc/logging.json scripts/logging.js
+	node scripts/logging.js
 
 clean:
 	rm $(SSRC) $(LSRC) $(OBJ) $(DEP)

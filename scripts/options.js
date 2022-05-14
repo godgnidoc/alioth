@@ -1,13 +1,19 @@
 const { readFileSync, writeFileSync } = require('fs');
-const { argv } = require('process');
+const { join } = require('path');
+const { fill_marked_fragment } = require('./util');
 
-let source = readFileSync(argv[2]).toString();
+/**
+ * @script 此脚本用于从全局选项ID枚举及其注释生成全局选项注册代码
+ */
 
+const compiler_hpp = join(__dirname, '..', 'inc', 'compiler.hpp')
+const compiler_options_hpp = join(__dirname, '..', 'src', 'compiler.options.cpp')
+
+let source = readFileSync(compiler_hpp).toString();
 source = source.match(/enum\s*global_options\s*{((?:.|\n)+)};/m)[1]
 
-let state = 1;
+let state = 1
 let global_options = []
-
 for (let line of source.split('\n')) {
     line = line.trim()
     switch (state) {
@@ -47,7 +53,6 @@ for (let line of source.split('\n')) {
 }
 
 let code = ''
-
 global_options = global_options.sort((a, b) => a.name > b.name ? 1 : -1)
 
 for (let go of global_options) {
@@ -62,12 +67,8 @@ for (let go of global_options) {
     `
 }
 
-source = readFileSync(argv[3]).toString()
+source = readFileSync(compiler_options_hpp).toString()
+source = fill_marked_fragment('global-options', source, code)
 
-source = source.replace(
-    /\/\*\* begin-code-gen-mark:global-options \*\/(.|\n)+\/\*\* end-code-gen-mark:global-options \*\//m,
-    `/** begin-code-gen-mark:global-options */${code}/** end-code-gen-mark:global-options */`
-)
-
-writeFileSync(argv[3], source)
+writeFileSync(compiler_options_hpp, source)
 // console.log(source)

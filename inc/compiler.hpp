@@ -5,7 +5,7 @@
 #include <set>
 
 #include "cli.hpp"
-#include "logging.hpp"
+#include "logger.hpp"
 
 namespace alioth {
 
@@ -46,11 +46,10 @@ class compiler : public cli::application {
     int compile(cli::commandline cmd);
     int common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry);
     void register_global_options();
-    bool load_logging_config(const std::filesystem::path& fpath );
 
    protected:
     /** 日志器 */
-    logging::logger& logger;
+    logging::helper logger;
 
     /** 配置信息目录 */
     std::filesystem::path m_configure_home;

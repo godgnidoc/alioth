@@ -57,7 +57,7 @@ std::string templating::render(const std::string& tmpl, const record::arguments&
 
 std::string templating::render(const record& record, const std::string& message) {
     static const char* months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    static const char* wdays[] = {"Sun", "Mon", "Wed", "Thurs", "Fri", "Sat"};
+    static const char* wdays[] = {"Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"};
     static const char* severities[] = {"ERROR", "WARN", "INFO", "HINT", "DEBUG"};
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto tm = *std::localtime(&now);

@@ -9,6 +9,7 @@
 #include <set>
 #include <type_traits>
 
+#include "logger.hpp"
 #include "logging.hpp"
 
 #ifndef __NAME
@@ -68,46 +69,44 @@ compiler::compiler() : logger(logging::logger::root(__QUOT(__NAME))) {
 int compiler::compile(cli::commandline cmd) { return 0; }
 
 int compiler::common_entry(cli::commandline cmd, std::function<int(cli::commandline)> entry) {
+    using logging::severity;
     m_configure_home = std::filesystem::absolute(std::filesystem::path("/etc/alioth")).lexically_normal();
     m_workspace_path = std::filesystem::current_path();
-    logger.set_level(logging::HINT);
+    logger->set_level(logging::HINT);
 
     if (cmd[OPTION_LOGGING_LEVEL].size()) {
         auto level = cmd[OPTION_LOGGING_LEVEL][0][0];
         if (level == "ERROR")
-            logger.set_level(logging::ERROR);
+            logger->set_level(logging::ERROR);
         else if (level == "WARN")
-            logger.set_level(logging::WARN);
+            logger->set_level(logging::WARN);
         else if (level == "INFO")
-            logger.set_level(logging::INFO);
+            logger->set_level(logging::INFO);
         else if (level == "HINT")
-            logger.set_level(logging::HINT);
+            logger->set_level(logging::HINT);
         else if (level == "DEBUG")
-            logger.set_level(logging::DEBUG);
+            logger->set_level(logging::DEBUG);
         else
-            logger.warn("unsupported logging level '$1$c$(l)$0', ignored", {{"l", level}});
+            logger->warn("unsupported logging level '$1$c$(l)$0', ignored", {{"l", level}});
     }
 
     auto logging_config_path = m_configure_home / std::filesystem::path("logging.json"s);
     if (cmd[OPTION_LOGGING_CONFIG].size()) logging_config_path = cmd[OPTION_LOGGING_CONFIG][0][0];
+    logging_config_path = std::filesystem::absolute(logging_config_path).lexically_normal();
 
-    load_logging_config(logging_config_path);
-    logger.debug(std::filesystem::absolute(m_configure_home).lexically_normal());
-    logger.debug(m_workspace_path);
+    auto is = std::ifstream(logging_config_path);
+    if (!is) {
+        logger->error("error loading logging config: cannot open file '$1$c$(p)$0'", {{"p", logging_config_path}});
+        return false;
+    }
+    try {
+        load_logging_config(is);
+    } catch (std::exception& e) {
+        logger->error("error loading logging config: $(what)", {{"what", e.what()}});
+    }
 
     return entry(cmd);
 }
-
-bool compiler::load_logging_config(const std::filesystem::path& fpath) {
-    logger.debug(std::filesystem::absolute(fpath).lexically_normal());
-    auto is = std::ifstream(fpath);
-    if (!is) {
-        logger.error("error loading logging config: cannot open file '$1$c$(p)$0'", {{"p", fpath}});
-        return false;
-    }
-    return true;
-}
-
 }  // namespace alioth
 
 int main(int argc, char** argv) {

@@ -7,6 +7,9 @@
             "HINT": "$1[ $cHINT $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(.msg)",
             "DEBUG": "$1[ $(.month). $(.mday), $(.year) $(.hour):$(.minute):$(.sec) DEBUG $c$(?.scope){$(.scope)$(?.begl){:$(.begl)$(?.begc){:$(.begc)}} }$0$1]$0 $(?.path){$(.path): }$(.msg)"
         },
-        "templates": {}
+        "templates": {
+            "file_not_found": "file $1$c$(file)$0 not found",
+            "unrecognized_token": "unrecognized token found $1$c$(token)$0, $1$g$(expected)$0"
+        }
     }
 }

@@ -4,6 +4,10 @@ const {argv} = require('process');
 const { promisify } = require('util')
 const child = require('child_process')
 
+/** 
+ * @script 此脚本用于在编译时控制项目相关信息
+ */
+
 const about_path = join(__dirname, '..', 'doc', 'about.json');
 
 const exec = promisify(child.exec);
