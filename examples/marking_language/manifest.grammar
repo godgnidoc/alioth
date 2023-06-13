@@ -1,0 +1,54 @@
+# Grammar for manifest
+
+lang: "manifest"
+
+SERVICE<keyword> = /service/ { type: "keyword" }
+EVENT<keyword> = /event/ { type: "keyword" }
+READONLY<keyword> = /readonly/ { type: "operator" }
+FIELD<keyword> = /field/ { type: "keyword" }
+METHOD<keyword> = /method/ { type: "keyword" }
+LP = /\(/ { type: "operator" }
+RP = /\)/ { type: "operator" }
+LB = /\[/ { type: "operator" }
+RB = /\]/ { type: "operator" }
+COMMA = /,/ { type: "operator" }
+COLON = /:/ { type: "operator" }
+LS = /{/ { type: "operator" }
+RS = /}/ { type: "operator" }
+ID = /[a-zA-Z_]\w*/ { type: "variable", modifier: "definition" }
+SPACE ?= /\s+/
+COMMENT ?= /#[^\n]*/
+
+manifest -> ...services;
+
+services -> ...services? service@services;
+
+service -> SERVICE ID@name LS ...elements RS {
+  name.type: "service"
+};
+
+elements -> ...elements? element@elements;
+
+element.event -> EVENT ID@name COLON ID@type;
+
+element.method -> METHOD ID@name LP ...params? RP ...return? {
+  name.type: "method",
+  return.type: "type",
+  return.modifier: "reference"
+};
+
+params -> param@params
+    | ...params COMMA param@params;
+param -> ID@name COLON ID@type {
+  type.type: "type",
+  type.modifier: "reference"
+};
+
+return -> COLON ID@return;
+
+element.field -> READONLY?@readonly FIELD ID@name COLON ID@type;
+
+element.event, element.field {
+  type.type: "type",
+  type.modifier: "reference"
+}

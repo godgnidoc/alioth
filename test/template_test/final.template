@@ -1,0 +1,9 @@
+{{ extends "./mid.template" }}
+
+{{ overwrite first }}
+第二行最终文本
+{{ end overwrite }}
+
+{{ overwrite fourth }}
+追加行最终文本
+{{ end overwrite }}

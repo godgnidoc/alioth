@@ -1,0 +1,19 @@
+{{ for@for v,k,i in arr }}
+- value: {{ v }};
+  key: {{ k }};
+  index: {{ i }};
+  first: {{ first@for }};
+  last: {{ last@for }};
+  nonfirst: {{ nonfirst@for }};
+  nonlast: {{ nonlast@for }};
+{{ end for }}{{ -- 
+  这里是{}注释
+}}{{ for@for v,k,i in obj }}
+- value: {{ v }};
+  key: {{ k }};
+  index: {{ i }};
+  first: {{ first@for }};
+  last: {{ last@for }};
+  nonfirst: {{ nonfirst@for }};
+  nonlast: {{ nonlast@for }};
+{{ end for }}

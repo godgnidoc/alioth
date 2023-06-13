@@ -1,0 +1,151 @@
+# Grammar of Grammar
+# 参考 /doc/grammar文法介绍.md 了解使用方法
+
+lang: "grammar"
+
+LEAD = /->/
+LT = /</
+GT = />/
+UNION = /\|/
+DEFINE = /=/
+IGNORE = /\?/
+AT = /@/
+SEMICOLON = /;/
+COLON = /:/
+COMMA = /,/
+DOT = /\./
+UNFOLD = /\.\.\./
+LBRACE = /{/
+RBRACE = /}/
+LPAREN = /\(/
+RPAREN = /\)/
+LBRACKET = /\[/
+RBRACKET = /]/
+EMPTY = /%empty/
+NULL<json> = /null/
+TRUE<json> = /true/
+FALSE<json> = /false/
+STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
+NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ { tokenize: { "type": "number" } }
+ID = /[a-zA-Z_]\w*/
+REGEX = /\/([^\\\/]|\\[^\n])+\// { tokenize: { "type": "regexp" } }
+COMMENT ?= /#[^\n]*\n/ { tokenize: { "type": "comment" } }
+SPACE ?= /\s+/
+
+LEAD, LT, GT, UNION, DEFINE, IGNORE, AT, 
+SEMICOLON, COLON, COMMA, DOT, UNFOLD, LBRACE, 
+RBRACE, LPAREN, RPAREN, LBRACKET, RBRACKET { 
+  tokenize: { "type": "operator" }
+}
+
+EMPTY, NULL, TRUE, FALSE {
+  tokenize: { "type": "keyword" }
+}
+
+grammar -> ...options ...terms ...ntrms;
+
+options -> ...options? option@options;
+
+option -> ID@key COLON ...json {
+  key.tokenize: { "type": "variable", "modifier": ["definition"] }
+};
+
+terms -> ...terms? term@terms
+    | ...terms annotation@annotations;
+
+term -> ID@name ...contexts? IGNORE?@ignore DEFINE REGEX@regex ...annotation_body? {
+  name.tokenize: { "type": "class", "modifier": ["definition"] }
+};
+
+contexts -> LT ...context_list GT;
+
+context_list -> ID@contexts
+    | ...context_list COMMA ID@contexts;
+
+context_list {
+  contexts.tokenize: { "type": "decorator", "modifier": ["definition"] }
+}
+
+ntrms -> ...ntrms? ntrm@ntrms
+    | ...ntrms annotation@annotations;
+
+ntrm -> ID@name  LEAD ...formula_group SEMICOLON
+    | ID@name DOT ID@form LEAD ...formula_group SEMICOLON;
+
+ntrm {
+  name.tokenize: { "type": "class", "modifier": ["definition"] },
+  form.tokenize: { "type": "decorator", "modifier": ["definition"] }
+}
+
+annotation -> ...selectors ...annotation_body;
+selectors -> selector@selectors
+    | ...selectors COMMA selector@selectors;
+selector -> ID@symbol
+    | ID@symbol DOT ID@form;
+
+selector {
+  symbol.tokenize: { "type": "class" },
+  form.tokenize: { "type": "decorator" }
+}
+
+formula_group -> formula@formulas
+    | empty_formula@formulas
+    | ...formula_group UNION formula@formulas
+    | ...formula_group UNION empty_formula@formulas;
+
+formula -> ...formula_body ...annotation_body?;
+formula_body -> ...formula_body? symbol@symbols;
+
+empty_formula -> EMPTY@empty;
+
+symbol -> ID@name IGNORE?@optional
+    | ID@name IGNORE?@optional AT ID@attr
+    | UNFOLD@attr ID@name IGNORE?@optional;
+
+symbol {
+  name.tokenize: { "type": "string" },
+  attr.tokenize: { "type": "property", "modifier": ["definition"] }
+}
+
+json -> ...object
+    | ...array
+    | ...string
+    | ...number
+    | ...boolean
+    | ...null;
+
+object -> LBRACE@empty_object RBRACE
+    | LBRACE ...fields RBRACE;
+
+fields -> field@object
+    | ...fields COMMA field@object;
+
+field -> STRING@key COLON ...json;
+
+array -> LBRACKET@empty_array RBRACKET
+    | LBRACKET ...elements RBRACKET;
+
+elements ->  json@array
+    | ...elements COMMA json@array;
+
+string -> STRING@string;
+
+number -> NUMBER@number;
+
+boolean -> TRUE@true
+    | FALSE@false;
+
+null -> NULL@null;
+
+annotation_body -> LBRACE ...attributes RBRACE;
+
+attributes -> attribute@attributes
+    | ...attributes COMMA attribute@attributes;
+
+attribute -> ID@key COLON json@value
+    | ID@of DOT ID@key COLON json@value;
+
+attribute {
+  key.tokenize: { "type": "property", "modifier": ["modification"] },
+  of.tokenize: { "type": "property" }
+}

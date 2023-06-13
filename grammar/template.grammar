@@ -1,0 +1,125 @@
+# 模板语法
+# 参考 doc/template模板引擎介绍.md 了解使用方法
+lang: "template"
+
+TXT<template> = /{|[^{]+/ { tokenize: { "type": "string" } }
+COMMENT<comment> = /}|[^}]+/ { tokenize: { "type": "comment" } }
+
+LOPEN<template> = /{{/
+ROPEN<ropen> = /}}/
+LCLOSE<lclose> = /{{/
+RCLOSE<rclose> = /}}/
+RCOMMENT<comment> = /}}/
+
+DASH<ctrl> = /-/
+DOUBLEDASH<ctrl> = /--/ { tokenize: { "type": "comment" } }
+AT<ctrl> = /@/
+
+OPEN_SUB<expr> = /\(/
+CLOSE_SUB<expr> = /\)/
+OPEN_IDX<expr> = /\[/
+CLOSE_IDX<expr> = /]/
+PIPE<expr> = /\|/
+COMMA<expr> = /,/
+DOT<expr> = /\./
+
+LOPEN, ROPEN, LCLOSE, RCLOSE, RCOMMENT,
+DASH, AT, OPEN_SUB, CLOSE_SUB, OPEN_IDX,
+CLOSE_IDX, PIPE, COMMA, DOT {
+ tokenize: { "type": "operator" }
+}
+
+EXTENDS<ctrl> = /extends/
+OVERWRITE<ctrl> = /overwrite/
+BLOCK<ctrl> = /block/
+CALL<ctrl> = /call/
+WITH<ctrl> = /with/
+FOR<ctrl> = /for/
+IN<ctrl> = /in/
+IF<ctrl> = /if/
+ELSE<ctrl> = /else/
+THEN<ctrl> = /then/
+END<ctrl> = /end/
+
+EXTENDS, OVERWRITE, BLOCK, CALL,
+WITH, FOR, IN, IF, ELSE, THEN, END {
+  tokenize: { "type": "keyword" }
+}
+
+STRING<expr> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
+NUMBER<expr> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ { tokenize: { "type": "number" } }
+ID<expr> = /[a-zA-Z_]\w*/ { tokenize: { "type": "variable" } }
+
+SPACE<expr, ctrl, ropen, rclose> ?= /\s+/
+
+template -> extends@fragments
+    | ...fragments;
+
+block -> ...open_block ...fragments close_block;
+open_block -> LOPEN BLOCK ID@block DASH?@trim_start ROPEN { 
+  block.tokenize: { "type": "class", "modifier": ["definition"] }
+};
+close_block -> LCLOSE DASH?@trim_end END BLOCK RCLOSE;
+
+extends -> SPACE? LOPEN EXTENDS STRING@extends ROPEN
+    | ...extends overwrite@overwrites
+    | ...extends TXT@drop { drop.tokenize: { "type": "comment" } };
+
+overwrite -> ...open_overwrite ...fragments close_overwrite;
+open_overwrite -> LOPEN OVERWRITE ID@overwrite DASH?@trim_start ROPEN  {
+  overwrite.tokenize: { "type": "class" }
+};
+close_overwrite -> LCLOSE DASH?@trim_end END OVERWRITE RCLOSE;
+
+fragments -> ...fragments? text@fragments
+    | ...fragments? eval@fragments
+    | ...fragments? call@fragments
+    | ...fragments? iter@fragments
+    | ...fragments? branch@fragments
+    | ...fragments? block@fragments
+    | ...fragments? comment;
+
+comment -> LOPEN DOUBLEDASH ...comments? RCOMMENT;
+comments -> ...comments? COMMENT;
+
+text -> TXT@text;
+
+eval -> LOPEN DASH?@trim_start expr@eval DASH?@trim_end ROPEN;
+
+call -> LOPEN DASH?@trim_start CALL STRING@call DASH?@trim_end ROPEN
+    | LOPEN DASH?@trim_start CALL STRING@call WITH expr@model DASH?@trim_end ROPEN;
+
+iter -> ...open_iter ...fragments ...close_iter;
+open_iter -> LOPEN FOR ...anchor? ...iter_vars IN expr@iter DASH?@trim_start ROPEN;
+anchor -> AT ID@anchor { anchor.tokenize: { "type": "label", "modifier": ["definition"] } };
+close_iter -> LCLOSE DASH?@trim_end END FOR RCLOSE;
+iter_vars -> ID@value
+    | ID@value COMMA ID@key
+    | ID@value COMMA ID@key COMMA ID@index;
+
+iter_vars {
+  value.tokenize: { "modifier": ["definition"] },
+  key.tokenize: { "modifier": ["definition"] },
+  index.tokenize: { "modifier": ["definition"] }
+}
+
+branch -> if@branch ...elifs? else?@branch ...close_branch;
+if -> LOPEN IF expr@cond DASH?@trim_start ROPEN ...fragments;
+elifs -> ...elifs? elif@branch;
+elif -> LCLOSE DASH?@trim_end ELSE IF expr@cond DASH?@trim_start RCLOSE ...fragments;
+else -> LCLOSE DASH?@trim_end ELSE THEN DASH?@trim_start RCLOSE ...fragments;
+close_branch -> LCLOSE DASH?@trim_end END IF RCLOSE;
+
+expr -> ...prim;
+expr.pipe -> expr@expr PIPE prim@pipe;
+
+prim.var -> ID@variable
+    | ID@variable AT ID@anchor { anchor.tokenize: { "type": "label" } };
+prim.string -> STRING@string;
+prim.number -> NUMBER@number;
+prim.invoke -> prim@invoke OPEN_SUB ...params? CLOSE_SUB;
+prim.field -> prim@of DOT ID@field { field.tokenize: { "type": "property" } };
+prim.index -> prim@of OPEN_IDX expr@index CLOSE_IDX;
+
+params -> expr@params
+    | ...params COMMA expr@params;

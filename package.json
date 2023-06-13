@@ -1,0 +1,72 @@
+{
+  "name": "alioth-language-support",
+  "displayName": "alioth-language-support",
+  "description": "Language support for alioth",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/godgnidoc/alioth.git"
+  },
+  "license": "MIT",
+  "author": "godgnidoc",
+  "publisher": "godgnidoc",
+  "version": "0.0.1",
+  "main": "./build/vscode/extension.js",
+  "files": [
+    "build/vscode",
+    "build/x64-linux-release/alioth",
+    "grammar",
+    "README.md",
+    "LICENSE"
+  ],
+  "activationEvents": [
+    "onLanguage:template",
+    "onLanguage:grammar"
+  ],
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "configurationDefaults": {
+      "[template]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "languages": [
+      {
+        "id": "template",
+        "aliases": [
+          "template",
+          "template"
+        ],
+        "extensions": [
+          ".template"
+        ]
+      },
+      {
+        "id": "grammar",
+        "aliases": [
+          "grammar",
+          "grammar"
+        ],
+        "extensions": [
+          ".grammar"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "package": "vsce package -o release/"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.3.2",
+    "typescript": "^5.0.4",
+    "@types/node": "^20.4.0",
+    "@types/vscode": "^1.99.0",
+    "generator-code": "^1.11.8",
+    "yo": "^5.1.0"
+  }
+}

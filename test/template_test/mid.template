@@ -1,0 +1,12 @@
+{{ extends "./root.template" }}
+
+{{ overwrite first }}
+第二行覆盖文本
+{{ end overwrite }}
+
+{{ overwrite second }}
+第四行覆盖文本
+{{ block fourth }}
+追加行原始文本
+{{ end block }}
+{{ end overwrite }}

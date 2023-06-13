@@ -1,0 +1,28 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "x64-linux-debug",
+            "binaryDir": "build/x64-linux-debug",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_TESTS": "ON"
+            },
+            "environment": {
+                "ALIOTH_HOME": "${sourceDir}"
+            }
+        },
+        {
+            "name": "x64-linux-release",
+            "binaryDir": "build/x64-linux-release",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "environment": {
+                "ALIOTH_HOME": "${sourceDir}"
+            }
+        }
+    ]
+}

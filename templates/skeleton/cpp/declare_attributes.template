@@ -1,0 +1,5 @@
+  {{--}}{{ for a, aname in model() -}}{{ if a.single -}}
+  {{--    }}alioth::ASTAttr {{aname}}{}; // {{for candidate in a.candidates }}{{candidate}} {{ end for }}
+  {{--  }}{{ else then -}}
+  {{--    }}alioth::ASTAttrs {{aname}}{}; // {{for candidate in a.candidates }}{{candidate}} {{ end for }}
+  {{--  }}{{ end if }}{{ end for }}

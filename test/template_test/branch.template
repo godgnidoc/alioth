@@ -1,0 +1,15 @@
+{{ if isobject(obj) -}}
+外层分支成立块{{ --
+}}{{ if isobject(obj.name) }}
+  内层分支成立块{}
+  {{ else if isstring(obj.name) -}}
+  内层分支备选块{}
+  {{- else then }}
+  内层分支不成立块{}
+  {{ end if }}{{ --
+  }}{{ if isobject(obj.name) }}
+  内层分支成立块2
+  {{ else then -}}
+  内层分支不成立块2
+  {{- end if }}
+{{- end if }}

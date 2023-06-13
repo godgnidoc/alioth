@@ -1,0 +1,52 @@
+#ifndef __{{uppercase(lang)}}_SYNTAX_H__
+#define __{{uppercase(lang)}}_SYNTAX_H__
+
+#include "alioth/ast.h"
+#include "alioth/document.h"
+
+namespace {{lowercase(lang)}} {
+
+{{ for@terms term, id in syntax.lex.terms -}}{{ if nonfirst@terms }}
+constexpr alioth::SymbolID {{ term.name }} = {{id}};
+{{ end if }}{{ end for }}
+
+{{ for s, name in skeleton -}}
+struct {{ camelcase(name) }}Node: public alioth::ASTNtrmNode {
+  {{ if s.forms -}}{{ -- 产生式有句型分组 }}
+  {{--}}{{ for f, fname in s.forms -}}
+  {{--  }}struct {{camelcase(fname)}};
+  {{--}}{{ end for }}
+  {{ else if s.attributes -}}{{ -- 产生式没有句型分组 }}
+  {{ call "declare_attributes.template" with s.attributes }}
+  {{- end if }}{{
+  -----------------
+  }}{{ if s.common_attributes -}}
+  {{ call "declare_attributes.template" with s.common_attributes }}
+  {{- end if }}
+  {{ if eq(name, lang) -}}
+  alioth::ASTRoot root;
+  {{- end if }}
+  
+  {{ camelcase(name) }}Node() = default;
+  {{ camelcase(name) }}Node(ASTNtrmNode const& node): ASTNtrmNode{node} {}
+  {{ camelcase(name) }}Node(ASTNtrmNode && node): ASTNtrmNode{std::move(node)} {}
+  ~{{ camelcase(name) }}Node() = default;
+};
+{{ if s.forms -}}
+{{ for f, fname in s.forms -}}
+struct {{ camelcase(name) }}Node::{{camelcase(fname)}}: public {{ camelcase(name) }}Node {
+  using {{ camelcase(name) }}Node::{{ camelcase(name) }}Node;
+
+  {{ if f.attributes -}}
+  {{ call "declare_attributes.template" with f.attributes }}
+  {{- end if }}
+};
+{{ end for }}
+{{ end if }}
+{{ end for }}
+
+std::shared_ptr<{{ camelcase(lang) }}Node> Parse{{ camelcase(lang) }}(alioth::Doc source);
+
+}
+
+#endif
