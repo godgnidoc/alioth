@@ -1,0 +1,110 @@
+# Grammar of Grammar
+
+# 选项语法由选项名和冒号领起
+# 选项的值是一个合法的 json
+# Grammar 定义了一些必须选项
+# 例如 lang 用于确定语言名称
+# 此外，开发者还可以自由添加选项
+lang: "grammar"
+
+
+# 词法规则由词法记号领起，等号后面接对应的正则表达式
+# 在词法记号名和等号之间，还可以添加一个问号表示这个单词不参与语法分析
+# 在问号之前可以使用一对尖括号为词法规则指定一或多个上下文
+# 指定了上下文的词法规则只在这些上下文中生效。其它词法规则在任意上下文都生效
+LEAD = /->/
+LT = /</
+GT = />/
+UNION = /\|/
+DEFINE = /=/
+IGNORE = /\?/
+AT = /@/
+SEMICOLON = /;/
+COLON = /:/
+COMMA = /,/
+DOT = /\./
+UNFOLD = /\.\.\./
+LBRACE = /{/
+RBRACE = /}/
+LBRACKET = /\[/
+RBRACKET = /]/
+EMPTY = /%empty/
+NULL<json> = /null/
+TRUE<json> = /true/
+FALSE<json> = /false/
+STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/
+NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+ID = /[a-zA-Z_]\w*/
+REGEX = /\/([^\\\/]|\\[^\n])+\//
+COMMENT ?= /#[^\n]*\n/
+SPACE ?= /\s+/
+
+# 语法规则由非终结符名和箭头领起
+# 箭头后面可以跟随一或多个产生式，中间用 | 分割
+# 产生式由符号构成
+# 在符号前添加 ... 表示将符号的属性展开到当前非终结符
+# 在符号后面添加 @ 和一个属性名可以将符号捕获为当前终结符的一个属性
+# 在符号后面添加问号是一种简便写法，隐含一条或一组不包含此符号的产生式
+grammar -> ...options ...terms ...ntrms
+    |  ...terms ...ntrms;
+
+options -> ...options? option@options;
+
+option -> ID@key COLON ...json;
+
+terms -> ...terms? term@terms;
+
+term -> ID@name ...contexts? IGNORE?@ignore DEFINE REGEX@regex;
+
+contexts -> LT ...context_list GT;
+
+context_list -> ID@contexts
+    | ...context_list COMMA ID@contexts;
+
+ntrms -> ...ntrms? ntrm@ntrms;
+
+ntrm -> ID@name  LEAD ...formula_group SEMICOLON
+    | ID@name DOT ID@form LEAD ...formula_group SEMICOLON;
+
+formula_group -> formula@formulas
+    | empty_formula@formulas
+    | ...formula_group UNION formula@formulas
+    | ...formula_group UNION empty_formula@formulas;
+
+formula -> ...formula? symbol@symbols;
+
+empty_formula -> EMPTY@empty;
+
+symbol -> ID@name IGNORE?@optional
+    | ID@name IGNORE?@optional AT ID@attr
+    | UNFOLD@attr ID@name IGNORE?@optional;
+
+json -> ...object
+    | ...array
+    | ...string
+    | ...number
+    | ...boolean
+    | ...null;
+
+object -> LBRACE@empty_object RBRACE
+    | LBRACE ...fields RBRACE;
+
+fields -> field@object
+    | ...fields COMMA field@object;
+
+field -> STRING@key COLON ...json;
+
+array -> LBRACKET@empty_array RBRACKET
+    | LBRACKET ...elements RBRACKET;
+
+elements ->  json@array
+    | ...elements COMMA json@array;
+
+string -> STRING@string;
+
+number -> NUMBER@number;
+
+boolean -> TRUE@true
+    | FALSE@false;
+
+null -> NULL@null;
