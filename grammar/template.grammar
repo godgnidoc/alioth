@@ -1,0 +1,119 @@
+# 模板语法
+lang: "template"
+
+# 纯文本，仅标记外部可以存在
+# 词法规则没办法向前看两个字符
+# 但是词法分析器在相同前缀的情况下会争取分析最长单词
+# 所以单独将 `{` 定义出来令它一旦出现，一定作为起始字符
+# 如此它会与 LOPEN 竞争长度并失败，最终连续的 `{{` 一定被翻译为 LOPEN
+TXT<template> = /{|[^{]+/
+COMMENT<comment> = /}|[^}]+/
+
+# 下述四个关键字分别处在四个不同的上下文
+# 是为了区分空白符、纯文本和表达式所处的分析环境
+# 但是具体搭配已经记不清了。。。能用反正
+LOPEN<template> = /{{/
+ROPEN<ropen> = /}}/
+LCLOSE<lclose> = /{{/
+RCLOSE<rclose> = /}}/
+RCOMMENT<comment> = /}}/
+
+# 用于标记空白符修剪
+DASH<ctrl> = /-/
+# 用于标记注释
+DOUBLEDASH<ctrl> = /--/
+AT<ctrl> = /@/
+
+# 表达式中的一些运算符
+OPEN_SUB<expr> = /\(/
+CLOSE_SUB<expr> = /\)/
+OPEN_IDX<expr> = /\[/
+CLOSE_IDX<expr> = /]/
+PIPE<expr> = /\|/
+COMMA<expr> = /,/
+DOT<expr> = /\./
+
+# 控制关键字均单独处在 ctrl 上下文中
+# 上下文要配合结构独立的句型使用
+# 如果两种上下文引导的分析线路句型相同会造成运行时歧义
+EXTENDS<ctrl> = /extends/
+OVERWRITE<ctrl> = /overwrite/
+BLOCK<ctrl> = /block/
+CALL<ctrl> = /call/
+WITH<ctrl> = /with/
+FOR<ctrl> = /for/
+IN<ctrl> = /in/
+IF<ctrl> = /if/
+ELSE<ctrl> = /else/
+THEN<ctrl> = /then/
+END<ctrl> = /end/
+
+# 一些字面量
+STRING<expr> = /\"([^\"\n\\]|\\[^\n])*\"/
+NUMBER<expr> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+ID<expr> = /[a-zA-Z_]\w*/
+
+# 想不起来为啥这么设计了，改了跑不了
+SPACE<expr, ctrl, ropen, rclose> ?= /\s+/
+
+template -> extends@fragments
+    | ...fragments;
+
+block -> ...open_block ...fragments close_block;
+open_block -> LOPEN BLOCK ID@block DASH?@trim_start ROPEN;
+close_block -> LCLOSE DASH?@trim_end END BLOCK RCLOSE;
+
+extends -> SPACE? LOPEN EXTENDS STRING@extends ROPEN
+    | ...extends overwrite@overwrites
+    | ...extends TXT; # 丢弃 overwrite 外围的文本
+
+overwrite -> ...open_overwrite ...fragments close_overwrite;
+open_overwrite -> LOPEN OVERWRITE ID@overwrite DASH?@trim_start ROPEN;
+close_overwrite -> LCLOSE DASH?@trim_end END OVERWRITE RCLOSE;
+
+fragments -> ...fragments? text@fragments
+    | ...fragments? eval@fragments
+    | ...fragments? call@fragments
+    | ...fragments? iter@fragments
+    | ...fragments? branch@fragments
+    | ...fragments? block@fragments
+    | ...fragments? comment;
+
+comment -> LOPEN DOUBLEDASH ...comments? RCOMMENT;
+comments -> ...comments? COMMENT;
+
+text -> TXT@text;
+
+eval -> LOPEN DASH?@trim_start expr@eval DASH?@trim_end ROPEN;
+
+call -> LOPEN DASH?@trim_start CALL STRING@call DASH?@trim_end ROPEN
+    | LOPEN DASH?@trim_start CALL STRING@call WITH expr@model DASH?@trim_end ROPEN;
+
+iter -> ...open_iter ...fragments ...close_iter;
+open_iter -> LOPEN FOR ...anchor? ...iter_vars IN expr@iter DASH?@trim_start ROPEN;
+anchor -> AT ID@anchor;
+close_iter -> LCLOSE DASH?@trim_end END FOR RCLOSE;
+iter_vars -> ID@value
+    | ID@value COMMA ID@key
+    | ID@value COMMA ID@key COMMA ID@index;
+
+branch -> if@branch ...elifs? else?@branch ...close_branch;
+if -> LOPEN IF expr@cond DASH?@trim_start ROPEN ...fragments;
+elifs -> ...elifs? elif@branch;
+elif -> LCLOSE DASH?@trim_end ELSE IF expr@cond DASH?@trim_start RCLOSE ...fragments;
+else -> LCLOSE DASH?@trim_end ELSE THEN DASH?@trim_start RCLOSE ...fragments;
+close_branch -> LCLOSE DASH?@trim_end END IF RCLOSE;
+
+expr -> ...prim;
+expr.pipe -> expr@expr PIPE prim@pipe;
+
+prim.var -> ID@variable
+    | ID@variable AT ID@anchor;
+prim.string -> STRING@string;
+prim.number -> NUMBER@number;
+prim.invoke -> prim@invoke OPEN_SUB ...params? CLOSE_SUB;
+prim.field -> prim@of DOT ID@field;
+prim.index -> prim@of OPEN_IDX expr@index CLOSE_IDX;
+
+params -> expr@params
+    | ...params COMMA expr@params;

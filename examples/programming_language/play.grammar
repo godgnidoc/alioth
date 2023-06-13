@@ -1,0 +1,124 @@
+# Play 语言文法，用于演示alioth基础设施的能力
+
+lang: "play"
+
+T_LP = /\(/
+T_RP = /\)/
+T_LI = /\[/
+T_RI = /\]/
+T_LS = /{/
+T_RS = /}/
+
+T_COMMA = /,/
+T_SEMI = /;/
+T_DOT = /\./
+
+T_ADD = /\+/
+T_SUB = /-/
+T_MUL = /\*/
+T_DIV = /\//
+T_MOL = /%/
+
+T_LT = /</
+T_GT = />/
+T_LE = /<=/
+T_GE = />=/
+T_EQ = /==/
+T_NE = /!=/
+
+T_AND = /&&/
+T_OR = /\|\|/
+T_NOT = /!/
+
+T_BITAND = /&/
+T_BITOR = /\|/
+T_BITNOT = /~/
+T_BITXOR = /^/
+
+T_ASSIGN = /=/
+
+# 定义一些关键字
+T_LET = /let/
+T_FN = /fn/
+T_IF = /if/
+T_ELSE = /else/
+T_FOR = /for/
+T_CONTINUE = /continue/
+T_BREAK = /break/
+T_RETURN = /return/
+
+T_NULL<json> = /null/
+T_TRUE<json> = /true/
+T_FALSE<json> = /false/
+T_STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/
+T_NUMBER = /(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+T_ID = /[a-zA-Z_]\w*/
+T_SPACE ?= /\s+/
+
+play -> stmt@stmts
+    | ...play T_SEMI stmt@stmts;
+
+stmt -> declare@declare
+    | branch@branch
+    | iterate@iterate
+    | control@control
+    | function@function
+    | expression@expression;
+
+block -> T_LS ...stmts T_RS;
+
+stmts -> stmt@stmts
+    | ...stmts T_SEMI stmt?@stmts;
+
+declare -> T_LET T_ID@name
+    | T_LET T_ID@name T_ASSIGN expression@init;
+
+branch -> if@branchs ...elseifs? else?@branchs;
+if -> T_IF T_LP expression@condition T_RP ...block;
+elseifs -> ...elseifs? elseif@branchs;
+elseif -> T_ELSE T_IF T_LP expression@condition T_RP ...block;
+else -> T_ELSE ...block;
+
+iterate -> T_FOR T_LP declare?@init T_SEMI expression?@cond T_SEMI expression?@ctrl T_RP ...block;
+
+control.break -> T_BREAK;
+control.continue -> T_CONTINUE;
+control.return -> T_RETURN
+    | T_RETURN expression@expr;
+
+function -> T_FN T_ID@name T_LP ...params? T_RP ...block;
+
+params -> T_ID@params
+    | ...params T_COMMA T_ID@params;
+
+expression -> ...priority4;
+expression.binary -> expression@lhs T_ASSIGN@op priority4@rhs;
+
+priority4 -> ...priority3;
+priority4.binary -> priority4@lhs T_AND@op priority3@rhs;
+priority4.binary -> priority4@lhs T_OR@op priority3@rhs;
+
+priority3 -> ...priority2;
+priority3.binary -> priority3@lhs T_ADD@op priority2@rhs;
+priority3.binary -> priority3@lhs T_SUB@op priority2@rhs;
+
+priority2 -> ...priority1;
+priority2.binary -> priority2@lhs T_MUL@op priority1@rhs;
+priority2.binary -> priority2@lhs T_DIV@op priority1@rhs;
+priority2.binary -> priority2@lhs T_MOL@op priority1@rhs;
+
+priority1 -> ...priority0;
+priority1.binary -> priority1@lhs T_BITAND@op priority0@rhs;
+priority1.binary -> priority1@lhs T_BITOR@op priority0@rhs;
+priority1.binary -> priority1@lhs T_BITXOR@op priority0@rhs;
+
+priority0.mono -> T_SUB@op priority0@rhs;
+priority0.mono -> T_NOT@op priority0@rhs;
+priority0.mono -> T_BITNOT@op priority0@rhs;
+priority0.sub -> T_LP expression@expr T_RP;
+priority0.var -> T_ID@name;
+priority0.value -> T_STRING@string;
+priority0.value -> T_NUMBER@number;
+priority0.value -> T_TRUE@boolean;
+priority0.value -> T_FALSE@boolean;
+priority0.value -> T_NULL@null;

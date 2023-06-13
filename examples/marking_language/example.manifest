@@ -1,0 +1,13 @@
+# Example manifest
+
+service MyService {
+  event MyNotification: NotifyPayload
+
+  field MyWritableField: WritableFieldType
+
+  readonly field MyReadonlyField: ReadonlyField
+
+  method FireAndForgetRequest(firstArgument: ArgType)
+
+  method RequestForResponse(firstArgument: ArgType, SecondArgument: ArgType): ReturnType
+}

@@ -1,0 +1,40 @@
+# Grammar for manifest
+
+lang: "manifest"
+
+SERVICE<keyword> = /service/
+EVENT<keyword> = /event/
+READONLY<keyword> = /readonly/
+FIELD<keyword> = /field/
+METHOD<keyword> = /method/
+LP = /\(/
+RP = /\)/
+LB = /\[/
+RB = /\]/
+COMMA = /,/
+COLON = /:/
+LS = /{/
+RS = /}/
+ID = /[a-zA-Z_]\w*/
+SPACE ?= /\s+/
+COMMENT ?= /#[^\n]*/
+
+manifest -> ...services;
+
+services -> ...services? service@services;
+
+service -> SERVICE ID@name LS ...elements RS;
+
+elements -> ...elements? element@elements;
+
+element.event -> EVENT@kind ID@name COLON ID@type;
+
+element.method -> METHOD@kind ID@name LP ...params? RP ...return?;
+
+params -> param@params
+    | ...params COMMA param@params;
+param -> ID@name COLON ID@type;
+
+return -> COLON ID@return;
+
+element.field -> READONLY?@readonly FIELD@kind ID@name COLON ID@type;
