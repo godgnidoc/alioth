@@ -1,0 +1,22 @@
+#ifndef __{{uppercase(lang)}}_SYNTAX_H__
+#define __{{uppercase(lang)}}_SYNTAX_H__
+
+#include "alioth/ast.h"
+
+namespace {{lowercase(lang)}} {
+
+{{ for@all s, name in skeleton -}}{{ if nonfirst@all }}
+struct {{ camelcase(name) }}Node: public alioth::ASTNtrmNode {
+    {{ if s.formed_attributes }}{{ -- 这里是注释
+    }}{{ for f, fname in s.formed_attributes -}}
+    struct {{camelcase(fname)}}{{ camelcase(name) }};
+    {{ end for }}
+    {{ else then }}
+    // not formed
+    {{ end if }}
+};
+{{ end if }}{{ end for }}
+
+}
+
+#endif

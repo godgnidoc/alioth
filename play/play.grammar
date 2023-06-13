@@ -1,0 +1,124 @@
+# Play 语言文法，用于演示alioth基础设施的能力
+
+lang: "play"
+
+LP = /\(/
+RP = /\)/
+LI = /\[/
+RI = /\]/
+LS = /{/
+RS = /}/
+
+COMMA = /,/
+SEMI = /;/
+DOT = /\./
+
+ADD = /\+/
+SUB = /-/
+MUL = /\*/
+DIV = /\//
+MOL = /%/
+
+LT = /</
+GT = />/
+LE = /<=/
+GE = />=/
+EQ = /==/
+NE = /!=/
+
+AND = /&&/
+OR = /\|\|/
+NOT = /!/
+
+BITAND = /&/
+BITOR = /\|/
+BITNOT = /~/
+BITXOR = /^/
+
+ASSIGN = /=/
+
+# 定义一些关键字
+LET = /let/
+FN = /fn/
+IF = /if/
+ELSE = /else/
+FOR = /for/
+CONTINUE = /continue/
+BREAK = /break/
+RETURN = /return/
+
+NULL<json> = /null/
+TRUE<json> = /true/
+FALSE<json> = /false/
+STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/
+NUMBER = /(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
+ID = /[a-zA-Z_]\w*/
+SPACE ?= /\s+/
+
+play -> stmt@stmts
+    | ...play SEMI stmt@stmts;
+
+stmt -> declare@declare
+    | branch@branch
+    | iterate@iterate
+    | control@control
+    | function@function
+    | expression@expression;
+
+block -> LS ...stmts RS;
+
+stmts -> stmt@stmts
+    | ...stmts SEMI stmt@stmts;
+
+declare -> LET ID@name
+    | LET ID@name ASSIGN expression@init;
+
+branch -> if@branchs ...elseifs? else?@branchs;
+if -> IF LP expression@condition RP ...block;
+elseifs -> ...elseifs? elseif@branchs;
+elseif -> ELSE IF LP expression@condition RP ...block;
+else -> ELSE ...block;
+
+iterate -> FOR LP declare?@init SEMI expression?@cond SEMI expression?@ctrl RP ...block;
+
+control -> BREAK@break
+    | CONTINUE@continue
+    | RETURN@return
+    | RETURN@return expression@result;
+
+function -> FN ID@name LP ...params? RP ...block;
+
+params -> ID@params
+    | ...params COMMA ID@params;
+
+expression -> ...priority4;
+expression.assign -> expression@lhs ASSIGN@assign priority4@rhs;
+
+priority4 -> ...priority3;
+priority4.and -> priority4@lhs AND@and priority3@rhs;
+priority4.or -> priority4@lhs OR@or priority3@rhs;
+
+priority3 -> ...priority2;
+priority3.add -> priority3@lhs ADD@add priority2@rhs;
+priority3.sub -> priority3@lhs SUB@sub priority2@rhs;
+
+priority2 -> ...priority1;
+priority2.mul -> priority2@lhs MUL@mul priority1@rhs;
+priority2.div -> priority2@lhs DIV@div priority1@rhs;
+priority2.mol -> priority2@lhs MOL@mol priority1@rhs;
+
+priority1 -> ...priority0;
+priority1.bitand -> priority1@lhs BITAND@bitand priority0@rhs;
+priority1.bitor -> priority1@lhs BITOR@bitor priority0@rhs;
+priority1.bitxor -> priority1@lhs BITXOR@bitxor priority0@rhs;
+
+priority0.neg -> SUB@neg priority0@rhs;
+priority0.not -> NOT@not priority0@rhs;
+priority0.bitnot -> BITNOT@bitnot priority0@rhs;
+priority0.subexpr -> LP ...expression RP;
+priority0.var -> ID@variable;
+priority0.string -> STRING@string;
+priority0.number -> NUMBER@number;
+priority0.boolean -> TRUE@true;
+priority0.boolean -> FALSE@false;
+priority0.null -> NULL@null;

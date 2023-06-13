@@ -1,0 +1,3931 @@
+{
+  "S'": {
+    "attributes": {
+      "play": {
+        "candidates": [
+          "play"
+        ],
+        "optional": false,
+        "single": true
+      }
+    }
+  },
+  "block": {
+    "attributes": {
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "branch": {
+    "attributes": {
+      "branchs": {
+        "candidates": [
+          "if",
+          "else",
+          "elseif"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "control": {
+    "attributes": {
+      "break": {
+        "candidates": [
+          "BREAK"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "continue": {
+        "candidates": [
+          "CONTINUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "result": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "return": {
+        "candidates": [
+          "RETURN"
+        ],
+        "optional": false,
+        "single": true
+      }
+    }
+  },
+  "declare": {
+    "attributes": {
+      "init": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "name": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    }
+  },
+  "else": {
+    "attributes": {
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "elseif": {
+    "attributes": {
+      "condition": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "elseifs": {
+    "attributes": {
+      "branchs": {
+        "candidates": [
+          "elseif"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "expression": {
+    "attributes": {
+      "add": {
+        "candidates": [
+          "ADD"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "and": {
+        "candidates": [
+          "AND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "assign": {
+        "candidates": [
+          "ASSIGN"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitand": {
+        "candidates": [
+          "BITAND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitnot": {
+        "candidates": [
+          "BITNOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitor": {
+        "candidates": [
+          "BITOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitxor": {
+        "candidates": [
+          "BITXOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "div": {
+        "candidates": [
+          "DIV"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "false": {
+        "candidates": [
+          "FALSE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "lhs": {
+        "candidates": [
+          "expression",
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mol": {
+        "candidates": [
+          "MOL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mul": {
+        "candidates": [
+          "MUL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "neg": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "not": {
+        "candidates": [
+          "NOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "null": {
+        "candidates": [
+          "NULL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "number": {
+        "candidates": [
+          "NUMBER"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "or": {
+        "candidates": [
+          "OR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "rhs": {
+        "candidates": [
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1",
+          "priority0"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "string": {
+        "candidates": [
+          "STRING"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "sub": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "true": {
+        "candidates": [
+          "TRUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "variable": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    },
+    "formed_attributes": {
+      "add": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "and": {
+        "attributes": {
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority4"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "assign": {
+        "attributes": {
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitand": {
+        "attributes": {
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitnot": {
+        "attributes": {
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitor": {
+        "attributes": {
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitxor": {
+        "attributes": {
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "boolean": {
+        "attributes": {
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": true,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": true,
+            "single": true
+          }
+        }
+      },
+      "div": {
+        "attributes": {
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mol": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mul": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "neg": {
+        "attributes": {
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "not": {
+        "attributes": {
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "null": {
+        "attributes": {
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "number": {
+        "attributes": {
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "or": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority4"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "string": {
+        "attributes": {
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "sub": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "subexpr": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression",
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1",
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "var": {
+        "attributes": {
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      }
+    }
+  },
+  "function": {
+    "attributes": {
+      "name": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "params": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": false
+      },
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "if": {
+    "attributes": {
+      "condition": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "iterate": {
+    "attributes": {
+      "cond": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "ctrl": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "init": {
+        "candidates": [
+          "declare"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "params": {
+    "attributes": {
+      "params": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "play": {
+    "attributes": {
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  },
+  "priority0": {
+    "attributes": {
+      "add": {
+        "candidates": [
+          "ADD"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "and": {
+        "candidates": [
+          "AND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "assign": {
+        "candidates": [
+          "ASSIGN"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitand": {
+        "candidates": [
+          "BITAND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitnot": {
+        "candidates": [
+          "BITNOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitor": {
+        "candidates": [
+          "BITOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitxor": {
+        "candidates": [
+          "BITXOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "div": {
+        "candidates": [
+          "DIV"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "false": {
+        "candidates": [
+          "FALSE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "lhs": {
+        "candidates": [
+          "expression",
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mol": {
+        "candidates": [
+          "MOL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mul": {
+        "candidates": [
+          "MUL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "neg": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "not": {
+        "candidates": [
+          "NOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "null": {
+        "candidates": [
+          "NULL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "number": {
+        "candidates": [
+          "NUMBER"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "or": {
+        "candidates": [
+          "OR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "rhs": {
+        "candidates": [
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1",
+          "priority0"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "string": {
+        "candidates": [
+          "STRING"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "sub": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "true": {
+        "candidates": [
+          "TRUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "variable": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    },
+    "formed_attributes": {
+      "bitnot": {
+        "attributes": {
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "boolean": {
+        "attributes": {
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": true,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": true,
+            "single": true
+          }
+        }
+      },
+      "neg": {
+        "attributes": {
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "not": {
+        "attributes": {
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "null": {
+        "attributes": {
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "number": {
+        "attributes": {
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "string": {
+        "attributes": {
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "subexpr": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression",
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1",
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "var": {
+        "attributes": {
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      }
+    }
+  },
+  "priority1": {
+    "attributes": {
+      "add": {
+        "candidates": [
+          "ADD"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "and": {
+        "candidates": [
+          "AND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "assign": {
+        "candidates": [
+          "ASSIGN"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitand": {
+        "candidates": [
+          "BITAND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitnot": {
+        "candidates": [
+          "BITNOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitor": {
+        "candidates": [
+          "BITOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitxor": {
+        "candidates": [
+          "BITXOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "div": {
+        "candidates": [
+          "DIV"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "false": {
+        "candidates": [
+          "FALSE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "lhs": {
+        "candidates": [
+          "expression",
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mol": {
+        "candidates": [
+          "MOL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mul": {
+        "candidates": [
+          "MUL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "neg": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "not": {
+        "candidates": [
+          "NOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "null": {
+        "candidates": [
+          "NULL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "number": {
+        "candidates": [
+          "NUMBER"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "or": {
+        "candidates": [
+          "OR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "rhs": {
+        "candidates": [
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1",
+          "priority0"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "string": {
+        "candidates": [
+          "STRING"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "sub": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "true": {
+        "candidates": [
+          "TRUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "variable": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    },
+    "formed_attributes": {
+      "bitand": {
+        "attributes": {
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitnot": {
+        "attributes": {
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitor": {
+        "attributes": {
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitxor": {
+        "attributes": {
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "boolean": {
+        "attributes": {
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": true,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": true,
+            "single": true
+          }
+        }
+      },
+      "neg": {
+        "attributes": {
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "not": {
+        "attributes": {
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "null": {
+        "attributes": {
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "number": {
+        "attributes": {
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "string": {
+        "attributes": {
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "subexpr": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression",
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1",
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "var": {
+        "attributes": {
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      }
+    }
+  },
+  "priority2": {
+    "attributes": {
+      "add": {
+        "candidates": [
+          "ADD"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "and": {
+        "candidates": [
+          "AND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "assign": {
+        "candidates": [
+          "ASSIGN"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitand": {
+        "candidates": [
+          "BITAND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitnot": {
+        "candidates": [
+          "BITNOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitor": {
+        "candidates": [
+          "BITOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitxor": {
+        "candidates": [
+          "BITXOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "div": {
+        "candidates": [
+          "DIV"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "false": {
+        "candidates": [
+          "FALSE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "lhs": {
+        "candidates": [
+          "expression",
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mol": {
+        "candidates": [
+          "MOL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mul": {
+        "candidates": [
+          "MUL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "neg": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "not": {
+        "candidates": [
+          "NOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "null": {
+        "candidates": [
+          "NULL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "number": {
+        "candidates": [
+          "NUMBER"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "or": {
+        "candidates": [
+          "OR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "rhs": {
+        "candidates": [
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1",
+          "priority0"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "string": {
+        "candidates": [
+          "STRING"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "sub": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "true": {
+        "candidates": [
+          "TRUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "variable": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    },
+    "formed_attributes": {
+      "bitand": {
+        "attributes": {
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitnot": {
+        "attributes": {
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitor": {
+        "attributes": {
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitxor": {
+        "attributes": {
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "boolean": {
+        "attributes": {
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": true,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": true,
+            "single": true
+          }
+        }
+      },
+      "div": {
+        "attributes": {
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mol": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mul": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "neg": {
+        "attributes": {
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "not": {
+        "attributes": {
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "null": {
+        "attributes": {
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "number": {
+        "attributes": {
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "string": {
+        "attributes": {
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "subexpr": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression",
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1",
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "var": {
+        "attributes": {
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      }
+    }
+  },
+  "priority3": {
+    "attributes": {
+      "add": {
+        "candidates": [
+          "ADD"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "and": {
+        "candidates": [
+          "AND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "assign": {
+        "candidates": [
+          "ASSIGN"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitand": {
+        "candidates": [
+          "BITAND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitnot": {
+        "candidates": [
+          "BITNOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitor": {
+        "candidates": [
+          "BITOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitxor": {
+        "candidates": [
+          "BITXOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "div": {
+        "candidates": [
+          "DIV"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "false": {
+        "candidates": [
+          "FALSE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "lhs": {
+        "candidates": [
+          "expression",
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mol": {
+        "candidates": [
+          "MOL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mul": {
+        "candidates": [
+          "MUL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "neg": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "not": {
+        "candidates": [
+          "NOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "null": {
+        "candidates": [
+          "NULL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "number": {
+        "candidates": [
+          "NUMBER"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "or": {
+        "candidates": [
+          "OR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "rhs": {
+        "candidates": [
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1",
+          "priority0"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "string": {
+        "candidates": [
+          "STRING"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "sub": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "true": {
+        "candidates": [
+          "TRUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "variable": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    },
+    "formed_attributes": {
+      "add": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitand": {
+        "attributes": {
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitnot": {
+        "attributes": {
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitor": {
+        "attributes": {
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitxor": {
+        "attributes": {
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "boolean": {
+        "attributes": {
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": true,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": true,
+            "single": true
+          }
+        }
+      },
+      "div": {
+        "attributes": {
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mol": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mul": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "neg": {
+        "attributes": {
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "not": {
+        "attributes": {
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "null": {
+        "attributes": {
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "number": {
+        "attributes": {
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "string": {
+        "attributes": {
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "sub": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "subexpr": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression",
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1",
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "var": {
+        "attributes": {
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      }
+    }
+  },
+  "priority4": {
+    "attributes": {
+      "add": {
+        "candidates": [
+          "ADD"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "and": {
+        "candidates": [
+          "AND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "assign": {
+        "candidates": [
+          "ASSIGN"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitand": {
+        "candidates": [
+          "BITAND"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitnot": {
+        "candidates": [
+          "BITNOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitor": {
+        "candidates": [
+          "BITOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "bitxor": {
+        "candidates": [
+          "BITXOR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "div": {
+        "candidates": [
+          "DIV"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "false": {
+        "candidates": [
+          "FALSE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "lhs": {
+        "candidates": [
+          "expression",
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mol": {
+        "candidates": [
+          "MOL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "mul": {
+        "candidates": [
+          "MUL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "neg": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "not": {
+        "candidates": [
+          "NOT"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "null": {
+        "candidates": [
+          "NULL"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "number": {
+        "candidates": [
+          "NUMBER"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "or": {
+        "candidates": [
+          "OR"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "rhs": {
+        "candidates": [
+          "priority4",
+          "priority3",
+          "priority2",
+          "priority1",
+          "priority0"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "string": {
+        "candidates": [
+          "STRING"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "sub": {
+        "candidates": [
+          "SUB"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "true": {
+        "candidates": [
+          "TRUE"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "variable": {
+        "candidates": [
+          "ID"
+        ],
+        "optional": false,
+        "single": true
+      }
+    },
+    "formed_attributes": {
+      "add": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "and": {
+        "attributes": {
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority4"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitand": {
+        "attributes": {
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitnot": {
+        "attributes": {
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitor": {
+        "attributes": {
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "bitxor": {
+        "attributes": {
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "boolean": {
+        "attributes": {
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": true,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": true,
+            "single": true
+          }
+        }
+      },
+      "div": {
+        "attributes": {
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mol": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "mul": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "neg": {
+        "attributes": {
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "not": {
+        "attributes": {
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "null": {
+        "attributes": {
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "number": {
+        "attributes": {
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "or": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority4"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "string": {
+        "attributes": {
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "sub": {
+        "attributes": {
+          "lhs": {
+            "candidates": [
+              "priority3"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority2"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "subexpr": {
+        "attributes": {
+          "add": {
+            "candidates": [
+              "ADD"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "and": {
+            "candidates": [
+              "AND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "assign": {
+            "candidates": [
+              "ASSIGN"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitand": {
+            "candidates": [
+              "BITAND"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitnot": {
+            "candidates": [
+              "BITNOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitor": {
+            "candidates": [
+              "BITOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "bitxor": {
+            "candidates": [
+              "BITXOR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "div": {
+            "candidates": [
+              "DIV"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "false": {
+            "candidates": [
+              "FALSE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "lhs": {
+            "candidates": [
+              "expression",
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mol": {
+            "candidates": [
+              "MOL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "mul": {
+            "candidates": [
+              "MUL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "neg": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "not": {
+            "candidates": [
+              "NOT"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "null": {
+            "candidates": [
+              "NULL"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "number": {
+            "candidates": [
+              "NUMBER"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "or": {
+            "candidates": [
+              "OR"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "rhs": {
+            "candidates": [
+              "priority4",
+              "priority3",
+              "priority2",
+              "priority1",
+              "priority0"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "string": {
+            "candidates": [
+              "STRING"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "sub": {
+            "candidates": [
+              "SUB"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "true": {
+            "candidates": [
+              "TRUE"
+            ],
+            "optional": false,
+            "single": true
+          },
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      },
+      "var": {
+        "attributes": {
+          "variable": {
+            "candidates": [
+              "ID"
+            ],
+            "optional": false,
+            "single": true
+          }
+        }
+      }
+    }
+  },
+  "stmt": {
+    "attributes": {
+      "branch": {
+        "candidates": [
+          "branch"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "control": {
+        "candidates": [
+          "control"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "declare": {
+        "candidates": [
+          "declare"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "expression": {
+        "candidates": [
+          "expression"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "function": {
+        "candidates": [
+          "function"
+        ],
+        "optional": false,
+        "single": true
+      },
+      "iterate": {
+        "candidates": [
+          "iterate"
+        ],
+        "optional": false,
+        "single": true
+      }
+    }
+  },
+  "stmts": {
+    "attributes": {
+      "stmts": {
+        "candidates": [
+          "stmt"
+        ],
+        "optional": false,
+        "single": false
+      }
+    }
+  }
+}
