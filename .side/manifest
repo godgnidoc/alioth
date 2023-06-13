@@ -1,0 +1,5 @@
+project: alioth
+engine: 1.1.10
+
+exports:
+  PROJECT_VERSION: 1.0.0

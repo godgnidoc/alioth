@@ -1,0 +1,51 @@
+# Hello
+
+EMPTY = /%empty/
+ID = /[a-zA-Z_]\w*/
+REGEX = /\/([^\\\/]|\\[^\n])+\//
+LEAD = /->/
+LT = /</
+GT = />/
+UNION = /\|/
+DEFINE = /=/
+IGNORE = /\?/
+AT = /@/
+SEMICOLON = /;/
+COMMA = /,/
+UNFOLD = /\.\.\./
+SPACE ?= /\s+/
+COMMENT ?= /#[^\n]*\n/
+
+prog -> ...lex ...syntax;
+
+lex -> %empty
+    | ...lex token@tokens;
+
+token -> ID@name ...contexts DEFINE REGEX@regex
+    | ID@name ...contexts IGNORE@ignore DEFINE REGEX@regrex;
+
+contexts -> %empty
+    | LT ...context_list GT;
+
+context_list -> ID@contexts
+    | ...context_list COMMA ID@contexts;
+
+syntax -> %empty
+    | ntrm@ntrms
+    | ...syntax ntrm@ntrms;
+
+ntrm -> ID@name LEAD ...body_group SEMICOLON;
+
+body_group -> formula@formulas
+    | empty_formula@formulas
+    | ...body_group UNION formula@formulas
+    | ...body_group UNION empty_formula@formulas;
+
+formula -> symbol@symbols
+    | ...formula symbol@symbols;
+
+empty_formula -> EMPTY@empty;
+
+symbol -> ID@name
+    | ID@name AT ID@attr
+    | UNFOLD@unfold ID@name;

@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+env -C build cmake ${SIDE_PROJECT}
+env -C build make -j$(nproc) $@
+
+if [[ $# -eq 0 ]]; then
+    env -C build make install
+fi

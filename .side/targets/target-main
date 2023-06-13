@@ -1,0 +1,5 @@
+requires:
+  '@google/gtest--x64-linux': ^1
+  '@gabime/spdlog': ^1
+  '@nlohmann/json': ^3
+  '@godgnidoc/libcli': ^1

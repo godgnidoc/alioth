@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+env -C build cmake ${SIDE_PROJECT}
+env -C build make test -j$(nproc)
+env -C build/module/test ctest $@
