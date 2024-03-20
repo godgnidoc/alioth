@@ -21,8 +21,7 @@ prog -> ...lex ...syntax;
 lex -> %empty
     | ...lex token@tokens;
 
-token -> ID@name ...contexts DEFINE REGEX@regex
-    | ID@name ...contexts IGNORE@ignore DEFINE REGEX@regrex;
+token -> ID@name ...contexts IGNORE?@ignore DEFINE REGEX@regex;
 
 contexts -> %empty
     | LT ...context_list GT;
@@ -31,8 +30,7 @@ context_list -> ID@contexts
     | ...context_list COMMA ID@contexts;
 
 syntax -> %empty
-    | ntrm@ntrms
-    | ...syntax ntrm@ntrms;
+    | ...syntax? ntrm@ntrms;
 
 ntrm -> ID@name LEAD ...body_group SEMICOLON;
 
@@ -41,11 +39,10 @@ body_group -> formula@formulas
     | ...body_group UNION formula@formulas
     | ...body_group UNION empty_formula@formulas;
 
-formula -> symbol@symbols
-    | ...formula symbol@symbols;
+formula -> ...formula? symbol@symbols;
 
 empty_formula -> EMPTY@empty;
 
-symbol -> ID@name
-    | ID@name AT ID@attr
-    | UNFOLD@unfold ID@name;
+symbol -> ID@name IGNORE?@optional
+    | ID@name IGNORE?@optional AT ID@attr
+    | UNFOLD@unfold ID@name IGNORE?@optional;

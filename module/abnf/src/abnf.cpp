@@ -1,6 +1,7 @@
 #include "abnf.h"
 
 #include "alioth/lex/builder.h"
+#include "alioth/logging.h"
 #include "alioth/syntax/builder.h"
 #include "alioth/syntax/parser.h"
 
@@ -29,6 +30,45 @@ alioth::SyntaxCRef ABNF::Compile(alioth::SourceRef source) {
     auto name = ntrm["name"].get<std::string>();
     auto formulas = ntrm["formulas"];
     if (formulas.is_object()) formulas = {formulas};
+
+    auto origin_size = formulas.size();
+    for (auto i = 0UL; i < origin_size; ++i) {
+      auto& formula = formulas[i];
+      if (formula.count("empty")) continue;
+      auto symbols = formula["symbols"];
+      if (symbols.is_object()) {
+        if (symbols.count("optional")) {
+          alioth::Logger {
+            "ABNF"
+          } -> error("The only symbol in a formula can't be optional");
+        }
+        continue;
+      }
+
+      std::vector<size_t> optional_indexes;
+      for (auto j = 0UL; j < symbols.size(); ++j) {
+        auto& symbol = symbols[j];
+        if (symbol.count("optional")) {
+          optional_indexes.push_back(j);
+        }
+      }
+
+      if (optional_indexes.empty()) continue;
+      std::reverse(optional_indexes.begin(), optional_indexes.end());
+      auto library = nlohmann::json::array();
+
+      for (auto idx : optional_indexes) {
+        auto snapshot = library.size();
+        library.push_back(formula);
+        library.back()["symbols"].erase(idx);
+        for (auto k = 0UL; k < snapshot; k++) {
+          library.push_back(library[k]);
+          library.back()["symbols"].erase(idx);
+        }
+      }
+
+      formulas.insert(formulas.end(), library.begin(), library.end());
+    }
 
     for (auto& formula : formulas) {
       auto formula_bulder = syntax_builder.StartFormula(name);
@@ -173,12 +213,27 @@ alioth::SyntaxCRef ABNF::GetSyntax() {
       .Commit()
       .StartFormula("symbol")
       .Symbol("ID", "name")
+      .Symbol("IGNORE", "optional")
+      .Commit()
+      .StartFormula("symbol")
+      .Symbol("ID", "name")
+      .Symbol("AT")
+      .Symbol("ID", "attr")
+      .Commit()
+      .StartFormula("symbol")
+      .Symbol("ID", "name")
+      .Symbol("IGNORE", "optional")
       .Symbol("AT")
       .Symbol("ID", "attr")
       .Commit()
       .StartFormula("symbol")
       .Symbol("UNFOLD", "unfold")
       .Symbol("ID", "name")
+      .Commit()
+      .StartFormula("symbol")
+      .Symbol("UNFOLD", "unfold")
+      .Symbol("ID", "name")
+      .Symbol("IGNORE", "optional")
       .Commit()
       .Build();
 }
