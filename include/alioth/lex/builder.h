@@ -7,6 +7,7 @@
 
 #include "alioth/lex/lex-fwd.h"
 #include "alioth/regex.h"
+#include "alioth/logging.h"
 
 namespace alioth::lex {
 
@@ -88,6 +89,8 @@ class Builder {
    * firstpos与上下文的映射
    */
   std::map<std::shared_ptr<regex::LeafNode>, std::set<int>> firstpos_ctx_map_;
+
+  Logger logger_{"lex"};
 };
 
 }  // namespace alioth::lex

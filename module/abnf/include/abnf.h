@@ -9,6 +9,8 @@ class ABNF {
   static alioth::SyntaxCRef Compile(alioth::SourceRef source);
 
  private:
+  static void PopulateFormulas(nlohmann::json& formulas);
+ 
   static alioth::LexCRef GetLex();
   static alioth::SyntaxCRef GetSyntax();
 };

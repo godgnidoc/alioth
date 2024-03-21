@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "alioth/lex/lex.h"
+#include "alioth/logging.h"
 
 namespace alioth::lex {
 
@@ -144,8 +145,13 @@ std::set<int> Builder::GetOrAddContexts(std::set<std::string> const& names) {
 }
 
 int Builder::AddToken(std::string const& name) {
-  for (auto& it : tokens_)
-    if (it == name) throw std::runtime_error("Token already exists");
+  for (auto& it : tokens_) {
+    if (it == name) {
+      auto error = fmt::format("Token {} already exists", name);
+      logger_-> error("{}", error);
+      throw std::runtime_error{error};
+    }
+  }
   tokens_.push_back(name);
   return tokens_.size();
 }

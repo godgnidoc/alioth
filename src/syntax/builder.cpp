@@ -42,8 +42,11 @@ Builder& FormulaBuilder::Commit() { return builder_.AddFormula(formula_); }
 Builder::Builder(LexCRef lex) : lex_(lex) { GetSymbolId(kStart); }
 
 FormulaBuilder Builder::StartFormula(std::string const& head) {
-  if (0 < lex_->GetTokenId(head))
-    throw std::runtime_error("symbol name conflict with token name");
+  if (0 < lex_->GetTokenId(head)) {
+    auto error = fmt::format("symbol name conflict with token name: {}", head);
+    logger_->error("{}", error);
+    throw std::runtime_error{error};
+  }
 
   return FormulaBuilder(*this, head);
 }
@@ -84,8 +87,13 @@ std::shared_ptr<Syntax> Builder::Build() {
   AddFormula(Formula{.head = start, .body = {start + 1, Token::kEOF}});
 
   CalculateNullable();
+  if (errors_ > 0) return nullptr;
+
   CalculateFirst();
+  if (errors_ > 0) return nullptr;
+
   CalculateFollow();
+  if (errors_ > 0) return nullptr;
 
   for (auto const& [id, ntrm] : ntrms_) {
     std::vector<std::string> first;
@@ -98,10 +106,12 @@ std::shared_ptr<Syntax> Builder::Build() {
       formulas += "  " + DumpFormula(formula_id) + "\n";
     }
 
-    SPDLOG_LOGGER_TRACE(
-        logger_, "{} {}:\n\tnullable = {}\n\tfirst = {}\n\tfollow = {}\n{}", id,
-        ntrm.name, ntrm.nullable, fmt::join(first, ", "),
-        fmt::join(follow, ", "), formulas);
+    if (spdlog::get_level() == spdlog::level::trace) {
+      fmt::print(stderr,
+                 "{} {}:\n\tnullable = {}\n\tfirst = {}\n\tfollow = {}\n{}\n",
+                 id, ntrm.name, ntrm.nullable, fmt::join(first, ", "),
+                 fmt::join(follow, ", "), formulas);
+    }
   }
 
   CalculateStates();
@@ -287,6 +297,12 @@ void Builder::CalculateFirst() {
 
         ntrm.first.erase(prefix_id);
         ntrm.first.insert(prefix.first.begin(), prefix.first.end());
+
+        if (ntrm.first.empty()) {
+          logger_->error("empty first set for {}", ntrm.name);
+          errors_++;
+          continue;
+        }
 
         /**
          * 若first集中最大的id是终结符，则该非终结符的first集已不再包含非终结符
@@ -502,10 +518,10 @@ void Builder::CalculateStates() {
          * 归约-归约冲突
          */
         if (state.reduce.count(term)) {
-          logger_->error("reduce/reduce conflict: {}/{} ({})",
+          logger_->error("reduce/reduce conflict:({})\n  reduce: {}\n  reduce: {}",
+                         lex_->GetTokenName(term),
                          DumpItem({formula_id, point}),
-                         DumpFormula(state.reduce.at(term)),
-                         lex_->GetTokenName(term));
+                         DumpFormula(state.reduce.at(term)));
           errors_++;
           continue;
         }
