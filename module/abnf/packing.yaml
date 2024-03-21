@@ -1,0 +1,11 @@
+packing:
+  repo: '@godgnidoc/abnf'
+  deploy:
+    strategy: copy
+    includes:
+      - usr
+  root:
+    compress: true
+    includes:
+      - usr/bin/abnf
+      - build-info.json

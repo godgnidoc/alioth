@@ -1,6 +1,7 @@
 #include "alioth/logging.h"
 
 #include <condition_variable>
+#include <filesystem>
 
 #include "alioth/error_handle.h"
 #include "spdlog/sinks/ringbuffer_sink.h"
@@ -12,6 +13,8 @@ namespace {
 std::atomic_bool initialized_{false};
 static std::vector<spdlog::sink_ptr> sinks_;
 static std::mutex sinks_mutex_;
+static std::string default_name{
+    std::filesystem::read_symlink("/proc/self/exe").filename().string()};
 
 template <typename Fn>
 auto UseSinks(Fn fn) {
@@ -23,7 +26,7 @@ auto UseSinks(Fn fn) {
   return fn(sinks_);
 }
 
-class MerakLogger : public spdlog::logger {
+class MyLogger : public spdlog::logger {
  public:
   using spdlog::logger::logger;
 
@@ -42,7 +45,7 @@ std::shared_ptr<spdlog::logger> GetLogger(std::string const& name) {
     auto it = spdlog::get(name);
     if (it) return it;
 
-    it = std::make_shared<MerakLogger>(name, sinks.begin(), sinks.end());
+    it = std::make_shared<MyLogger>(name, sinks.begin(), sinks.end());
     spdlog::initialize_logger(it);
     return it;
   });
@@ -72,7 +75,8 @@ void DoInitLogging(std::vector<spdlog::sink_ptr>& localSinks,
 
 }  // namespace
 
-Logger::Logger(std::string const& name) : logger_(GetLogger(name)) {}
+Logger::Logger(std::optional<std::string> const& name)
+    : logger_(GetLogger(name.value_or(default_name))) {}
 
 spdlog::logger* Logger::operator*() const { return get(); }
 spdlog::logger* Logger::operator->() const { return get(); }
@@ -85,14 +89,14 @@ void InitLogging(std::vector<spdlog::sink_ptr> const& sinks) {
 }
 
 void PrintErrors(std::exception const& errors) {
-  return PrintErrors(Logger("merak"), errors);
+  return PrintErrors(Logger{}, errors);
 }
 
 /**
  * 打印相互关联的异常信息
  */
 void PrintErrors(std::vector<std::string> const& errors) {
-  return PrintErrors(Logger("merak"), errors);
+  return PrintErrors(Logger{}, errors);
 }
 
 /**

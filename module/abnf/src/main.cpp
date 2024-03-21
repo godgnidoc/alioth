@@ -32,6 +32,11 @@ class Compile : public CommandDefinition<Compile> {
     }
 
     auto syntax_source = alioth::Source::Load(args.front());
+    if(syntax_source == nullptr) {
+      logger_->error("Failed to load syntax source");
+      return 1;
+    }
+    
     auto syntax = ABNF::Compile(syntax_source);
     if (syntax == nullptr) {
       logger_->error("Failed to compile syntax");
@@ -39,8 +44,12 @@ class Compile : public CommandDefinition<Compile> {
     }
 
     auto source = alioth::Source::Load(args.back());
+    if(source == nullptr) {
+      logger_->error("Failed to load source");
+      return 1;
+    }
+    
     auto ast = alioth::syntax::Parser::Parse(syntax, source);
-
     if (ast == nullptr) {
       logger_->error("Failed to parse source");
       return 1;
@@ -59,8 +68,8 @@ class Compile : public CommandDefinition<Compile> {
 int main(int argc, char** argv) {
   alioth::InitLogging(
       {std::make_shared<spdlog::sinks::stderr_color_sink_st>()});
-  spdlog::set_level(spdlog::level::trace);
-  spdlog::set_pattern("%^%l%$ (%n) %v");
+  spdlog::set_level(spdlog::level::info);
+  spdlog::set_pattern("[%n] %^%l%$: %v");
 
   App::SetBrief("ABNF syntax compiler");
   App::SetVersion(PROJECT_VERSION);

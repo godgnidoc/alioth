@@ -18,7 +18,7 @@ namespace alioth {
  */
 class Logger final {
  public:
-  Logger(std::string const& name = "");
+  Logger(std::optional<std::string> const& name = std::nullopt);
   Logger(Logger const&) = default;
   Logger(Logger&&) = default;
   ~Logger() = default;
