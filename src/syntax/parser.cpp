@@ -31,8 +31,9 @@ AST Parser::_Parse() {
         std::dynamic_pointer_cast<ast::Term>(seens_.back())) {
       std::vector<std::string> seens;
       for (auto seen : seens_) seens.push_back(seen->GetName());
-      logger_->trace("shift: {}; ({} . {})", seens_.back()->GetName(),
-                     fmt::join(seens, " "), input->GetName());
+      SPDLOG_LOGGER_TRACE(logger_, "shift: {}; ({} . {})",
+                          seens_.back()->GetName(), fmt::join(seens, " "),
+                          input->GetName());
     }
 
     /**
@@ -120,9 +121,9 @@ AST Parser::_Parse() {
       {
         std::vector<std::string> seens;
         for (auto seen : seens_) seens.push_back(seen->GetName());
-        logger_->trace("reduce: {} -> {}; ({} . {})", ntrm->GetName(),
-                       fmt::join(sentence, " "), fmt::join(seens, " "),
-                       input->GetName());
+        SPDLOG_LOGGER_TRACE(logger_, "reduce: {} -> {}; ({} . {})",
+                            ntrm->GetName(), fmt::join(sentence, " "),
+                            fmt::join(seens, " "), input->GetName());
       }
 
       /**
