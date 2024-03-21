@@ -146,9 +146,6 @@ AST Parser::_Parse() {
     /**
      * 处理错误
      */
-    logger_->error("{}: syntax error: unexpected token {} {}",
-                   input->GetLocation(), input->GetName(), input->GetText());
-
     std::set<std::string> expected;
     for (auto const& [id, _] : state->shift) {
       expected.insert(syntax->GetSymbolName(id));
@@ -157,7 +154,9 @@ AST Parser::_Parse() {
       expected.insert(syntax->GetSymbolName(id));
     }
 
-    logger_->info("expected: {}", fmt::join(expected, " | "));
+    logger_->error("{}: syntax error: unexpected token {} {}{}  expected: {}",
+                   input->GetLocation(), input->GetName(), input->GetText(),
+                   SPDLOG_EOL, fmt::join(expected, " | "));
 
     // TODO: 错误处理
     throw std::runtime_error("syntax error");

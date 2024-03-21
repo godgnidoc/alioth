@@ -60,6 +60,7 @@ int main(int argc, char** argv) {
   alioth::InitLogging(
       {std::make_shared<spdlog::sinks::stderr_color_sink_st>()});
   spdlog::set_level(spdlog::level::trace);
+  spdlog::set_pattern("%^%l%$ (%n) %v");
 
   App::SetBrief("ABNF syntax compiler");
   App::SetVersion(PROJECT_VERSION);
@@ -72,23 +73,28 @@ int main(int argc, char** argv) {
       opt::global(), opt::brief("set logging level"), opt::keyword("--logging"),
       opt::arg({"trace", "debug", "info", "warn", "error", "critical"})};
 
-  return App::Execute(argc, argv, [&logging] {
-    if (!logging) return 0;
+  try {
+    return App::Execute(argc, argv, [&logging] {
+      if (!logging) return 0;
 
-    if (*logging == "trace") {
-      spdlog::set_level(spdlog::level::trace);
-    } else if (*logging == "debug") {
-      spdlog::set_level(spdlog::level::debug);
-    } else if (*logging == "info") {
-      spdlog::set_level(spdlog::level::info);
-    } else if (*logging == "warn") {
-      spdlog::set_level(spdlog::level::warn);
-    } else if (*logging == "error") {
-      spdlog::set_level(spdlog::level::err);
-    } else if (*logging == "critical") {
-      spdlog::set_level(spdlog::level::critical);
-    }
+      if (*logging == "trace") {
+        spdlog::set_level(spdlog::level::trace);
+      } else if (*logging == "debug") {
+        spdlog::set_level(spdlog::level::debug);
+      } else if (*logging == "info") {
+        spdlog::set_level(spdlog::level::info);
+      } else if (*logging == "warn") {
+        spdlog::set_level(spdlog::level::warn);
+      } else if (*logging == "error") {
+        spdlog::set_level(spdlog::level::err);
+      } else if (*logging == "critical") {
+        spdlog::set_level(spdlog::level::critical);
+      }
 
-    return 0;
-  });
+      return 0;
+    });
+  } catch (std::exception const& e) {
+    alioth::PrintErrors(e);
+    return 1;
+  }
 }
