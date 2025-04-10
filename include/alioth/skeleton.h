@@ -63,6 +63,26 @@ struct Skeleton {
   static void PropagateForms(Skeleton& lang);
 
   /**
+   * 归纳公共属性结构
+   *
+   * @param lang 语言骨架
+   */
+  static void DeduceCommon(Skeleton& lang);
+
+  /**
+   * 依据匿名完全展开的产生式将等价的属性候选替换为最高抽象
+   *
+   * 例如 higher -> ...lower;
+   *
+   * 则 ntrm -> lower@attr; 转换为 ntrm -> higher@attr;
+   *
+   * 此替换仅体现在属性树，不应当影响语法分析过程
+   *
+   * @param lang 语言骨架
+   */
+  static void ReplaceEquivalentCandidates(Skeleton& lang);
+
+  /**
    * 去除中间属性结构
    *
    * 从语法树根沿着属性结构向下遍历，永远不能抵达的语法结构为中间语法结构
@@ -70,13 +90,6 @@ struct Skeleton {
    * @param lang 语言骨架
    */
   static void StripIntermediate(Skeleton& lang);
-
-  /**
-   * 归纳公共属性结构
-   *
-   * @param lang 语言骨架
-   */
-  static void DeduceCommon(Skeleton& lang);
 };
 
 /**

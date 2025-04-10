@@ -13,8 +13,9 @@ Skeleton Skeleton::Deduce(Syntax const& syntax) {
   DeduceStructures(lang);
   DeduceForms(lang);
   PropagateForms(lang);
-  StripIntermediate(lang);
   DeduceCommon(lang);
+  ReplaceEquivalentCandidates(lang);
+  StripIntermediate(lang);
 
   return lang;
 }
@@ -237,6 +238,47 @@ void Skeleton::PropagateForms(Skeleton& lang) {
                                   attr.candidates.end());
       }
     }
+  }
+}
+
+void Skeleton::ReplaceEquivalentCandidates(Skeleton& lang) {
+  auto syntax = lang.syntax;
+
+  std::map<SymbolID, SymbolID> mappings;  // lower -> higher
+  for (auto formula = 0UL; formula < syntax->formulas.size(); ++formula) {
+    auto& f = syntax->formulas.at(formula);
+    if (f.form) continue;
+    if (f.body.size() != 1) continue;
+    if (f.body.front().attr.value_or("") != "...") continue;
+
+    /**
+     * 文法中大概不会出现多种不同的完全展开式，暂不考虑如下可能
+     *
+     * ntrmA -> ...lower;
+     * ntrmB -> ...lower;
+     */
+    mappings[f.body.front().id] = f.head;
+  }
+
+  auto upgrade = [&](Attribute& attr) {
+    std::vector<SymbolID> candidates{};
+    candidates.insert(candidates.end(), attr.candidates.begin(),
+                      attr.candidates.end());
+    attr.candidates.clear();
+
+    for (auto candidate : candidates) {
+      while (mappings.count(candidate)) {
+        candidate = mappings.at(candidate);
+      }
+      attr.candidates.insert(candidate);
+    }
+  };
+
+  for (auto& it : lang.structures) {
+    for (auto& ait : it.second.attributes) upgrade(ait.second);
+    for (auto& fit : it.second.formed_attributes)
+      for (auto& ait : fit.second) upgrade(ait.second);
+    for (auto& ait : it.second.common_attributes) upgrade(ait.second);
   }
 }
 
