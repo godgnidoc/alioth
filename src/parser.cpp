@@ -71,7 +71,7 @@ ASTRoot Parser::Parse() {
   root_->id = syntax->formulas.front().head;
   root_->formula = 0;
   root_->sentence.push_back(accept);
-  root_->attributes[syntax->lex->contexts.front()].push_back(accept);
+  root_->attributes[NameOf(syntax)].push_back(accept);
 
   return root_;
 }
@@ -101,7 +101,26 @@ bool Parser::ReduceOrFalse(Thread& thread) {
    * 触发0号产生式，接受解析结果
    */
   if (formula == 0) {
-    candidates_.push_back(thread.seens.back());
+    auto accept = thread.seens.back();
+    candidates_.push_back(accept);
+
+    /**
+     * 将源码首末被忽略的单词填回句子
+     */
+    auto ntrm = AsNtrm(accept);
+    auto from = FirstOf(accept)->offset;
+    std::vector<AST> prefix;
+
+    for (auto ignored : thread.ignores) {
+      if (ignored->offset > from) {
+        ntrm->sentence.push_back(ignored);
+      } else {
+        prefix.push_back(ignored);
+      }
+    }
+
+    ntrm->sentence.insert(ntrm->sentence.begin(), prefix.begin(), prefix.end());
+
     return true;
   }
 

@@ -77,7 +77,7 @@ TEST(Parser, Simple) {
     tokenized += TextOf(token);
   }
 
-  ASSERT_EQ(tokenized, Strings::Trim(source, true, true));
+  ASSERT_EQ(tokenized, source);
 }
 
 }  // namespace test

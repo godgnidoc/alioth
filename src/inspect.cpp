@@ -174,6 +174,20 @@ nlohmann::json AttrsOf(AST node) {
 
   return attrs;
 }
+
+std::string NameOf(std::variant<Lex, Syntax> g) {
+  Lex lex{};
+
+  if (std::holds_alternative<Lex>(g)) {
+    lex = std::get<Lex>(g);
+  } else {
+    auto syntax = std::get<Syntax>(g);
+    lex = syntax->lex;
+  }
+
+  return lex->contexts.front();
+}
+
 std::string NameOf(SymbolID symbol, std::variant<Lex, Syntax> alphabeta) {
   if (symbol == Lexicon::kERR)
     return "<ERR>";

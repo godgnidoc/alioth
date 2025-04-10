@@ -134,6 +134,15 @@ std::vector<ASTTerm> Tokenize(AST node);
 nlohmann::json AttrsOf(AST node);
 
 /**
+ * 获取词法规则或语法规则的语言名称
+ * 
+ * 约定使用词法规则的第一个上下文名称作为语言名称
+ * 
+ * @param g 词法或语法规则
+ */
+std::string NameOf(std::variant<Lex, Syntax> g);
+
+/**
  * 打印符号
  *
  * @param symbol 符号ID
