@@ -7,14 +7,40 @@ namespace {{lowercase(lang)}} {
 
 {{ for@all s, name in skeleton -}}{{ if nonfirst@all }}
 struct {{ camelcase(name) }}Node: public alioth::ASTNtrmNode {
-    {{ if s.formed_attributes }}{{ -- 这里是注释
+    {{ if s.formed_attributes }}{{ -- 产生式有句型分组
     }}{{ for f, fname in s.formed_attributes -}}
     struct {{camelcase(fname)}}{{ camelcase(name) }};
     {{ end for }}
+
+    {{ if s.common_attributes }}{{ for a, aname in s.common_attributes -}}
+    {{ if a.is_single }}
+    ASTAttr {{aname}}{};
     {{ else then }}
-    // not formed
+    ASTAttrs {{aname}}{};
     {{ end if }}
+    {{ end for }}{{ end if }}
+    {{ else then }}{{ -- 产生式没有句型分组 }}
+    {{ if s.attributes }}{{ for a, aname in s.attributes -}}
+    {{ if a.is_single }}
+    ASTAttr {{aname}}{};
+    {{ else then }}
+    ASTAttrs {{aname}}{};
+    {{ end if }}
+    {{ end for }}{{ end if }}
+    {{ end if }}
+};{{ if s.formed_attributes }}
+{{ for f, fname in s.formed_attributes -}}
+struct {{ camelcase(name) }}Node::{{camelcase(fname)}}{{ camelcase(name) }} {
+    {{ for a, aname in f -}}
+    {{ if a.is_single }}
+    ASTAttr {{aname}}{};
+    {{ else then }}
+    ASTAttrs {{aname}}{};
+    {{ end if }}
+    {{ end for }}
 };
+{{ end for }}
+{{ end if }}
 {{ end if }}{{ end for }}
 
 }

@@ -11,3 +11,10 @@
 为 grammar 开发VSCode语法插件
 
 需要在传播句型时替换候选语法结构才能令strip生效
+
+从句型分组中归纳公共属性时是否应当忽略属性候选符号？
+
+expr -> expr@lhs ADD@op expr@rhs
+expr -> expr@lhs SUB@op expr@rhs
+
+op 应当为公共属性，但候选集不相同。

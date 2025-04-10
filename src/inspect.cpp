@@ -315,7 +315,7 @@ nlohmann::json StoreSkeleton(Skeleton const& lang) {
         for (auto const& id : attr.candidates) {
           a["candidates"].push_back(NameOf(id, syntax));
         }
-        f["attributes"][name] = a;
+        f[name] = a;
       }
       s["formed_attributes"][form] = f;
     }
