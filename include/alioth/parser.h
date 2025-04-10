@@ -97,10 +97,11 @@ class Parser {
 };
 
 struct Parser::Thread {
-  size_t offset{};               // 当前扫描位置
-  std::vector<StateID> stack{};  // 状态栈，从尾部出入栈
-  std::vector<AST> seens{};      // 已经识别的语法单元，按识别顺序排列
-  std::vector<AST> inputs{};     // 输入的语法单元，按读取顺序排列
+  size_t offset{};                 // 当前扫描位置
+  std::vector<StateID> stack{};    // 状态栈，从尾部出入栈
+  std::vector<AST> seens{};        // 已经识别的语法单元，按识别顺序排列
+  std::vector<ASTTerm> ignores{};  // 被忽略的语法单元，按忽略顺序排列
+  std::vector<AST> inputs{};       // 输入的语法单元，按读取顺序排列
 };
 
 }  // namespace alioth

@@ -122,6 +122,11 @@ ASTTerm FirstOf(AST node);
 ASTTerm LastOf(AST node);
 
 /**
+ * 获取语法树节点的所有终结符
+ */
+std::vector<ASTTerm> Tokenize(AST node);
+
+/**
  * 获取符号的属性树
  *
  * @param node 语法树节点
@@ -143,7 +148,7 @@ std::string NameOf(SymbolID symbol, std::variant<Lex, Syntax> alphabeta);
  * @param alphabeta 词法规则或语法规则
  */
 SymbolID SymbolIdOf(std::string const& name,
-                       std::variant<Lex, Syntax> alphabeta);
+                    std::variant<Lex, Syntax> alphabeta);
 
 /**
  * 打印产生式

@@ -82,6 +82,7 @@ bool Parser::IgnoreOrFalse(Thread& thread) {
 
   if (!syntax->IsIgnored(input->id)) return false;
 
+  if (auto term = AsTerm(input)) thread.ignores.push_back(term);
   thread.inputs.erase(thread.inputs.begin());
   return true;
 }
@@ -109,6 +110,33 @@ bool Parser::ReduceOrFalse(Thread& thread) {
   auto begin = thread.seens.begin() + thread.seens.size() - cost;
   auto end = thread.seens.end();
   auto ntrm = root_->Ntrm(formula, begin, end);
+
+  /**
+   * 将被忽略的符号填回句子单词串
+   */
+  if (!ntrm->sentence.empty()) {
+    auto from = FirstOf(ntrm)->offset;
+    auto to = LastOf(ntrm)->offset;
+    auto itx = 0UL;
+    auto igx = 0UL;
+    while (igx < thread.ignores.size()) {
+      auto ignored = thread.ignores.at(igx);
+      if (ignored->offset >= to) break;
+      if (ignored->offset <= from) {
+        ++igx;
+        continue;
+      }
+
+      while (itx < ntrm->sentence.size()) {
+        auto symbol = ntrm->sentence.at(itx);
+        if (ignored->offset < FirstOf(symbol)->offset) break;
+        ++itx;
+      }
+
+      ntrm->sentence.insert(ntrm->sentence.begin() + itx, ignored);
+      thread.ignores.erase(thread.ignores.begin() + igx);
+    }
+  }
 
   /**
    * 依据产生式长度，从栈中弹出相应数量的状态和符号

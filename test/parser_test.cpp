@@ -2,6 +2,7 @@
 
 #include "alioth/inspect.h"
 #include "alioth/regex.h"
+#include "alioth/strings.h"
 #include "alioth/syntax.h"
 #include "fmt/ranges.h"
 #include "gtest/gtest.h"
@@ -69,6 +70,14 @@ TEST(Parser, Simple) {
   ASSERT_EQ(TextOf(type2), "int");
   ASSERT_EQ(TextOf(name2), "y");
   ASSERT_EQ(TextOf(value2), "1");
+
+  auto tokens = alioth::Tokenize(root);
+  std::string tokenized;
+  for (auto const& token : tokens) {
+    tokenized += TextOf(token);
+  }
+
+  ASSERT_EQ(tokenized, Strings::Trim(source, true, true));
 }
 
 }  // namespace test

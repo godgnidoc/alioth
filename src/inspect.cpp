@@ -1,5 +1,7 @@
 #include "alioth/inspect.h"
 
+#include <stack>
+
 #include "fmt/format.h"
 
 namespace alioth {
@@ -100,16 +102,56 @@ ASTTerm FirstOf(AST node) {
   if (auto term = AsTerm(node)) return term;
 
   auto ntrm = AsNtrm(node);
-  if (ntrm->sentence.empty()) return nullptr;
-  return FirstOf(ntrm->sentence.front());
+  for (auto symbol : ntrm->sentence) {
+    auto term = FirstOf(symbol);
+    if (term) return term;
+  }
+  return nullptr;
 }
 
 ASTTerm LastOf(AST node) {
   if (auto term = AsTerm(node)) return term;
 
   auto ntrm = AsNtrm(node);
-  if (ntrm->sentence.empty()) return nullptr;
-  return LastOf(ntrm->sentence.back());
+  for (auto it = ntrm->sentence.rbegin(); it != ntrm->sentence.rend(); ++it) {
+    auto symbol = *it;
+    auto term = LastOf(symbol);
+    if (term) return term;
+  }
+  return nullptr;
+}
+
+std::vector<ASTTerm> Tokenize(AST node) {
+  if (auto term = AsTerm(node)) return {term};
+
+  using S = decltype(ASTNtrmNode::sentence);
+  using I = typename S::const_iterator;
+  std::stack<std::pair<S const*, I>> stack;
+
+  auto ntrm = AsNtrm(node);
+  stack.push({&ntrm->sentence, ntrm->sentence.begin()});
+
+  std::vector<ASTTerm> tokens;
+  while (!stack.empty()) {
+    auto& [sentence, it] = stack.top();
+    if (it == sentence->end()) {
+      stack.pop();
+      continue;
+    }
+
+    while (it != sentence->end()) {
+      auto symbol = *it++;
+      if (auto term = AsTerm(symbol)) {
+        tokens.push_back(term);
+        continue;
+      }
+      auto ntrm = AsNtrm(symbol);
+      stack.push({&ntrm->sentence, ntrm->sentence.begin()});
+      break;
+    }
+  }
+
+  return tokens;
 }
 
 nlohmann::json AttrsOf(AST node) {
