@@ -36,7 +36,7 @@ Syntactic::Builder::Builder(Lex lex) {
   syntax_ = Syntax{new Syntactic{}};
   syntax_->lex = lex;
   auto start = TouchNtrm("S'");
-  Formula(start).Symbol(start + 1, lex->contexts[0]).Commit();
+  Formula(start).Symbol(start + 1, NameOf(lex)).Commit();
 }
 
 Syntactic::Builder::FormulaBuilder Syntactic::Builder::Formula(

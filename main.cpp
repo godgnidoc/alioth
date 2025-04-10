@@ -145,7 +145,7 @@ struct Framework : public cli::Command {
     meta["titlecase"] = Template::Pipe(&Strings::Titlecase);
     model["skeleton"] = Template::Value::FromJson(StoreSkeleton(skeleton));
     model["syntax"] = Template::Value::FromJson(StoreSyntax(syntax));
-    model["lang"] = syntax->lex->contexts.front();
+    model["lang"] = NameOf(syntax);
 
     auto home = AliothHome();
     auto root = home / "templates" / "skeleton" / "cpp";
