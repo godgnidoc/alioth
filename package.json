@@ -1,0 +1,42 @@
+{
+  "name": "alioth-language-support",
+  "displayName": "alioth-language-support",
+  "description": "Language support for alioth",
+  "version": "0.0.1",
+  "main": "./build/extension.js",
+  "activationEvents": [
+    "onLanguage:template"
+  ],
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "configurationDefaults": {
+      "[template]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "languages": [
+      {
+        "id": "template",
+        "aliases": [
+          "template",
+          "template"
+        ],
+        "extensions": [
+          ".tmpl"
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "@types/node": "^20.4.0",
+    "@types/vscode": "^1.99.0",
+    "generator-code": "^1.11.8",
+    "yo": "^5.1.0"
+  }
+}

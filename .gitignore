@@ -5,3 +5,5 @@
 /.vscode/
 
 CMakeUserPresets.json
+node_modules
+tsconfig.tsbuildinfo
