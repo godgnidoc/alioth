@@ -167,12 +167,56 @@ struct Framework : public cli::Command {
                        ->Brief("output directory");
 };
 
+struct Tokenize : public cli::Command {
+  int Run() override {
+    alioth::Doc doc;
+    if (path->Value() == "-") {
+      doc = alioth::Document::Read();
+    } else {
+      doc = alioth::Document::Read(path->Value());
+    }
+
+    auto gdoc = alioth::Document::Read(gpath->Value());
+    auto grammar = alioth::Grammar::Load(gdoc);
+    auto syntax = grammar.Compile();
+
+    auto parser = alioth::Parser(syntax, doc);
+    auto root = parser.Parse();
+    nlohmann::json tokens;
+    for (auto const& token : alioth::Tokenize(root)) {
+      nlohmann::json t;
+      t["id"] = token->id;
+      t["name"] = alioth::NameOf(token);
+      // t["text"] = alioth::TextOf(token);
+      t["range"] = alioth::StoreRange(alioth::RangeOf(token));
+      tokens.push_back(t);
+      continue;
+    }
+
+    if (isatty(fileno(stdout))) {
+      fmt::println("{}", tokens.dump(2));
+    } else {
+      fmt::print("{}", tokens.dump());
+    }
+
+    return 0;
+  }
+
+  cli::Arg path = Named("source-path");
+  cli::Opt gpath = Option({"-g", "--grammar"})
+                       ->Required()
+                       ->Argument("grammar-path")
+                       ->Brief("grammar file path")
+                       ->Doc("specify the path to the grammar file");
+};
+
 int main(int argc, char** argv) {
   cli::Application::Command(std::make_shared<Syntax>(), {"syntax"});
   cli::Application::Command(std::make_shared<Compile>(), {"compile"});
   cli::Application::Command(std::make_shared<Render>(), {"render"});
   cli::Application::Command(std::make_shared<Skeleton>(), {"skeleton"});
   cli::Application::Command(std::make_shared<Framework>(), {"framework"});
+  cli::Application::Command(std::make_shared<Tokenize>(), {"tokenize"});
   cli::Application::Name("alioth");
   cli::Application::Brief("compiler utils");
   cli::Application::Version("0.0.0");
