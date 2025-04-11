@@ -18,23 +18,25 @@ struct ControlNode: public alioth::ASTNtrmNode {
     struct ReturnControl;
     
 
+    ASTAttr action{};
+    
     
     
 };
 struct ControlNode::BreakControl {
-    ASTAttrs action{};
+    ASTAttr action{};
     
     
 };
 struct ControlNode::ContinueControl {
-    ASTAttrs action{};
+    ASTAttr action{};
     
     
 };
 struct ControlNode::ReturnControl {
-    ASTAttrs action{};
+    ASTAttr action{};
     
-    ASTAttrs expr{};
+    ASTAttr expr{};
     
     
 };
@@ -42,9 +44,9 @@ struct ControlNode::ReturnControl {
 
 struct DeclareNode: public alioth::ASTNtrmNode {
     
-    ASTAttrs init{};
+    ASTAttr init{};
     
-    ASTAttrs name{};
+    ASTAttr name{};
     
     
     
@@ -58,7 +60,7 @@ struct ElseNode: public alioth::ASTNtrmNode {
 };
 struct ElseifNode: public alioth::ASTNtrmNode {
     
-    ASTAttrs condition{};
+    ASTAttr condition{};
     
     ASTAttrs stmts{};
     
@@ -77,41 +79,41 @@ struct ExpressionNode: public alioth::ASTNtrmNode {
     
 };
 struct ExpressionNode::BinaryExpression {
-    ASTAttrs lhs{};
+    ASTAttr lhs{};
     
-    ASTAttrs op{};
+    ASTAttr op{};
     
-    ASTAttrs rhs{};
+    ASTAttr rhs{};
     
     
 };
 struct ExpressionNode::MonoExpression {
-    ASTAttrs op{};
+    ASTAttr op{};
     
-    ASTAttrs rhs{};
+    ASTAttr rhs{};
     
     
 };
 struct ExpressionNode::SubExpression {
-    ASTAttrs expr{};
+    ASTAttr expr{};
     
     
 };
 struct ExpressionNode::ValueExpression {
-    ASTAttrs false{};
+    ASTAttr false{};
     
-    ASTAttrs null{};
+    ASTAttr null{};
     
-    ASTAttrs number{};
+    ASTAttr number{};
     
-    ASTAttrs string{};
+    ASTAttr string{};
     
-    ASTAttrs true{};
+    ASTAttr true{};
     
     
 };
 struct ExpressionNode::VarExpression {
-    ASTAttrs name{};
+    ASTAttr name{};
     
     
 };
@@ -119,7 +121,7 @@ struct ExpressionNode::VarExpression {
 
 struct FunctionNode: public alioth::ASTNtrmNode {
     
-    ASTAttrs name{};
+    ASTAttr name{};
     
     ASTAttrs params{};
     
@@ -130,7 +132,7 @@ struct FunctionNode: public alioth::ASTNtrmNode {
 };
 struct IfNode: public alioth::ASTNtrmNode {
     
-    ASTAttrs condition{};
+    ASTAttr condition{};
     
     ASTAttrs stmts{};
     
@@ -139,11 +141,11 @@ struct IfNode: public alioth::ASTNtrmNode {
 };
 struct IterateNode: public alioth::ASTNtrmNode {
     
-    ASTAttrs cond{};
+    ASTAttr cond{};
     
-    ASTAttrs ctrl{};
+    ASTAttr ctrl{};
     
-    ASTAttrs init{};
+    ASTAttr init{};
     
     ASTAttrs stmts{};
     
@@ -159,17 +161,17 @@ struct PlayNode: public alioth::ASTNtrmNode {
 };
 struct StmtNode: public alioth::ASTNtrmNode {
     
-    ASTAttrs branch{};
+    ASTAttr branch{};
     
-    ASTAttrs control{};
+    ASTAttr control{};
     
-    ASTAttrs declare{};
+    ASTAttr declare{};
     
-    ASTAttrs expression{};
+    ASTAttr expression{};
     
-    ASTAttrs function{};
+    ASTAttr function{};
     
-    ASTAttrs iterate{};
+    ASTAttr iterate{};
     
     
     

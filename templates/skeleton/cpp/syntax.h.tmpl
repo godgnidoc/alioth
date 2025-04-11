@@ -13,7 +13,7 @@ struct {{ camelcase(name) }}Node: public alioth::ASTNtrmNode {
     {{ end for }}
 
     {{ if s.common_attributes }}{{ for a, aname in s.common_attributes -}}
-    {{ if a.is_single }}
+    {{ if a.single }}
     ASTAttr {{aname}}{};
     {{ else then }}
     ASTAttrs {{aname}}{};
@@ -21,7 +21,7 @@ struct {{ camelcase(name) }}Node: public alioth::ASTNtrmNode {
     {{ end for }}{{ end if }}
     {{ else then }}{{ -- 产生式没有句型分组 }}
     {{ if s.attributes }}{{ for a, aname in s.attributes -}}
-    {{ if a.is_single }}
+    {{ if a.single }}
     ASTAttr {{aname}}{};
     {{ else then }}
     ASTAttrs {{aname}}{};
@@ -32,7 +32,7 @@ struct {{ camelcase(name) }}Node: public alioth::ASTNtrmNode {
 {{ for f, fname in s.formed_attributes -}}
 struct {{ camelcase(name) }}Node::{{camelcase(fname)}}{{ camelcase(name) }} {
     {{ for a, aname in f -}}
-    {{ if a.is_single }}
+    {{ if a.single }}
     ASTAttr {{aname}}{};
     {{ else then }}
     ASTAttrs {{aname}}{};
