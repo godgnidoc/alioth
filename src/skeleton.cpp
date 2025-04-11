@@ -322,16 +322,12 @@ void Skeleton::DeduceCommon(Skeleton& lang) {
       for (auto it : common) drop.insert(it.first);
       for (auto& [name, attr] : formed) {
         if (!common.count(name)) continue;
-
-        auto cttr = common.at(name);
-        auto same = cttr.is_single == attr.is_single;
-        same = same && cttr.is_optional == attr.is_optional;
-        same = same && cttr.candidates == attr.candidates;
-        if (!same) {
-          common.erase(name);
-          continue;
-        }
         drop.erase(name);
+
+        auto& cttr = common.at(name);
+        cttr.is_single = cttr.is_single && attr.is_single;
+        cttr.is_optional = cttr.is_optional || attr.is_optional;
+        cttr.candidates.insert(attr.candidates.begin(), attr.candidates.end());
       }
       for (auto const& name : drop) common.erase(name);
     }
