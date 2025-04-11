@@ -6,6 +6,20 @@
 
 namespace alioth {
 
+nlohmann::json StorePoint(Point const& point) {
+  nlohmann::json json;
+  json["line"] = point.line;
+  json["column"] = point.column;
+  return json;
+}
+
+nlohmann::json StoreRange(Range const& range) {
+  nlohmann::json json;
+  json["start"] = StorePoint(range.start);
+  json["end"] = StorePoint(range.end);
+  return json;
+}
+
 Point PointAt(size_t offset, Doc doc) {
   Point point{};
   for (auto i = 0UL; i < offset; ++i) {

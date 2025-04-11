@@ -32,6 +32,20 @@ struct Range {
 };
 
 /**
+ * 将点转换为JSON格式
+ * 
+ * @param point 点
+ */
+nlohmann::json StorePoint(Point const& point);
+
+/**
+ * 将范围转换为JSON格式
+ *
+ * @param range 范围
+ */
+nlohmann::json StoreRange(Range const& range);
+
+/**
  * 计算文本中指定偏移量的行号和列号
  *
  * @param offset 偏移量
