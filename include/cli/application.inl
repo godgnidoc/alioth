@@ -63,7 +63,7 @@ inline int Application::Run(std::vector<std::string> args) {
   for (auto i = 0UL; i < args.size(); ++i) {
     auto const& arg = args[i];
     if (arg == kEOO) break;
-    if (arg.front() != '-') continue;
+    if (arg.front() != '-' || arg.size() < 2) continue;
     if (consumed[i]) continue;
 
     for (auto opt : options) {
