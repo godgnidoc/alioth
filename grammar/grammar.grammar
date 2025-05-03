@@ -55,8 +55,13 @@ option -> ID@key COLON json@value {
 
 imports -> ...imports? import@imports;
 
-import -> IMPORT ID@ntrm FROM STRING@from
-  | IMPORT ID@ntrm AS ID@alias FROM STRING@from;
+import -> IMPORT ...import_targets FROM STRING@from;
+
+import_targets -> import_target@targets
+    | ...import_targets COMMA import_target@targets;
+
+import_target -> ID@symbol
+    | ID@symbol AS ID@alias;
 
 terms -> ...terms? term@terms
     | ...terms annotation@annotations;
