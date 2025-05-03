@@ -1,5 +1,15 @@
-  {{--}}{{ for a, aname in model() -}}{{ if a.single -}}
-  {{--    }}alioth::ASTAttr {{aname}}{}; // {{for candidate in a.candidates }}{{candidate}} {{ end for }}
-  {{--  }}{{ else then -}}
-  {{--    }}alioth::ASTAttrs {{aname}}{}; // {{for candidate in a.candidates }}{{candidate}} {{ end for }}
-  {{--  }}{{ end if }}{{ end for }}
+  {{ for a, aname in model -}}
+  {{ if a.single -}}
+  {{ if isNtrm(onlyOne(a.candidates)) -}}
+  {{ camelcase(onlyOne(a.candidates)) }} {{ aname }}() const;
+  {{- else then -}}
+  alioth::AST {{ aname }}() const;
+  {{- end if }}
+  {{- else then -}}
+  {{ if isNtrm(onlyOne(a.candidates)) -}}
+  std::vector<{{ camelcase(onlyOne(a.candidates)) }}> {{ aname }}() const;
+  {{- else then -}}
+  std::vector<alioth::AST> {{ aname }}() const;
+  {{- end if }}
+  {{- end if }}
+  {{ end for }}

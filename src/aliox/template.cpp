@@ -23,7 +23,7 @@ Tmpl Template::Load(Doc source) {
 
     path = home / "grammar" / "template.grammar";
     auto gdoc = Document::Read(path);
-    auto grammar = Grammar::Load(gdoc);
+    auto grammar = Grammar::Parse(gdoc);
     return grammar.Compile();
   }();
 
@@ -50,6 +50,11 @@ Template::Frag Template::LoadFrag(AST node) {
     frag->call = nlohmann::json::parse(call->Text()).get<String>();
     auto model = node->Attr("model");
     if (model) frag->model = LoadExpr(model);
+    for (auto that : node->Attrs("these")) {
+      auto name = *that->TextOf("key");
+      auto value = that->Attr("value");
+      frag->these[name] = LoadExpr(value);
+    }
     f = frag;
   } else if (auto eval = node->Attr("eval"); eval) {
     auto frag = std::make_shared<EvalFragment>();
@@ -241,11 +246,22 @@ Template::Filter Template::Compile(std::shared_ptr<TextFragment> frag) {
 Template::Filter Template::Compile(std::shared_ptr<CallFragment> frag) {
   Filter expr;
   if (frag->model) expr = Compile(*frag->model);
+  std::map<std::string, Filter> these;
+  for (auto const& [name, value] : frag->these) {
+    these[name] = Compile(value);
+  }
   return [=](Context& ctx, Array const&) {
     auto path = ctx.Resolve(frag->call);
     if (expr) {
       auto value = expr(ctx, {});
       auto model = value.GetMap();
+      ctx.stack.push_back(
+          {.variables = model, .path = path, .transparent = false});
+    } else if (!these.empty()) {
+      Map model;
+      for (auto const& [name, filter] : these) {
+        model[name] = filter(ctx, {});
+      }
       ctx.stack.push_back(
           {.variables = model, .path = path, .transparent = false});
     } else {
@@ -598,6 +614,31 @@ Template::Filter const& Template::Value::GetFilter() const {
   return std::get<Filter>(*this);
 }
 
+nlohmann::json Template::Value::ToJson() const {
+  if (IsNull()) return nullptr;
+  if (IsString()) return GetString();
+  if (IsInteger()) return GetInteger();
+  if (IsNumber()) return GetNumber();
+  if (IsBoolean()) return GetBoolean();
+  if (IsFilter()) return "<filter>";
+  if (IsArray()) {
+    auto json = nlohmann::json::array();
+    for (auto const& item : GetArray()) {
+      json.push_back(item.ToJson());
+    }
+    return json;
+  }
+  if (IsMap()) {
+    auto json = nlohmann::json::object();
+    for (auto const& [key, value] : GetMap()) {
+      json[key] = value.ToJson();
+    }
+    return json;
+  }
+
+  throw std::runtime_error("unreachable branch");
+}
+
 Template::Value Template::Value::FromJson(nlohmann::json const& json) {
   if (json.is_null()) return nullptr;
   if (json.is_boolean()) return json.get<Boolean>();
@@ -620,7 +661,7 @@ Template::Value Template::Value::FromJson(nlohmann::json const& json) {
 Template::Value Template::Context::Variable(std::string const& name) const {
   auto jumping = false;
   for (auto frame = stack.rbegin(); frame != stack.rend(); ++frame) {
-    if (jumping) continue;
+    if (jumping && (!frame->path || frame->transparent)) continue;
 
     auto it = frame->variables.find(name);
     if (it != frame->variables.end()) return it->second;

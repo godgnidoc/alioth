@@ -1,0 +1,83 @@
+# Annotation grammar
+
+lang: "annotation"
+
+SEMICOLON = /;/
+COLON = /:/
+COMMA = /,/
+DOT = /\./
+LBRACE = /{/
+RBRACE = /}/
+LBRACKET = /\[/
+RBRACKET = /]/
+NULL<json> = /null/
+TRUE<json> = /true/
+FALSE<json> = /false/
+STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
+NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ { tokenize: { "type": "number" } }
+ID = /[a-zA-Z_]\w*/
+COMMENT ?= /#[^\n]*\n/ { tokenize: { "type": "comment" } }
+SPACE ?= /\s+/
+
+prog -> ...options ...annotations;
+
+options -> ...options? option@options;
+option -> ID@key COLON ...json {
+  key.tokenize: { "type": "variable", "modifier": ["definition"] }
+};
+
+annotations -> ...annotations? annotation@annotations;
+
+annotation -> ...selectors ...annotation_body SEMICOLON?;
+selectors -> selector@selectors
+    | ...selectors COMMA selector@selectors;
+selector -> ID@symbol
+    | ID@symbol DOT ID@form;
+
+selector {
+  symbol.tokenize: { "type": "class" },
+  form.tokenize: { "type": "decorator" }
+}
+
+annotation_body -> LBRACE ...attributes RBRACE;
+
+attributes -> attribute@attributes
+    | ...attributes COMMA attribute@attributes;
+
+attribute -> ID@key COLON json@value
+    | ID@of DOT ID@key COLON json@value;
+
+attribute {
+  key.tokenize: { "type": "property", "modifier": ["modification"] },
+  of.tokenize: { "type": "property" }
+}
+
+json -> ...object
+    | ...array
+    | ...string
+    | ...number
+    | ...boolean
+    | ...null;
+
+object -> LBRACE@empty_object RBRACE
+    | LBRACE ...fields RBRACE;
+
+fields -> field@object
+    | ...fields COMMA field@object;
+
+field -> STRING@key COLON ...json;
+
+array -> LBRACKET@empty_array RBRACKET
+    | LBRACKET ...elements RBRACKET;
+
+elements ->  json@array
+    | ...elements COMMA json@array;
+
+string -> STRING@string;
+
+number -> NUMBER@number;
+
+boolean -> TRUE@true
+    | FALSE@false;
+
+null -> NULL@null;

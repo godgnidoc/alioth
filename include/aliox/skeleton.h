@@ -31,6 +31,20 @@ struct Skeleton {
   std::map<SymbolID, Structure> structures{};
 
   /**
+   * 记录语法结构的等价性 origin -> final
+   *
+   * 裁剪中间结构后，需要依靠等价性传递表找到非终结符所属的语法结构
+   */
+  std::map<SymbolID, SymbolID> equivalence{};
+
+  /**
+   * 查询非终结符对应的语法结构
+   *
+   * @param symbol 符号ID
+   */
+  Structure const& StructOf(SymbolID symbol) const;
+
+  /**
    * 将语言骨架保存为JSON格式
    */
   nlohmann::json Store() const;

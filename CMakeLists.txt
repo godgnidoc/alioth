@@ -12,7 +12,9 @@ add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter)
 
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories(
+  "${CMAKE_SOURCE_DIR}/include"
+  "${CMAKE_SOURCE_DIR}/generated/include")
 link_libraries(nlohmann_json nlohmann_json::nlohmann_json fmt::fmt-header-only)
 
 set(CORE_SOURCES

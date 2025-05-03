@@ -12,6 +12,7 @@ bool RegexTree::AcceptNode::GetNullable() { return {}; }
 RegexTree::Leafs RegexTree::AcceptNode::GetFirstpos() { return {}; }
 RegexTree::Leafs RegexTree::AcceptNode::GetLastpos() { return {}; }
 bool RegexTree::AcceptNode::Match(char) { return {}; }
+std::string RegexTree::AcceptNode::Print() const { return ""; }
 
 bool RegexTree::CharNode::GetNullable() { return false; }
 RegexTree::Leafs RegexTree::CharNode::GetFirstpos() {
@@ -21,6 +22,7 @@ RegexTree::Leafs RegexTree::CharNode::GetLastpos() {
   return {shared_from_this()};
 }
 bool RegexTree::CharNode::Match(char ch) { return ch_ == ch; }
+std::string RegexTree::CharNode::Print() const { return pattern_; };
 
 bool RegexTree::RangeNode::GetNullable() { return false; }
 RegexTree::Leafs RegexTree::RangeNode::GetFirstpos() {
@@ -32,6 +34,7 @@ RegexTree::Leafs RegexTree::RangeNode::GetLastpos() {
 bool RegexTree::RangeNode::Match(char ch) {
   return includes_ == (0 != set_.count(ch));
 }
+std::string RegexTree::RangeNode::Print() const { return pattern_; };
 
 bool RegexTree::ConcatNode::GetNullable() {
   return left_->GetNullable() && right_->GetNullable();
@@ -54,6 +57,16 @@ void RegexTree::ConcatNode::CalcFollowpos() {
     node->followpos_.merge(right_->GetFirstpos());
   }
 }
+std::string RegexTree::ConcatNode::Print() const {
+  auto lhs = left_->Print();
+  auto rhs = right_->Print();
+  if (std::dynamic_pointer_cast<UnionNode>(left_)) {
+    lhs = "(" + lhs + ")";
+  } else if (std::dynamic_pointer_cast<UnionNode>(right_)) {
+    rhs = "(" + rhs + ")";
+  }
+  return lhs + rhs;
+};
 
 bool RegexTree::UnionNode::GetNullable() {
   return left_->GetNullable() || right_->GetNullable();
@@ -72,6 +85,11 @@ void RegexTree::UnionNode::CalcFollowpos() {
   left_->CalcFollowpos();
   right_->CalcFollowpos();
 }
+std::string RegexTree::UnionNode::Print() const {
+  auto lhs = left_->Print();
+  auto rhs = right_->Print();
+  return lhs + "|" + rhs;
+};
 
 bool RegexTree::KleeneNode::GetNullable() { return true; }
 RegexTree::Leafs RegexTree::KleeneNode::GetFirstpos() {
@@ -87,6 +105,13 @@ void RegexTree::KleeneNode::CalcFollowpos() {
     node->followpos_.merge(child_->GetFirstpos());
   }
 }
+std::string RegexTree::KleeneNode::Print() const {
+  auto sub = child_->Print();
+  if (std::dynamic_pointer_cast<BinaryNode>(child_)) {
+    sub = "(" + sub + ")";
+  }
+  return sub + "*";
+};
 
 bool RegexTree::PositiveNode::GetNullable() { return child_->GetNullable(); }
 RegexTree::Leafs RegexTree::PositiveNode::GetFirstpos() {
@@ -102,6 +127,13 @@ void RegexTree::PositiveNode::CalcFollowpos() {
     node->followpos_.merge(child_->GetFirstpos());
   }
 }
+std::string RegexTree::PositiveNode::Print() const {
+  auto sub = child_->Print();
+  if (std::dynamic_pointer_cast<BinaryNode>(child_)) {
+    sub = "(" + sub + ")";
+  }
+  return sub + "+";
+};
 
 bool RegexTree::OptionalNode::GetNullable() { return true; }
 RegexTree::Leafs RegexTree::OptionalNode::GetFirstpos() {
@@ -111,6 +143,13 @@ RegexTree::Leafs RegexTree::OptionalNode::GetLastpos() {
   return child_->GetLastpos();
 }
 void RegexTree::OptionalNode::CalcFollowpos() { child_->CalcFollowpos(); }
+std::string RegexTree::OptionalNode::Print() const {
+  auto sub = child_->Print();
+  if (std::dynamic_pointer_cast<BinaryNode>(child_)) {
+    sub = "(" + sub + ")";
+  }
+  return sub + "?";
+};
 
 std::string const& RegexTree::Operators() {
   static std::string str = "+*?|()";
@@ -128,11 +167,13 @@ void RegexTree::ParseRange(std::vector<Unit>& input, size_t const start) {
   if (input[start].Char() != '[') {
     throw InvalidRange{};
   } else {
+    node->pattern_ += input.at(start).Char();
     input.erase(input.begin() + start);
   }
 
   if (input[start].Char() == '^') {
     node->includes_ = false;
+    node->pattern_ += input.at(start).Char();
     input.erase(input.begin() + start);
   } else {
     node->includes_ = true;
@@ -180,6 +221,7 @@ void RegexTree::ParseRange(std::vector<Unit>& input, size_t const start) {
       } break;
     }
 
+    node->pattern_ += input.at(start).Char();
     input.erase(input.begin() + start);
   }
 
@@ -203,24 +245,29 @@ void RegexTree::ParseChars(std::vector<Unit>& input) {
         if (i + 1 >= input.size()) throw InvalidEscape{};
 
         input.erase(input.begin() + i);
+        auto p = std::string({'\\', input.at(i).Char()});
         auto [range, includes] = Chars::Extract(input[i].Char());
         if (range.size() == 1) {
           auto const node = std::make_shared<CharNode>();
+          node->pattern_ = p;
           node->ch_ = range[0];
           input[i] = node;
         } else {
           auto const node = std::make_shared<RangeNode>();
+          node->pattern_ = p;
           node->includes_ = includes;
           for (auto c : range) node->set_.insert(c);
           input[i] = node;
         }
       } else if (input[i].Char() == '.') {
         auto const node = std::make_shared<RangeNode>();
+        node->pattern_ = ".";
         node->includes_ = false;
         node->set_ = {};
         input[i] = node;
       } else {
         auto const node = std::make_shared<CharNode>();
+        node->pattern_ = input[i].Char();
         node->ch_ = input[i].Char();
         input[i] = node;
       }

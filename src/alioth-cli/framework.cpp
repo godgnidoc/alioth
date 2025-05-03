@@ -11,19 +11,46 @@
 #include "aliox/skeleton.h"
 #include "aliox/template.h"
 
-int Framework::Run() {
-  using namespace alioth;
+using namespace alioth;
 
+inline auto json() {
+  return [](auto&, auto const& args) { return args[0].ToJson().dump(); };
+}
+
+inline auto nameOf(alioth::Syntax syntax) {
+  return [syntax](auto&, auto const& args) {
+    return syntax->NameOf(args[0].GetInteger());
+  };
+}
+
+inline auto onlyOne() {
+  return [](auto&, auto const& args) {
+    auto const& arg = args[0];
+    if (!arg.IsArray() || arg.GetArray().size() != 1)
+      return Template::Value{nullptr};
+    return arg.GetArray().front();
+  };
+}
+
+inline auto isNtrm(alioth::Syntax syntax) {
+  return [syntax](auto&, auto const& args) -> Template::Value {
+    auto const& node = args[0];
+    if (node.IsString()) {
+      return !syntax->IsTerm(syntax->FindSymbol(node.GetString()));
+    } else if (node.IsInteger()) {
+      return !syntax->IsTerm(node.GetInteger());
+    }
+    return false;
+  };
+}
+
+int Framework::Run() {
   auto syntax = ::Syntax::Load(gpath->Value());
 
   Template::Map model;
   auto lang = syntax->Lang();
   model["lang"] = lang;
-
-  auto jsyntax = syntax->Store();
-  auto binary = nlohmann::json::to_cbor(jsyntax);
-  jsyntax["binary"] = binary;
-  model["syntax"] = Template::Value::FromJson(jsyntax);
+  model["syntax"] = Template::Value::FromJson(syntax->Store());
 
   auto skeleton = alioth::Skeleton::Deduce(syntax);
   auto jskeleton = skeleton.Store();
@@ -35,11 +62,10 @@ int Framework::Run() {
   meta["lowercase"] = Template::Pipe(&Strings::Lowercase);
   meta["camelcase"] = Template::Pipe(&Strings::Camelcase);
   meta["titlecase"] = Template::Pipe(&Strings::Titlecase);
-  meta["eq"] = Template::Filter{[](auto&, auto const& args) {
-    return Template::Value{args[0].TextOf() == args[1].TextOf()};
-  }};
-  meta["model"] =
-      Template::Filter{[](auto& ctx, auto const&) { return ctx.Model(); }};
+  meta["json"] = Template::Filter{json()};
+  meta["nameOf"] = Template::Filter{nameOf(syntax)};
+  meta["onlyOne"] = Template::Filter{onlyOne()};
+  meta["isNtrm"] = Template::Filter{isNtrm(syntax)};
 
   auto home = AliothHome();
   auto root = home / "templates" / "skeleton" / "cpp";
@@ -50,14 +76,6 @@ int Framework::Run() {
     auto dir = output_dir / "include" / lang;
     std::filesystem::create_directories(dir);
     std::ofstream ofs(dir / "syntax.h");
-    ofs << text;
-  }
-
-  {
-    auto text = Template::Render(root / "syntax.cpp.template", model, meta);
-    auto dir = output_dir / "src";
-    std::filesystem::create_directories(dir);
-    std::ofstream ofs(dir / "syntax.cpp");
     ofs << text;
   }
 

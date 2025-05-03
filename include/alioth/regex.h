@@ -51,6 +51,11 @@ struct RegexTree {
   virtual void CalcFollowpos() = 0;
 
   /**
+   * 打印正则表达式
+   */
+  virtual std::string Print() const = 0;
+
+  /**
    * 编译正则表达式
    *
    * @param pattern 正则表达式
@@ -110,6 +115,7 @@ struct RegexTree::AcceptNode : public LeafNode {
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   bool Match(char input) override;
+  std::string Print() const override;
 
   /**
    * 为正则表达式标记接受节点
@@ -124,11 +130,13 @@ struct RegexTree::AcceptNode : public LeafNode {
  */
 struct RegexTree::CharNode : public LeafNode {
   char ch_{};
-
+  std::string pattern_{};
+  
   bool GetNullable() override;
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   bool Match(char input) override;
+  std::string Print() const override;
 };
 
 /**
@@ -152,11 +160,13 @@ struct RegexTree::CharNode : public LeafNode {
 struct RegexTree::RangeNode : public LeafNode {
   bool includes_{};
   std::set<char> set_{};
+  std::string pattern_{};
 
   bool GetNullable() override;
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   bool Match(char input) override;
+  std::string Print() const override;
 };
 
 struct RegexTree::ConcatNode : public BinaryNode {
@@ -164,6 +174,7 @@ struct RegexTree::ConcatNode : public BinaryNode {
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   void CalcFollowpos() override;
+  std::string Print() const override;
 };
 
 struct RegexTree::UnionNode : public BinaryNode {
@@ -171,6 +182,7 @@ struct RegexTree::UnionNode : public BinaryNode {
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   void CalcFollowpos() override;
+  std::string Print() const override;
 
   /**
    * 将两个正则表达式使用或运算连接
@@ -186,6 +198,7 @@ struct RegexTree::KleeneNode : public MonoNode {
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   void CalcFollowpos() override;
+  std::string Print() const override;
 };
 
 struct RegexTree::PositiveNode : public MonoNode {
@@ -193,6 +206,7 @@ struct RegexTree::PositiveNode : public MonoNode {
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   void CalcFollowpos() override;
+  std::string Print() const override;
 };
 
 struct RegexTree::OptionalNode : public MonoNode {
@@ -200,6 +214,7 @@ struct RegexTree::OptionalNode : public MonoNode {
   Leafs GetFirstpos() override;
   Leafs GetLastpos() override;
   void CalcFollowpos() override;
+  std::string Print() const override;
 };
 
 /** 泛型输入单元 */

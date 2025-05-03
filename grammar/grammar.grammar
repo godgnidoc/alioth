@@ -22,7 +22,10 @@ RPAREN = /\)/
 LBRACKET = /\[/
 RBRACKET = /]/
 EMPTY = /%empty/
-NULL<json> = /null/
+IMPORT<keyword> = /import/
+FROM<keyword> = /from/
+AS<keyword> = /as/
+JNULL<json> = /null/
 TRUE<json> = /true/
 FALSE<json> = /false/
 STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
@@ -38,17 +41,22 @@ RBRACE, LPAREN, RPAREN, LBRACKET, RBRACKET {
   tokenize: { "type": "operator" }
 }
 
-EMPTY, NULL, TRUE, FALSE {
+EMPTY, JNULL, TRUE, FALSE {
   tokenize: { "type": "keyword" }
 }
 
-grammar -> ...options ...terms ...ntrms;
+grammar -> ...options ...imports? ...terms ...ntrms;
 
 options -> ...options? option@options;
 
-option -> ID@key COLON ...json {
+option -> ID@key COLON json@value {
   key.tokenize: { "type": "variable", "modifier": ["definition"] }
 };
+
+imports -> ...imports? import@imports;
+
+import -> IMPORT ID@ntrm FROM STRING@from
+  | IMPORT ID@ntrm AS ID@alias FROM STRING@from;
 
 terms -> ...terms? term@terms
     | ...terms annotation@annotations;
@@ -77,7 +85,7 @@ ntrm {
   form.tokenize: { "type": "decorator", "modifier": ["definition"] }
 }
 
-annotation -> ...selectors ...annotation_body;
+annotation -> ...selectors ...annotation_body SEMICOLON?;
 selectors -> selector@selectors
     | ...selectors COMMA selector@selectors;
 selector -> ID@symbol
@@ -120,7 +128,7 @@ object -> LBRACE@empty_object RBRACE
 fields -> field@object
     | ...fields COMMA field@object;
 
-field -> STRING@key COLON ...json;
+field -> STRING@key COLON json@value;
 
 array -> LBRACKET@empty_array RBRACKET
     | LBRACKET ...elements RBRACKET;
@@ -132,10 +140,10 @@ string -> STRING@string;
 
 number -> NUMBER@number;
 
-boolean -> TRUE@true
-    | FALSE@false;
+boolean -> TRUE@boolean
+    | FALSE@boolean;
 
-null -> NULL@null;
+null -> JNULL@null;
 
 annotation_body -> LBRACE ...attributes RBRACE;
 

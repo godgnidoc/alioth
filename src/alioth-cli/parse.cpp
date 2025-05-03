@@ -24,7 +24,7 @@ int Parse::Run() {
   alioth::ASTNode::StoreOptions options{};
 
   if (disable_compact->HasValue()) options.compact = false;
-  if (hint_with_skeleton) {
+  if (hint_with_skeleton->HasValue()) {
     skeleton =
         std::make_shared<alioth::Skeleton>(alioth::Skeleton::Deduce(syntax));
     options.skeleton = skeleton.get();

@@ -34,6 +34,7 @@ OVERWRITE<ctrl> = /overwrite/
 BLOCK<ctrl> = /block/
 CALL<ctrl> = /call/
 WITH<ctrl> = /with/
+AS<ctrl> = /as/
 FOR<ctrl> = /for/
 IN<ctrl> = /in/
 IF<ctrl> = /if/
@@ -42,7 +43,7 @@ THEN<ctrl> = /then/
 END<ctrl> = /end/
 
 EXTENDS, OVERWRITE, BLOCK, CALL,
-WITH, FOR, IN, IF, ELSE, THEN, END {
+WITH, AS, FOR, IN, IF, ELSE, THEN, END {
   tokenize: { "type": "keyword" }
 }
 
@@ -87,7 +88,13 @@ text -> TXT@text;
 eval -> LOPEN DASH?@trim_start expr@eval DASH?@trim_end ROPEN;
 
 call -> LOPEN DASH?@trim_start CALL STRING@call DASH?@trim_end ROPEN
-    | LOPEN DASH?@trim_start CALL STRING@call WITH expr@model DASH?@trim_end ROPEN;
+    | LOPEN DASH?@trim_start CALL STRING@call WITH expr@model DASH?@trim_end ROPEN
+    | LOPEN DASH?@trim_start CALL STRING@call WITH ...these DASH?@trim_end ROPEN;
+
+these -> this@these
+    | ...these COMMA this@these;
+
+this -> expr@value AS ID@key;
 
 iter -> ...open_iter ...fragments ...close_iter;
 open_iter -> LOPEN FOR ...anchor? ...iter_vars IN expr@iter DASH?@trim_start ROPEN;

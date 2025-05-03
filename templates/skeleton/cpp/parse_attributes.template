@@ -1,5 +1,0 @@
-{{ for a, aname in model() -}}{{ if a.single -}}
-  {{--  }}n->{{aname}} = ParseArbitraryAttribute(node->Attr("{{ aname }}"));
-  {{--}}{{ else then -}}
-  {{--  }}for( auto attr : node->Attrs("{{ aname }}")) n->{{aname}}.push_back(ParseArbitraryAttribute(attr));
-{{--}}{{ end if }}{{ end for }}

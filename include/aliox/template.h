@@ -184,6 +184,7 @@ struct Template::Value : public std::variant<Null, String, Integer, Number,
   Map const& GetMap() const;
   Filter const& GetFilter() const;
 
+  nlohmann::json ToJson() const;
   static Value FromJson(nlohmann::json const& json);
 };
 
@@ -272,6 +273,7 @@ struct Template::TextFragment : public Fragment {
 struct Template::CallFragment : public Fragment {
   std::string call;
   std::optional<Expr> model;
+  std::map<std::string, Expr> these;
 };
 
 struct Template::EvalFragment : public Fragment {

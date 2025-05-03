@@ -50,6 +50,18 @@ struct ASTNode : public std::enable_shared_from_this<ASTNode> {
   ASTTerm AsTerm();
 
   /**
+   * 使用指定视图访问语法树节点
+   *
+   * 视图是面向语法结构设计的访问器，由代码生成器定义
+   *
+   * 转换条件是依据非终结符等价性判断当前节点是否属于指定视图
+   *
+   * @tparam View 视图类型
+   */
+  template <typename View>
+  View As();
+
+  /**
    * 获取符号的第一个终结符
    */
   ASTTerm First();
@@ -263,37 +275,6 @@ struct ASTRootNode : public ASTNtrmNode {
   ASTNtrm Ntrm(FormulaID formula, std::vector<AST>::const_iterator begin,
                std::vector<AST>::const_iterator end);
 };
-
-/**
- * 语法树属性封装
- */
-struct ASTAttr : public AST {
-  using AST::AST;
-  ASTAttr(AST const& node) : AST(node) {}
-  ASTAttr(AST&& node) : AST(std::move(node)) {}
-
-  ASTAttr() = default;
-  ASTAttr(ASTAttr const&) = default;
-  ASTAttr(ASTAttr&&) = default;
-  ~ASTAttr() = default;
-  ASTAttr& operator=(ASTAttr const& node) = default;
-  ASTAttr& operator=(ASTAttr&& node) = default;
-
-  template <typename T, std::enable_if_t<!is_shared_ptr_v<T>>* = nullptr>
-  std::shared_ptr<T> As() const {
-    return std::dynamic_pointer_cast<T>(*this);
-  }
-
-  template <typename T, std::enable_if_t<is_shared_ptr_v<T>>* = nullptr>
-  T As() const {
-    return std::dynamic_pointer_cast<typename T::element_type>(*this);
-  }
-};
-
-/**
- * 语法树属性列表
- */
-using ASTAttrs = std::vector<ASTAttr>;
 
 }  // namespace alioth
 

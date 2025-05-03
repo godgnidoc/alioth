@@ -1,0 +1,15 @@
+{{ for a, aname in model -}}
+inline {{ if a.single -}}
+{{ if isNtrm(onlyOne(a.candidates)) -}}
+{{ camelcase(onlyOne(a.candidates)) }} {{call "scope.template"}}{{ aname }}() const { return node->Attr("{{aname}}")->template As<{{ camelcase(onlyOne(a.candidates)) }}>(); }
+{{- else then -}}
+alioth::AST {{call "scope.template"}}{{ aname }}() const { return node->Attr("{{aname}}"); }
+{{- end if }}
+{{- else then -}}
+{{ if isNtrm(onlyOne(a.candidates)) -}}
+std::vector<{{ camelcase(onlyOne(a.candidates)) }}> {{call "scope.template"}}{{ aname }}() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("{{aname}}"), [](auto n) { return n->template As<{{ camelcase(onlyOne(a.candidates)) }}>(); }); }
+{{- else then -}}
+std::vector<alioth::AST> {{call "scope.template"}}{{ aname }}() const { return node->Attrs("{{aname}}"); }
+{{- end if }}
+{{- end if }}
+{{ end for }}

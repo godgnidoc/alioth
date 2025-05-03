@@ -11,6 +11,12 @@ nlohmann::json Skeleton::Store() const {
   for (auto const& [symbol, structure] : structures) {
     nlohmann::json s;
     s["id"] = symbol;
+    auto accepts = generic::collect(equivalence, [&](auto const& it) {
+      if (it.second == symbol) return it.first;
+      return symbol;
+    });
+    accepts.insert(symbol);
+    s["accepts"] = accepts;
     for (auto const& [name, attr] : structure.attributes) {
       nlohmann::json a;
       a["optional"] = attr.is_optional;
@@ -48,6 +54,14 @@ nlohmann::json Skeleton::Store() const {
   }
 
   return json;
+}
+
+Skeleton::Structure const& Skeleton::StructOf(SymbolID symbol) const {
+  auto eit = equivalence.find(symbol);
+  if (eit != equivalence.end()) {
+    symbol = eit->second;
+  }
+  return structures.at(symbol);
 }
 
 Skeleton Skeleton::Deduce(Syntax const& syntax) {
@@ -315,6 +329,28 @@ void Skeleton::ReplaceEquivalentCandidates(Skeleton& lang) {
     mappings[f.body.front().id] = f.head;
   }
 
+  // 登记符号等价性
+  for (auto const& [from, to] : mappings) {
+    auto it = lang.equivalence.find(from);
+    if (it != lang.equivalence.end()) continue;
+
+    std::set<SymbolID> seen{};
+    seen.insert(from);
+    auto phinal = to;
+    while (mappings.count(phinal) && !(phinal)) {
+      seen.insert(phinal);
+      auto eit = lang.equivalence.find(phinal);
+      if (eit != lang.equivalence.end()) {
+        phinal = eit->second;
+      } else {
+        phinal = mappings.at(phinal);
+      }
+    }
+    for (auto const& id : seen) {
+      lang.equivalence[id] = phinal;
+    }
+  }
+
   auto upgrade = [&](Attribute& attr) {
     std::vector<SymbolID> candidates{};
     candidates.insert(candidates.end(), attr.candidates.begin(),
@@ -322,8 +358,9 @@ void Skeleton::ReplaceEquivalentCandidates(Skeleton& lang) {
     attr.candidates.clear();
 
     for (auto candidate : candidates) {
-      while (mappings.count(candidate)) {
-        candidate = mappings.at(candidate);
+      auto eit = lang.equivalence.find(candidate);
+      if (eit != lang.equivalence.end()) {
+        candidate = eit->second;
       }
       attr.candidates.insert(candidate);
     }

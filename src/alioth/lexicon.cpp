@@ -27,7 +27,7 @@ nlohmann::json Lexicon::Store() const {
   for (auto const& term : terms) {
     nlohmann::json t;
     t["name"] = term.name;
-    // TODO 尚未实现正则表达式转文本，暂时不保存正则表达式
+    if (term.pattern) t["pattern"] = term.pattern->Print();
     for (auto const& entry : term.entries) {
       t["entries"].push_back(entry);
     }
@@ -53,6 +53,9 @@ Lex Lexicon::Load(nlohmann::json const& json) {
   for (auto const& t : json["terms"]) {
     Lexicon::Term term{};
     term.name = t["name"];
+    if (t.contains("pattern")) {
+      term.pattern = RegexTree::Compile(t["pattern"].get<std::string>());
+    }
     if (t.contains("entries"))
       for (auto const& entry : t["entries"]) {
         term.entries.insert(entry.get<char>());

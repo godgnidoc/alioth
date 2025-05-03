@@ -9,6 +9,10 @@ T_RI = /\]/
 T_LS = /{/
 T_RS = /}/
 
+T_LP, T_RP, T_LI, T_RI, T_LS, T_RS {
+ tokenize: { "type": "operator" }
+}
+
 T_COMMA = /,/
 T_SEMI = /;/
 T_DOT = /\./
@@ -87,6 +91,10 @@ control.return -> T_RETURN
     | T_RETURN expression@expr;
 
 function -> T_FN T_ID@name T_LP ...params? T_RP ...block;
+
+function {
+ name.type: "function"
+}
 
 params -> T_ID@params
     | ...params T_COMMA T_ID@params;

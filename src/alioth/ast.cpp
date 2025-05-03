@@ -167,7 +167,7 @@ nlohmann::json ASTNode::Store(StoreOptions const& options) {
   auto const& origin_formula = syntax->formulas.at(origin_formula_id);
   Skeleton::Attributes const* hints{};
   if (options.skeleton) {
-    auto const& structure = options.skeleton->structures.at(ntrm->id);
+    auto const& structure = options.skeleton->StructOf(ntrm->id);
     if (origin_formula.form) {
       hints = &structure.forms.at(*origin_formula.form).attributes;
     } else {

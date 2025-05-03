@@ -19,14 +19,14 @@ TEST(Grammar, Bootstrap) {
 
   auto gdoc = Document::Read(path);
   fmt::println("step 1: load grammar from source");
-  auto grammar = Grammar::Load(gdoc);
+  auto grammar = Grammar::Parse(gdoc);
   fmt::println("step 2: compile grammar to syntax");
   auto syntax = grammar.Compile();
   fmt::println("step 3: use syntax to parse grammar");
   auto parser = Parser(syntax, gdoc);
   auto ast = parser.Parse();
   fmt::println("step 4: load grammar from ast");
-  auto grammar2 = Grammar::Load(ast);
+  auto grammar2 = Grammar::Parse(ast);
   fmt::println("step 5: compile grammar to syntax");
   auto syntax2 = grammar2.Compile();
   fmt::println("step 6: use syntax to parse grammar");
@@ -56,7 +56,7 @@ TEST(Grammar, Form) {
     int b = 1;
   )");
 
-  auto syntax = Grammar::Load(gdoc).Compile();
+  auto syntax = Grammar::Parse(gdoc).Compile();
   ASSERT_EQ(syntax->formulas.at(3).form, "uninited");
   ASSERT_EQ(syntax->formulas.at(4).form, "assigned");
 }
