@@ -16,12 +16,7 @@ namespace test {
 TEST(Storage, Json) {
   auto path = AliothHome() / "grammar" / "grammar.grammar";
   auto gdoc = Document::Read(path);
-  auto syntax = Grammar::SyntaxOf();
-
-  {
-    auto parser = Parser(syntax, gdoc);
-    auto root = parser.Parse();
-  }
+  auto syntax = Grammar::Compile(gdoc);
 
   auto json = syntax->Store();
   auto loaded = Syntactic::Load(json);

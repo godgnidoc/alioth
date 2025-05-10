@@ -2,14 +2,9 @@
 
 namespace alioth {
 
-Parser::Parser(Syntax syntax, Doc doc) : root_{new ASTRootNode} {
-  root_->doc = doc;
-  root_->syntax = syntax;
-  root_->root = root_;
-}
+Parser::Parser(Syntax syntax, Doc doc) : doc_{doc}, syntax_{syntax} {}
 
-ASTRoot Parser::Parse() {
-  auto syntax = root_->syntax;
+ASTNtrm Parser::Parse() {
   threads_.push_back(Thread{
       .stack = {0},
   });
@@ -70,10 +65,9 @@ ASTRoot Parser::Parse() {
 }
 
 bool Parser::IgnoreOrFalse(Thread& thread) {
-  auto syntax = root_->syntax;
   auto input = thread.inputs.front();
 
-  if (!syntax->IsIgnored(input->id)) return false;
+  if (!syntax_->IsIgnored(input->id)) return false;
 
   if (auto term = input->AsTerm()) thread.ignores.push_back(term);
   thread.inputs.erase(thread.inputs.begin());
@@ -81,42 +75,77 @@ bool Parser::IgnoreOrFalse(Thread& thread) {
 }
 
 bool Parser::ReduceOrFalse(Thread& thread) {
-  auto syntax = root_->syntax;
   auto input = thread.inputs.front();
-  auto state = &syntax->states.at(thread.stack.back());
+  auto state = &syntax_->states.at(thread.stack.back());
   auto reduce = state->reduce.find(input->id);
 
   if (reduce == state->reduce.end()) return false;
 
   auto const formula = reduce->second;
 
-  /**
-   * 触发0号产生式，接受解析结果
-   */
-  if (formula == 0) {
-    auto accept = thread.seens.back();
-    candidates_.push_back({accept->AsNtrm(), thread.ignores});
-    return true;
-  }
-
-  auto const& f = root_->syntax->formulas.at(formula);
+  auto const& f = syntax_->formulas.at(formula);
   auto cost = f.body.size();
   auto begin = thread.seens.begin() + thread.seens.size() - cost;
   auto end = thread.seens.end();
-  auto ntrm = root_->Ntrm(formula, begin, end);
+  auto ntrm = std::make_shared<ASTNtrmNode>();
+  ntrm->doc = doc_;
+  ntrm->syntax = syntax_;
+  ntrm->id = f.head;
+  ntrm->formula = formula;
+  ntrm->sentence.insert(ntrm->sentence.end(), begin, end);
+
+  for (auto i = 0UL; i < ntrm->sentence.size(); ++i) {
+    /**
+     * 收集展开符号的属性
+     */
+    if (f.body.at(i).Unfolded()) {
+      auto n = std::dynamic_pointer_cast<ASTNtrmNode>(ntrm->sentence.at(i));
+      for (auto const& [name, attrs] : n->attributes) {
+        auto& attributes = ntrm->attributes[name];
+        attributes.insert(attributes.end(), attrs.begin(), attrs.end());
+      }
+
+      continue;
+    }
+
+    /**
+     * 将符号收集为属性
+     */
+    if (f.body.at(i).attr) {
+      ntrm->attributes[*f.body.at(i).attr].push_back(ntrm->sentence.at(i));
+      continue;
+    }
+  }
+
+  /**
+   * 为终结符属性追加标注属性
+   */
+  for (auto& [name, attrs] : ntrm->attributes) {
+    auto ait = f.attributes.find(name);
+    if (ait == f.attributes.end()) continue;
+
+    for (auto symbol : attrs) {
+      auto term = symbol->AsTerm();
+      if (!term) continue;
+
+      for (auto const& [key, value] : ait->second) {
+        term->attributes[key].merge_patch(value);
+      }
+    }
+  }
 
   /**
    * 将被忽略的符号填回句子单词串
    */
   if (!ntrm->sentence.empty()) {
-    auto from = ntrm->First()->offset;
-    auto to = ntrm->Last()->offset;
+    auto from = formula == 0 ? 0UL : ntrm->First()->offset;
+    auto to = formula == 0 ? -1UL : ntrm->Last()->offset;
     auto itx = 0UL;
     auto igx = 0UL;
     while (igx < thread.ignores.size()) {
       auto ignored = thread.ignores.at(igx);
       if (ignored->offset >= to) break;
-      if (ignored->offset <= from) {
+      if (ignored->offset < from) {
         ++igx;
         continue;
       }
@@ -138,17 +167,24 @@ bool Parser::ReduceOrFalse(Thread& thread) {
   thread.stack.resize(thread.stack.size() - cost);
   thread.seens.resize(thread.seens.size() - cost);
 
-  /**
-   * 将归约结果用作下一个输入
-   */
-  thread.inputs.insert(thread.inputs.begin(), ntrm);
+  if (formula == 0) {
+    /**
+     * 触发0号产生式，接受解析结果
+     */
+    candidates_.push_back(ntrm);
+  } else {
+    /**
+     * 将归约结果用作下一个输入
+     */
+    thread.inputs.insert(thread.inputs.begin(), ntrm);
+  }
+
   return true;
 }
 
 bool Parser::ShiftOrFalse(Thread& thread) {
-  auto syntax = root_->syntax;
   auto input = thread.inputs.front();
-  auto state = &syntax->states.at(thread.stack.back());
+  auto state = &syntax_->states.at(thread.stack.back());
   auto shift = state->shift.find(input->id);
 
   if (shift == state->shift.end()) return false;
@@ -171,44 +207,16 @@ void Parser::ClearOrCrash(std::vector<size_t> const& failed,
   }
 }
 
-ASTRoot Parser::AcceptOrAmbiguous() {
-  if (candidates_.size() != 1) {
-    fmt::println(stderr, "error: Ambiguous results");
-    for (auto const& [candidate, _] : candidates_) {
-      fmt::println(stderr, "\033[1;34mCandate:\033[0m");
-      fmt::println(stderr, "  {}", candidate->Store({}).dump(2));
-    }
+ASTNtrm Parser::AcceptOrAmbiguous() {
+  if (candidates_.size() == 1) return candidates_.back();
 
-    throw ParseError{};
+  fmt::println(stderr, "error: Ambiguous results");
+  for (auto const& candidate : candidates_) {
+    fmt::println(stderr, "\033[1;34mCandate:\033[0m");
+    fmt::println(stderr, "  {}", candidate->Store({}).dump(2));
   }
 
-  auto syntax = root_->syntax;
-  auto const& [candidate, ignores] = candidates_.back();
-  root_->id = syntax->formulas.front().head;
-  root_->formula = 0;
-  root_->attributes[syntax->Lang()].push_back(candidate);
-
-  /**
-   * 将源码首末被忽略的单词填回句子
-   */
-  auto from = candidate->First()->offset;
-  auto feeded = false;
-  for (auto ignored : ignores) {
-    if (ignored->offset > from) {
-      if (!feeded) {
-        root_->sentence.push_back(candidate);
-        feeded = true;
-      }
-      root_->sentence.push_back(ignored);
-    } else {
-      root_->sentence.push_back(ignored);
-    }
-  }
-  if (!feeded) {
-    root_->sentence.push_back(candidate);
-  }
-
-  return root_;
+  throw ParseError{};
 }
 
 void Parser::Crash() {
@@ -228,11 +236,11 @@ void Parser::Crash() {
                    last->Text());
     }
     std::vector<std::string> expected;
-    auto const& state = root_->syntax->states.at(thread.stack.back());
+    auto const& state = syntax_->states.at(thread.stack.back());
     for (auto const& reduce : state.reduce)
-      expected.push_back(root_->syntax->NameOf(reduce.first));
+      expected.push_back(syntax_->NameOf(reduce.first));
     for (auto const& shift : state.shift)
-      expected.push_back(root_->syntax->NameOf(shift.first));
+      expected.push_back(syntax_->NameOf(shift.first));
     fmt::println(stderr, "note: expected one of {}", fmt::join(expected, ", "));
   }
   throw ParseError{};
@@ -245,13 +253,12 @@ void Parser::Clean(std::vector<size_t> const& according) {
 }
 
 void Parser::ScanAndFork() {
-  auto syntax = root_->syntax;
-  auto lex = syntax->lex;
+  auto lex = syntax_->lex;
 
   for (auto i = 0UL; i < threads_.size(); i++) {
     if (!threads_[i].inputs.empty()) continue;
 
-    auto& state = syntax->states.at(threads_[i].stack.back());
+    auto& state = syntax_->states.at(threads_[i].stack.back());
     if (state.contexts.empty() || state.contexts.size() == 1) {
       auto& thread = threads_[i];
       auto context = state.contexts.empty() ? 0 : *state.contexts.begin();
@@ -287,18 +294,21 @@ void Parser::ScanAndFork() {
 }
 
 ASTTerm Parser::Scan(Thread& thread, ContextID context) {
-  auto doc = root_->doc;
-  auto syntax = root_->syntax;
-  auto lex = syntax->lex;
+  auto lex = syntax_->lex;
 
-  auto term = root_->Term(Lexicon::kEOF, thread.offset);
-  if (thread.offset >= doc->content.size()) return term;
+  auto term = std::make_shared<ASTTermNode>();
+  term->doc = doc_;
+  term->syntax = syntax_;
+  term->id = Lexicon::kEOF;
+  term->offset = thread.offset;
+  term->length = 0;
+  if (thread.offset >= doc_->content.size()) return term;
 
   auto start = lex->states.front();
   auto state = start.transitions.at(context);
 
-  while (state != 0 && thread.offset <= doc->content.size()) {
-    auto const ch = doc->content[thread.offset];
+  while (state != 0 && thread.offset <= doc_->content.size()) {
+    auto const ch = doc_->content[thread.offset];
     auto const& st = lex->states.at(state);
     auto next = st.transitions.find(ch);
     if (next == st.transitions.end()) {

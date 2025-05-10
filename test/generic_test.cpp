@@ -34,8 +34,7 @@ TEST(Generic, Ambiguous) {
     loop -> FOR ID@value IN expr@range
         | FOR ID@value COMMA ID@key IN expr@range;
   )");
-  auto grammar = Grammar::Parse(gdoc);
-  auto syntax = grammar.Compile();
+  auto syntax = Grammar::Compile(gdoc);
 
   auto doc = Document::Create(R"(
         x;

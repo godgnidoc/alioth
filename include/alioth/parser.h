@@ -22,7 +22,7 @@ class Parser {
   /**
    * 解析源码
    */
-  ASTRoot Parse();
+  ASTNtrm Parse();
 
   struct ParseError : public Error {
     ParseError() : Error("Parse error occured") {}
@@ -68,7 +68,7 @@ class Parser {
   /**
    * 若分析线路数量不为1，分析失败
    */
-  ASTRoot AcceptOrAmbiguous();
+  ASTNtrm AcceptOrAmbiguous();
 
   /**
    * 依据下标清除分析线路
@@ -91,17 +91,10 @@ class Parser {
   ASTTerm Scan(Thread& thread, ContextID context = 0);
 
  protected:
-  /**
-   * 分析线路接受候选
-   *
-   * first - 产生式 0 的句子
-   * second - 当前 ignores 符号串
-   */
-  using Candidate = std::pair<ASTNtrm, std::vector<ASTTerm>>;
-
-  ASTRoot root_;                       // 正在分析的语法树根
-  std::vector<Thread> threads_;        // 分析线路
-  std::vector<Candidate> candidates_;  // 已分析完毕的候选语法树
+  Doc doc_;                          // 正在分析的源码
+  Syntax syntax_;                    // 语法规则
+  std::vector<Thread> threads_;      // 分析线路
+  std::vector<ASTNtrm> candidates_;  // 已分析完毕的候选语法树
 };
 
 struct Parser::Thread {

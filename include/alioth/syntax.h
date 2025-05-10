@@ -19,6 +19,14 @@ namespace alioth {
 class Syntactic;
 using Syntax = std::shared_ptr<Syntactic>;
 
+/**
+ * 获取指定语言的语法规则
+ *
+ * @tparam Lang 语言类型
+ */
+template <typename Lang>
+Syntax SyntaxOf();
+
 struct Syntactic {
   struct LR0Item;
   struct LR1Item;

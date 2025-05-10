@@ -23,8 +23,7 @@ Tmpl Template::Load(Doc source) {
 
     path = home / "grammar" / "template.grammar";
     auto gdoc = Document::Read(path);
-    auto grammar = Grammar::Parse(gdoc);
-    return grammar.Compile();
+    return Grammar::Compile(gdoc);
   }();
 
   auto parser = Parser(syntax, source);

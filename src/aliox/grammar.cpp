@@ -9,17 +9,9 @@ namespace alioth {
 using namespace ::grammar;
 using namespace generic;
 
-Grammar Grammar::Parse(Doc source) {
-  auto syntax = SyntaxOf();
-  auto parser = Parser(syntax, source);
-  auto root = parser.Parse();
-  return Parse(root);
-}
-Grammar Grammar::Parse(ASTRoot root) { return {root}; }
-Syntax Grammar::SyntaxOf() { return SyntaxOfGrammar(); }
-
-Syntax Grammar::Compile() const {
-  auto g = ViewOf(root);
+Syntax Grammar::Compile(Doc grammar, std::vector<Doc>) {
+  auto root = Parser(SyntaxOf<grammar::Grammar>(), grammar).Parse();
+  auto g = ViewOf<grammar::Grammar>(root);
 
   auto options = associate(collect<multiple>(g.options(), [](auto const& it) {
     return std::pair{

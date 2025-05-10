@@ -29,8 +29,7 @@ alioth::Syntax Syntax::Load(std::string const& path) {
     auto syntax = alioth::Syntactic::Load(json);
     return syntax;
   } catch (nlohmann::json::parse_error const&) {
-    auto grammar = alioth::Grammar::Parse(doc);
-    auto syntax = grammar.Compile();
+    auto syntax = alioth::Grammar::Compile(doc);
     return syntax;
   }
 }

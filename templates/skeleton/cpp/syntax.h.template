@@ -85,6 +85,7 @@ inline {{lowercase(lang)}}::{{ camelcase(name) }}::{{camelcase(fname)}} alioth::
 {{ end for }}
 {{ end if }}
 {{ end for }}
+{{ call "syntax_of.template" }}
 }
 
 namespace {{lowercase(lang)}} {
@@ -105,11 +106,6 @@ namespace {{lowercase(lang)}} {
 {{ end for }}
 {{ end if }}
 {{ end for }}
-
-inline {{ camelcase(lang) }} ViewOf(alioth::ASTRoot root) {
-  return root->Attr("{{lang}}")->As<{{ camelcase(lang) }}>();
-}
-{{ call "syntax_of.template" }}
 
 }
 

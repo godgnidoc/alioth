@@ -1,30 +1,29 @@
-inline alioth::Syntax SyntaxOf{{ camelcase(lang) }}() {
+template<>
+inline Syntax SyntaxOf<{{lowercase(lang)}}::{{ camelcase(lang) }}>() {
   static auto syntax = []{
     using namespace alioth;
     using namespace nlohmann;
-    auto lex_builder = Lexicon::Builder("{{lang}}");
+    auto lex = Lexicon::Builder("{{lang}}");
     {{ for@terms term in syntax.lex.terms -}}{{ if nonfirst@terms }}
-    lex_builder.Define("{{term.name}}", R"({{term.pattern}})"_regex{{ if term.entries }}, { {{for@ctxs c in term.entries -}}
+    lex.Define("{{term.name}}", R"({{term.pattern}})"_regex{{ if term.entries }}, { {{for@ctxs c in term.entries -}}
       "{{ syntax.lex.contexts[c] }}", {{ end for }} }{{ end if }});
     {{ if term.attrs }}{{ for attr, key in term.attrs -}}
-    lex_builder.Annotate("{{term.name}}", "{{key}}", R"({{ json(attr) }})"_json);
+    lex.Annotate("{{term.name}}", "{{key}}", R"({{ json(attr) }})"_json);
     {{ end for }}{{ end if }}
     {{ end if }}{{ end for }}
-    auto lex = lex_builder.Build();
-
-    auto syntax_builder = Syntactic::Builder(lex);
+    auto syntax = Syntactic::Builder(lex.Build());
     {{ if syntax.ignores }}{{ for ignore in syntax.ignores -}}
-    syntax_builder.Ignore("{{ syntax.lex.terms[ignore].name }}");
+    syntax.Ignore("{{ syntax.lex.terms[ignore].name }}");
     {{ end for }}{{ end if }}
     {{ for@formulas formula in syntax.formulas -}}{{ if nonfirst@formulas }}
-    syntax_builder.Formula("{{nameOf(formula.head)}}"{{ if formula.form }}, "{{formula.form}}"{{ end if }}){{ for symbol in formula.body -}}
+    syntax.Formula("{{nameOf(formula.head)}}"{{ if formula.form }}, "{{formula.form}}"{{ end if }}){{ for symbol in formula.body -}}
       .Symbol("{{nameOf(symbol.id)}}"{{ if symbol.attr }}, "{{symbol.attr}}"{{end if }})
     {{- end for }}{{ if formula.attrs }}
       {{ for attrs, attr in formula.attrs -}}{{ for value, key in attrs -}}
       .Annotate("{{attr}}", "{{key}}", R"({{ json(value) }})"_json)
       {{ end for }}{{ end for }}{{ end if }}.Commit();
     {{ end if }}{{ end for }}
-    return syntax_builder.Build();
+    return syntax.Build();
   }();
 
   return syntax;

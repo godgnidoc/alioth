@@ -376,6 +376,246 @@ inline grammar::Term alioth::ASTNode::As<grammar::Term>() {
 }
 
 
+template<>
+inline Syntax SyntaxOf<grammar::Grammar>() {
+  static auto syntax = []{
+    using namespace alioth;
+    using namespace nlohmann;
+    auto lex = Lexicon::Builder("grammar");
+    lex.Define("LEAD", R"(->)"_regex);
+    lex.Annotate("LEAD", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("LT", R"(<)"_regex);
+    lex.Annotate("LT", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("GT", R"(>)"_regex);
+    lex.Annotate("GT", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("UNION", R"(\|)"_regex);
+    lex.Annotate("UNION", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("DEFINE", R"(=)"_regex);
+    lex.Annotate("DEFINE", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("IGNORE", R"(\?)"_regex);
+    lex.Annotate("IGNORE", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("AT", R"(@)"_regex);
+    lex.Annotate("AT", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("SEMICOLON", R"(;)"_regex);
+    lex.Annotate("SEMICOLON", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("COLON", R"(:)"_regex);
+    lex.Annotate("COLON", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("COMMA", R"(,)"_regex);
+    lex.Annotate("COMMA", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("DOT", R"(\.)"_regex);
+    lex.Annotate("DOT", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("UNFOLD", R"(\.\.\.)"_regex);
+    lex.Annotate("UNFOLD", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("LBRACE", R"({)"_regex);
+    lex.Annotate("LBRACE", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("RBRACE", R"(})"_regex);
+    lex.Annotate("RBRACE", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("LPAREN", R"(\()"_regex);
+    lex.Annotate("LPAREN", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("RPAREN", R"(\))"_regex);
+    lex.Annotate("RPAREN", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("LBRACKET", R"(\[)"_regex);
+    lex.Annotate("LBRACKET", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("RBRACKET", R"(])"_regex);
+    lex.Annotate("RBRACKET", "tokenize", R"({"type":"operator"})"_json);
+    
+    lex.Define("EMPTY", R"(%empty)"_regex);
+    lex.Annotate("EMPTY", "tokenize", R"({"type":"keyword"})"_json);
+    
+    lex.Define("IMPORT", R"(import)"_regex, { "keyword",  });
+    
+    lex.Define("FROM", R"(from)"_regex, { "keyword",  });
+    
+    lex.Define("AS", R"(as)"_regex, { "keyword",  });
+    
+    lex.Define("JNULL", R"(null)"_regex, { "json",  });
+    lex.Annotate("JNULL", "tokenize", R"({"type":"keyword"})"_json);
+    
+    lex.Define("TRUE", R"(true)"_regex, { "json",  });
+    lex.Annotate("TRUE", "tokenize", R"({"type":"keyword"})"_json);
+    
+    lex.Define("FALSE", R"(false)"_regex, { "json",  });
+    lex.Annotate("FALSE", "tokenize", R"({"type":"keyword"})"_json);
+    
+    lex.Define("STRING", R"(\"([^\"\n\\]|\\[^\n])*\")"_regex, { "json",  });
+    lex.Annotate("STRING", "tokenize", R"({"type":"string"})"_json);
+    
+    lex.Define("NUMBER", R"(-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?)"_regex, { "json",  });
+    lex.Annotate("NUMBER", "tokenize", R"({"type":"number"})"_json);
+    
+    lex.Define("ID", R"([a-zA-Z_]\w*)"_regex);
+    
+    lex.Define("REGEX", R"(\/([^\\\/]|\\[^\n])+\/)"_regex);
+    lex.Annotate("REGEX", "tokenize", R"({"type":"regexp"})"_json);
+    
+    lex.Define("COMMENT", R"(#[^\n]*\n)"_regex);
+    lex.Annotate("COMMENT", "tokenize", R"({"type":"comment"})"_json);
+    
+    lex.Define("SPACE", R"(\s+)"_regex);
+    
+    
+    auto syntax = Syntactic::Builder(lex.Build());
+    syntax.Ignore("COMMENT");
+    syntax.Ignore("SPACE");
+    
+    syntax.Formula("grammar").Symbol("options", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
+    syntax.Formula("grammar").Symbol("options", "...").Symbol("imports", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
+    syntax.Formula("options").Symbol("option", "options").Commit();
+    syntax.Formula("options").Symbol("options", "...").Symbol("option", "options").Commit();
+    syntax.Formula("option").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
+      .Annotate("key", "tokenize", R"({"modifier":["definition"],"type":"variable"})"_json)
+      .Commit();
+    syntax.Formula("imports").Symbol("import", "imports").Commit();
+    syntax.Formula("imports").Symbol("imports", "...").Symbol("import", "imports").Commit();
+    syntax.Formula("import").Symbol("IMPORT").Symbol("import_targets", "...").Symbol("FROM").Symbol("STRING", "from").Commit();
+    syntax.Formula("import_targets").Symbol("import_target", "targets").Commit();
+    syntax.Formula("import_targets").Symbol("import_targets", "...").Symbol("COMMA").Symbol("import_target", "targets").Commit();
+    syntax.Formula("import_target").Symbol("ID", "symbol").Commit();
+    syntax.Formula("import_target").Symbol("ID", "symbol").Symbol("AS").Symbol("ID", "alias").Commit();
+    syntax.Formula("terms").Symbol("term", "terms").Commit();
+    syntax.Formula("terms").Symbol("terms", "...").Symbol("term", "terms").Commit();
+    syntax.Formula("terms").Symbol("terms", "...").Symbol("annotation", "annotations").Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("DEFINE").Symbol("REGEX", "regex")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("contexts").Symbol("LT").Symbol("context_list", "...").Symbol("GT").Commit();
+    syntax.Formula("context_list").Symbol("ID", "contexts")
+      .Annotate("contexts", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
+      .Commit();
+    syntax.Formula("context_list").Symbol("context_list", "...").Symbol("COMMA").Symbol("ID", "contexts")
+      .Annotate("contexts", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
+      .Commit();
+    syntax.Formula("ntrms").Symbol("ntrm", "ntrms").Commit();
+    syntax.Formula("ntrms").Symbol("ntrms", "...").Symbol("ntrm", "ntrms").Commit();
+    syntax.Formula("ntrms").Symbol("ntrms", "...").Symbol("annotation", "annotations").Commit();
+    syntax.Formula("ntrm").Symbol("ID", "name").Symbol("LEAD").Symbol("formula_group", "...").Symbol("SEMICOLON")
+      .Annotate("form", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("ntrm").Symbol("ID", "name").Symbol("DOT").Symbol("ID", "form").Symbol("LEAD").Symbol("formula_group", "...").Symbol("SEMICOLON")
+      .Annotate("form", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
+      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Commit();
+    syntax.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Symbol("SEMICOLON").Commit();
+    syntax.Formula("selectors").Symbol("selector", "selectors").Commit();
+    syntax.Formula("selectors").Symbol("selectors", "...").Symbol("COMMA").Symbol("selector", "selectors").Commit();
+    syntax.Formula("selector").Symbol("ID", "symbol")
+      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
+      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("selector").Symbol("ID", "symbol").Symbol("DOT").Symbol("ID", "form")
+      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
+      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
+      .Commit();
+    syntax.Formula("formula_group").Symbol("formula", "formulas").Commit();
+    syntax.Formula("formula_group").Symbol("empty_formula", "formulas").Commit();
+    syntax.Formula("formula_group").Symbol("formula_group", "...").Symbol("UNION").Symbol("formula", "formulas").Commit();
+    syntax.Formula("formula_group").Symbol("formula_group", "...").Symbol("UNION").Symbol("empty_formula", "formulas").Commit();
+    syntax.Formula("formula").Symbol("formula_body", "...").Commit();
+    syntax.Formula("formula").Symbol("formula_body", "...").Symbol("annotation_body", "...").Commit();
+    syntax.Formula("formula_body").Symbol("symbol", "symbols").Commit();
+    syntax.Formula("formula_body").Symbol("formula_body", "...").Symbol("symbol", "symbols").Commit();
+    syntax.Formula("empty_formula").Symbol("EMPTY", "empty").Commit();
+    syntax.Formula("symbol").Symbol("ID", "name")
+      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
+      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
+      .Commit();
+    syntax.Formula("symbol").Symbol("ID", "name").Symbol("IGNORE", "optional")
+      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
+      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
+      .Commit();
+    syntax.Formula("symbol").Symbol("ID", "name").Symbol("AT").Symbol("ID", "attr")
+      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
+      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
+      .Commit();
+    syntax.Formula("symbol").Symbol("ID", "name").Symbol("IGNORE", "optional").Symbol("AT").Symbol("ID", "attr")
+      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
+      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
+      .Commit();
+    syntax.Formula("symbol").Symbol("UNFOLD", "attr").Symbol("ID", "name")
+      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
+      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
+      .Commit();
+    syntax.Formula("symbol").Symbol("UNFOLD", "attr").Symbol("ID", "name").Symbol("IGNORE", "optional")
+      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
+      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
+      .Commit();
+    syntax.Formula("json").Symbol("object", "...").Commit();
+    syntax.Formula("json").Symbol("array", "...").Commit();
+    syntax.Formula("json").Symbol("string", "...").Commit();
+    syntax.Formula("json").Symbol("number", "...").Commit();
+    syntax.Formula("json").Symbol("boolean", "...").Commit();
+    syntax.Formula("json").Symbol("null", "...").Commit();
+    syntax.Formula("object").Symbol("LBRACE", "empty_object").Symbol("RBRACE").Commit();
+    syntax.Formula("object").Symbol("LBRACE").Symbol("fields", "...").Symbol("RBRACE").Commit();
+    syntax.Formula("fields").Symbol("field", "object").Commit();
+    syntax.Formula("fields").Symbol("fields", "...").Symbol("COMMA").Symbol("field", "object").Commit();
+    syntax.Formula("field").Symbol("STRING", "key").Symbol("COLON").Symbol("json", "value").Commit();
+    syntax.Formula("array").Symbol("LBRACKET", "empty_array").Symbol("RBRACKET").Commit();
+    syntax.Formula("array").Symbol("LBRACKET").Symbol("elements", "...").Symbol("RBRACKET").Commit();
+    syntax.Formula("elements").Symbol("json", "array").Commit();
+    syntax.Formula("elements").Symbol("elements", "...").Symbol("COMMA").Symbol("json", "array").Commit();
+    syntax.Formula("string").Symbol("STRING", "string").Commit();
+    syntax.Formula("number").Symbol("NUMBER", "number").Commit();
+    syntax.Formula("boolean").Symbol("TRUE", "boolean").Commit();
+    syntax.Formula("boolean").Symbol("FALSE", "boolean").Commit();
+    syntax.Formula("null").Symbol("JNULL", "null").Commit();
+    syntax.Formula("annotation_body").Symbol("LBRACE").Symbol("attributes", "...").Symbol("RBRACE").Commit();
+    syntax.Formula("attributes").Symbol("attribute", "attributes").Commit();
+    syntax.Formula("attributes").Symbol("attributes", "...").Symbol("COMMA").Symbol("attribute", "attributes").Commit();
+    syntax.Formula("attribute").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
+      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
+      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
+      .Commit();
+    syntax.Formula("attribute").Symbol("ID", "of").Symbol("DOT").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
+      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
+      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
+      .Commit();
+    
+    return syntax.Build();
+  }();
+
+  return syntax;
+}
 }
 
 namespace grammar {
@@ -437,251 +677,6 @@ inline alioth::AST Term::name() const { return node->Attr("name"); }
 inline alioth::AST Term::regex() const { return node->Attr("regex"); }
 
 
-
-inline Grammar ViewOf(alioth::ASTRoot root) {
-  return root->Attr("grammar")->As<Grammar>();
-}
-inline alioth::Syntax SyntaxOfGrammar() {
-  static auto syntax = []{
-    using namespace alioth;
-    using namespace nlohmann;
-    auto lex_builder = Lexicon::Builder("grammar");
-    lex_builder.Define("LEAD", R"(->)"_regex);
-    lex_builder.Annotate("LEAD", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("LT", R"(<)"_regex);
-    lex_builder.Annotate("LT", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("GT", R"(>)"_regex);
-    lex_builder.Annotate("GT", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("UNION", R"(\|)"_regex);
-    lex_builder.Annotate("UNION", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("DEFINE", R"(=)"_regex);
-    lex_builder.Annotate("DEFINE", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("IGNORE", R"(\?)"_regex);
-    lex_builder.Annotate("IGNORE", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("AT", R"(@)"_regex);
-    lex_builder.Annotate("AT", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("SEMICOLON", R"(;)"_regex);
-    lex_builder.Annotate("SEMICOLON", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("COLON", R"(:)"_regex);
-    lex_builder.Annotate("COLON", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("COMMA", R"(,)"_regex);
-    lex_builder.Annotate("COMMA", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("DOT", R"(\.)"_regex);
-    lex_builder.Annotate("DOT", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("UNFOLD", R"(\.\.\.)"_regex);
-    lex_builder.Annotate("UNFOLD", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("LBRACE", R"({)"_regex);
-    lex_builder.Annotate("LBRACE", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("RBRACE", R"(})"_regex);
-    lex_builder.Annotate("RBRACE", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("LPAREN", R"(\()"_regex);
-    lex_builder.Annotate("LPAREN", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("RPAREN", R"(\))"_regex);
-    lex_builder.Annotate("RPAREN", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("LBRACKET", R"(\[)"_regex);
-    lex_builder.Annotate("LBRACKET", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("RBRACKET", R"(])"_regex);
-    lex_builder.Annotate("RBRACKET", "tokenize", R"({"type":"operator"})"_json);
-    
-    lex_builder.Define("EMPTY", R"(%empty)"_regex);
-    lex_builder.Annotate("EMPTY", "tokenize", R"({"type":"keyword"})"_json);
-    
-    lex_builder.Define("IMPORT", R"(import)"_regex, { "keyword",  });
-    
-    lex_builder.Define("FROM", R"(from)"_regex, { "keyword",  });
-    
-    lex_builder.Define("AS", R"(as)"_regex, { "keyword",  });
-    
-    lex_builder.Define("JNULL", R"(null)"_regex, { "json",  });
-    lex_builder.Annotate("JNULL", "tokenize", R"({"type":"keyword"})"_json);
-    
-    lex_builder.Define("TRUE", R"(true)"_regex, { "json",  });
-    lex_builder.Annotate("TRUE", "tokenize", R"({"type":"keyword"})"_json);
-    
-    lex_builder.Define("FALSE", R"(false)"_regex, { "json",  });
-    lex_builder.Annotate("FALSE", "tokenize", R"({"type":"keyword"})"_json);
-    
-    lex_builder.Define("STRING", R"(\"([^\"\n\\]|\\[^\n])*\")"_regex, { "json",  });
-    lex_builder.Annotate("STRING", "tokenize", R"({"type":"string"})"_json);
-    
-    lex_builder.Define("NUMBER", R"(-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?)"_regex, { "json",  });
-    lex_builder.Annotate("NUMBER", "tokenize", R"({"type":"number"})"_json);
-    
-    lex_builder.Define("ID", R"([a-zA-Z_]\w*)"_regex);
-    
-    lex_builder.Define("REGEX", R"(\/([^\\\/]|\\[^\n])+\/)"_regex);
-    lex_builder.Annotate("REGEX", "tokenize", R"({"type":"regexp"})"_json);
-    
-    lex_builder.Define("COMMENT", R"(#[^\n]*\n)"_regex);
-    lex_builder.Annotate("COMMENT", "tokenize", R"({"type":"comment"})"_json);
-    
-    lex_builder.Define("SPACE", R"(\s+)"_regex);
-    
-    
-    auto lex = lex_builder.Build();
-
-    auto syntax_builder = Syntactic::Builder(lex);
-    syntax_builder.Ignore("COMMENT");
-    syntax_builder.Ignore("SPACE");
-    
-    syntax_builder.Formula("grammar").Symbol("options", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax_builder.Formula("grammar").Symbol("options", "...").Symbol("imports", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax_builder.Formula("options").Symbol("option", "options").Commit();
-    syntax_builder.Formula("options").Symbol("options", "...").Symbol("option", "options").Commit();
-    syntax_builder.Formula("option").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["definition"],"type":"variable"})"_json)
-      .Commit();
-    syntax_builder.Formula("imports").Symbol("import", "imports").Commit();
-    syntax_builder.Formula("imports").Symbol("imports", "...").Symbol("import", "imports").Commit();
-    syntax_builder.Formula("import").Symbol("IMPORT").Symbol("import_targets", "...").Symbol("FROM").Symbol("STRING", "from").Commit();
-    syntax_builder.Formula("import_targets").Symbol("import_target", "targets").Commit();
-    syntax_builder.Formula("import_targets").Symbol("import_targets", "...").Symbol("COMMA").Symbol("import_target", "targets").Commit();
-    syntax_builder.Formula("import_target").Symbol("ID", "symbol").Commit();
-    syntax_builder.Formula("import_target").Symbol("ID", "symbol").Symbol("AS").Symbol("ID", "alias").Commit();
-    syntax_builder.Formula("terms").Symbol("term", "terms").Commit();
-    syntax_builder.Formula("terms").Symbol("terms", "...").Symbol("term", "terms").Commit();
-    syntax_builder.Formula("terms").Symbol("terms", "...").Symbol("annotation", "annotations").Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("DEFINE").Symbol("REGEX", "regex")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("contexts").Symbol("LT").Symbol("context_list", "...").Symbol("GT").Commit();
-    syntax_builder.Formula("context_list").Symbol("ID", "contexts")
-      .Annotate("contexts", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
-      .Commit();
-    syntax_builder.Formula("context_list").Symbol("context_list", "...").Symbol("COMMA").Symbol("ID", "contexts")
-      .Annotate("contexts", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
-      .Commit();
-    syntax_builder.Formula("ntrms").Symbol("ntrm", "ntrms").Commit();
-    syntax_builder.Formula("ntrms").Symbol("ntrms", "...").Symbol("ntrm", "ntrms").Commit();
-    syntax_builder.Formula("ntrms").Symbol("ntrms", "...").Symbol("annotation", "annotations").Commit();
-    syntax_builder.Formula("ntrm").Symbol("ID", "name").Symbol("LEAD").Symbol("formula_group", "...").Symbol("SEMICOLON")
-      .Annotate("form", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("ntrm").Symbol("ID", "name").Symbol("DOT").Symbol("ID", "form").Symbol("LEAD").Symbol("formula_group", "...").Symbol("SEMICOLON")
-      .Annotate("form", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
-      .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Commit();
-    syntax_builder.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Symbol("SEMICOLON").Commit();
-    syntax_builder.Formula("selectors").Symbol("selector", "selectors").Commit();
-    syntax_builder.Formula("selectors").Symbol("selectors", "...").Symbol("COMMA").Symbol("selector", "selectors").Commit();
-    syntax_builder.Formula("selector").Symbol("ID", "symbol")
-      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
-      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("selector").Symbol("ID", "symbol").Symbol("DOT").Symbol("ID", "form")
-      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
-      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
-      .Commit();
-    syntax_builder.Formula("formula_group").Symbol("formula", "formulas").Commit();
-    syntax_builder.Formula("formula_group").Symbol("empty_formula", "formulas").Commit();
-    syntax_builder.Formula("formula_group").Symbol("formula_group", "...").Symbol("UNION").Symbol("formula", "formulas").Commit();
-    syntax_builder.Formula("formula_group").Symbol("formula_group", "...").Symbol("UNION").Symbol("empty_formula", "formulas").Commit();
-    syntax_builder.Formula("formula").Symbol("formula_body", "...").Commit();
-    syntax_builder.Formula("formula").Symbol("formula_body", "...").Symbol("annotation_body", "...").Commit();
-    syntax_builder.Formula("formula_body").Symbol("symbol", "symbols").Commit();
-    syntax_builder.Formula("formula_body").Symbol("formula_body", "...").Symbol("symbol", "symbols").Commit();
-    syntax_builder.Formula("empty_formula").Symbol("EMPTY", "empty").Commit();
-    syntax_builder.Formula("symbol").Symbol("ID", "name")
-      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
-      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
-      .Commit();
-    syntax_builder.Formula("symbol").Symbol("ID", "name").Symbol("IGNORE", "optional")
-      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
-      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
-      .Commit();
-    syntax_builder.Formula("symbol").Symbol("ID", "name").Symbol("AT").Symbol("ID", "attr")
-      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
-      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
-      .Commit();
-    syntax_builder.Formula("symbol").Symbol("ID", "name").Symbol("IGNORE", "optional").Symbol("AT").Symbol("ID", "attr")
-      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
-      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
-      .Commit();
-    syntax_builder.Formula("symbol").Symbol("UNFOLD", "attr").Symbol("ID", "name")
-      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
-      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
-      .Commit();
-    syntax_builder.Formula("symbol").Symbol("UNFOLD", "attr").Symbol("ID", "name").Symbol("IGNORE", "optional")
-      .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
-      .Annotate("name", "tokenize", R"({"type":"string"})"_json)
-      .Commit();
-    syntax_builder.Formula("json").Symbol("object", "...").Commit();
-    syntax_builder.Formula("json").Symbol("array", "...").Commit();
-    syntax_builder.Formula("json").Symbol("string", "...").Commit();
-    syntax_builder.Formula("json").Symbol("number", "...").Commit();
-    syntax_builder.Formula("json").Symbol("boolean", "...").Commit();
-    syntax_builder.Formula("json").Symbol("null", "...").Commit();
-    syntax_builder.Formula("object").Symbol("LBRACE", "empty_object").Symbol("RBRACE").Commit();
-    syntax_builder.Formula("object").Symbol("LBRACE").Symbol("fields", "...").Symbol("RBRACE").Commit();
-    syntax_builder.Formula("fields").Symbol("field", "object").Commit();
-    syntax_builder.Formula("fields").Symbol("fields", "...").Symbol("COMMA").Symbol("field", "object").Commit();
-    syntax_builder.Formula("field").Symbol("STRING", "key").Symbol("COLON").Symbol("json", "value").Commit();
-    syntax_builder.Formula("array").Symbol("LBRACKET", "empty_array").Symbol("RBRACKET").Commit();
-    syntax_builder.Formula("array").Symbol("LBRACKET").Symbol("elements", "...").Symbol("RBRACKET").Commit();
-    syntax_builder.Formula("elements").Symbol("json", "array").Commit();
-    syntax_builder.Formula("elements").Symbol("elements", "...").Symbol("COMMA").Symbol("json", "array").Commit();
-    syntax_builder.Formula("string").Symbol("STRING", "string").Commit();
-    syntax_builder.Formula("number").Symbol("NUMBER", "number").Commit();
-    syntax_builder.Formula("boolean").Symbol("TRUE", "boolean").Commit();
-    syntax_builder.Formula("boolean").Symbol("FALSE", "boolean").Commit();
-    syntax_builder.Formula("null").Symbol("JNULL", "null").Commit();
-    syntax_builder.Formula("annotation_body").Symbol("LBRACE").Symbol("attributes", "...").Symbol("RBRACE").Commit();
-    syntax_builder.Formula("attributes").Symbol("attribute", "attributes").Commit();
-    syntax_builder.Formula("attributes").Symbol("attributes", "...").Symbol("COMMA").Symbol("attribute", "attributes").Commit();
-    syntax_builder.Formula("attribute").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
-      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
-      .Commit();
-    syntax_builder.Formula("attribute").Symbol("ID", "of").Symbol("DOT").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
-      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
-      .Commit();
-    
-    return syntax_builder.Build();
-  }();
-
-  return syntax;
-}
 
 }
 

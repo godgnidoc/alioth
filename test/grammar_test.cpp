@@ -10,6 +10,7 @@
 #include "fmt/ranges.h"
 #include "gtest/gtest.h"
 #include "nlohmann/json.hpp"
+#include "grammar/syntax.h"
 
 namespace alioth {
 namespace test {
@@ -18,21 +19,9 @@ TEST(Grammar, Bootstrap) {
   auto path = AliothHome() / "grammar" / "grammar.grammar";
 
   auto gdoc = Document::Read(path);
-  fmt::println("step 1: load grammar from source");
-  auto grammar = Grammar::Parse(gdoc);
-  fmt::println("step 2: compile grammar to syntax");
-  auto syntax = grammar.Compile();
-  fmt::println("step 3: use syntax to parse grammar");
-  auto parser = Parser(syntax, gdoc);
-  auto ast = parser.Parse();
-  fmt::println("step 4: load grammar from ast");
-  auto grammar2 = Grammar::Parse(ast);
-  fmt::println("step 5: compile grammar to syntax");
-  auto syntax2 = grammar2.Compile();
-  fmt::println("step 6: use syntax to parse grammar");
-  auto parser2 = Parser(syntax2, gdoc);
-  auto ast2 = parser2.Parse();
-  EXPECT_EQ(ast->Store({}), ast2->Store({}));
+  auto gs = Grammar::Compile(gdoc);
+  auto native = SyntaxOf<grammar::Grammar>();
+  EXPECT_EQ(gs->Store(), native->Store());
 }
 
 TEST(Grammar, Form) {
@@ -56,7 +45,7 @@ TEST(Grammar, Form) {
     int b = 1;
   )");
 
-  auto syntax = Grammar::Parse(gdoc).Compile();
+  auto syntax = Grammar::Compile(gdoc);
   ASSERT_EQ(syntax->formulas.at(3).form, "uninited");
   ASSERT_EQ(syntax->formulas.at(4).form, "assigned");
 }

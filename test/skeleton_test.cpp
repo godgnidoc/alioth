@@ -19,7 +19,7 @@ TEST(Skeleton, Deduce) {
   auto home = AliothHome();
   auto path = home / "grammar" / "template.grammar";
   auto gdoc = Document::Read(path);
-  auto syntax = Grammar::Parse(gdoc).Compile();
+  auto syntax = Grammar::Compile(gdoc);
   auto skeleton = Skeleton::Deduce(syntax);
 
   for (auto const& [symbol, structure] : skeleton.structures) {

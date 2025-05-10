@@ -41,8 +41,6 @@ TEST(Syntactic, Simple) {
                     .Build();
 }
 
-TEST(Syntactic, Grammar) { auto syntax = Grammar::SyntaxOf(); }
-
 TEST(Syntactic, ReduceShift) {
   auto lex = Lexicon::Builder("test")
                  .Define("X", "x"_regex)

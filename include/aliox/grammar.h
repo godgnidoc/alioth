@@ -1,33 +1,21 @@
 #ifndef __ALIOX_GRAMMAR_H__
 #define __ALIOX_GRAMMAR_H__
 
+#include <vector>
+
 #include "alioth/ast.h"
 #include "alioth/document.h"
 
 namespace alioth {
 
 struct Grammar {
-  ASTRoot root;
-
   /**
    * 将文法定义编译为语法规则
+   *
+   * @param grammar 文法源码
+   * @param annotations 外挂注解源码
    */
-  Syntax Compile() const;
-
-  /**
-   * 从文法源码加载文法定义
-   */
-  static Grammar Parse(Doc source);
-
-  /**
-   * 从 AST 语法树加载文法定义
-   */
-  static Grammar Parse(ASTRoot root);
-
-  /**
-   * 获取语法规则
-   */
-  static Syntax SyntaxOf();
+  static Syntax Compile(Doc grammar, std::vector<Doc> annotations = {});
 };
 
 }  // namespace alioth
