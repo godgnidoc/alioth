@@ -13,9 +13,8 @@ struct Grammar {
    * 将文法定义编译为语法规则
    *
    * @param grammar 文法源码
-   * @param annotations 外挂注解源码
    */
-  static Syntax Compile(Doc grammar, std::vector<Doc> annotations = {});
+  static Syntax Compile(Doc grammar);
 };
 
 }  // namespace alioth

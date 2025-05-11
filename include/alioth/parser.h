@@ -15,8 +15,10 @@ namespace alioth {
 class Parser {
  public:
   struct Thread;
+  struct ParseOptions;
 
  public:
+  Parser(Syntax syntax, Doc doc, ParseOptions options);
   Parser(Syntax syntax, Doc doc);
 
   /**
@@ -44,6 +46,14 @@ class Parser {
    * @param thread 当前分析线路
    */
   bool IgnoreOrFalse(Thread& thread);
+
+  /**
+   * 尝试截断分析，退还一个输入符号，替换为EOF
+   * 若能触发0号产生式归约，则截断成功
+   *
+   * @param thread 当前分析线路
+   */
+  bool TruncateOrFalse(Thread& thread);
 
   /**
    * 尝试归约，若归约成功则返回true
@@ -91,6 +101,11 @@ class Parser {
   ASTTerm Scan(Thread& thread, ContextID context = 0);
 
  protected:
+  size_t starting_;                         // 开始分析的偏移量
+  bool truncate_;                           // 遭遇分析错误时尝试截断
+  bool lazy_;                               // 开篇遭遇可忽略符号时判定为分析失败
+  std::map<std::string, Syntax> syntaxes_;  // 语法规则集合
+
   Doc doc_;                          // 正在分析的源码
   Syntax syntax_;                    // 语法规则
   std::vector<Thread> threads_;      // 分析线路
@@ -103,6 +118,16 @@ struct Parser::Thread {
   std::vector<AST> seens{};        // 已经识别的语法单元，按识别顺序排列
   std::vector<ASTTerm> ignores{};  // 被忽略的语法单元，按忽略顺序排列
   std::vector<AST> inputs{};       // 输入的语法单元，按读取顺序排列
+};
+
+/**
+ * 分析选项
+ */
+struct Parser::ParseOptions {
+  size_t starting{};  // 开始分析的偏移量
+  bool truncate{};    // 遭遇分析错误时尝试截断
+  bool lazy{};        // 在开篇遭遇可忽略符号时判定为分析失败
+  std::map<std::string, Syntax> syntaxes{};  // 语法规则
 };
 
 }  // namespace alioth

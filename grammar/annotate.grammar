@@ -1,6 +1,6 @@
 # Annotation grammar
 
-lang: "annotation"
+lang: "annotate"
 
 SEMICOLON = /;/
 COLON = /:/
@@ -10,7 +10,7 @@ LBRACE = /{/
 RBRACE = /}/
 LBRACKET = /\[/
 RBRACKET = /]/
-NULL<json> = /null/
+JNULL<json> = /null/
 TRUE<json> = /true/
 FALSE<json> = /false/
 STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
@@ -19,12 +19,7 @@ ID = /[a-zA-Z_]\w*/
 COMMENT ?= /#[^\n]*\n/ { tokenize: { "type": "comment" } }
 SPACE ?= /\s+/
 
-prog -> ...options ...annotations;
-
-options -> ...options? option@options;
-option -> ID@key COLON ...json {
-  key.tokenize: { "type": "variable", "modifier": ["definition"] }
-};
+annotate -> ...annotations;
 
 annotations -> ...annotations? annotation@annotations;
 
@@ -52,6 +47,8 @@ attribute {
   of.tokenize: { "type": "property" }
 }
 
+
+
 json -> ...object
     | ...array
     | ...string
@@ -65,7 +62,7 @@ object -> LBRACE@empty_object RBRACE
 fields -> field@object
     | ...fields COMMA field@object;
 
-field -> STRING@key COLON ...json;
+field -> STRING@key COLON json@value;
 
 array -> LBRACKET@empty_array RBRACKET
     | LBRACKET ...elements RBRACKET;
@@ -77,7 +74,7 @@ string -> STRING@string;
 
 number -> NUMBER@number;
 
-boolean -> TRUE@true
-    | FALSE@false;
+boolean -> TRUE@boolean
+    | FALSE@boolean;
 
-null -> NULL@null;
+null -> JNULL@null;

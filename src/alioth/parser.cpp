@@ -2,10 +2,21 @@
 
 namespace alioth {
 
-Parser::Parser(Syntax syntax, Doc doc) : doc_{doc}, syntax_{syntax} {}
+Parser::Parser(Syntax syntax, Doc doc) : Parser(syntax, doc, {}) {}
+
+Parser::Parser(Syntax syntax, Doc doc, ParseOptions options)
+    : starting_{options.starting},
+      truncate_{options.truncate},
+      lazy_{options.lazy},
+      syntaxes_{options.syntaxes},
+      doc_{doc},
+      syntax_{syntax} {
+  syntaxes_.emplace(syntax->Lang(), syntax);
+}
 
 ASTNtrm Parser::Parse() {
   threads_.push_back(Thread{
+      .offset = starting_,
       .stack = {0},
   });
 
@@ -45,6 +56,14 @@ ASTNtrm Parser::Parse() {
       if (IgnoreOrFalse(thread)) continue;
 
       /**
+       * 尝试截断分析
+       */
+      if (TruncateOrFalse(thread)) {
+        if (candidates_.size() > snap) accepted.push_back(i);
+        continue;
+      }
+
+      /**
        * 以上操作均失败，当前线路也失败
        */
       failed.push_back(&thread - threads_.data());
@@ -69,9 +88,25 @@ bool Parser::IgnoreOrFalse(Thread& thread) {
 
   if (!syntax_->IsIgnored(input->id)) return false;
 
+  if (lazy_ && thread.seens.empty()) return false;
+
   if (auto term = input->AsTerm()) thread.ignores.push_back(term);
   thread.inputs.erase(thread.inputs.begin());
   return true;
+}
+
+bool Parser::TruncateOrFalse(Thread& thread) {
+  if (!truncate_) return false;
+  thread.offset = thread.inputs.front()->First()->offset;
+  thread.inputs.clear();
+  auto term = std::make_shared<ASTTermNode>();
+  term->doc = doc_;
+  term->syntax = syntax_;
+  term->id = Lexicon::kEOF;
+  term->offset = thread.offset;
+  term->length = 0;
+  thread.inputs.push_back(term);
+  return ReduceOrFalse(thread);
 }
 
 bool Parser::ReduceOrFalse(Thread& thread) {
@@ -220,8 +255,11 @@ ASTNtrm Parser::AcceptOrAmbiguous() {
 }
 
 void Parser::Crash() {
+  if (truncate_ || lazy_) throw ParseError{};
+
   if (threads_.size() != 1) {
-    fmt::println(stderr, "error: Parse error on multiple routes");
+    fmt::println(stderr,
+                 "\033[1;31merror:\033[0m Parse error on multiple routes");
   }
 
   for (auto const& thread : threads_) {
@@ -259,6 +297,38 @@ void Parser::ScanAndFork() {
     if (!threads_[i].inputs.empty()) continue;
 
     auto& state = syntax_->states.at(threads_[i].stack.back());
+    auto const offset = threads_[i].offset;
+
+    for (auto external : state.externals) {
+      auto formula_id = syntax_->externals.at(external);
+      auto const& formula = syntax_->formulas.at(formula_id);
+      auto lang = *formula.lang;
+      auto syntax = syntaxes_.at(lang);
+      auto parser = Parser(syntax, doc_,
+                           ParseOptions{
+                               .starting = offset,
+                               .truncate = true,
+                               .lazy = true,
+                               .syntaxes = syntaxes_,
+                           });
+      ASTNtrm ntrm;
+      try {
+        ntrm = parser.Parse();
+      } catch (ParseError const&) {
+        continue;
+      }
+      ntrm->id = external;
+      ntrm->syntax = syntax_;
+      ntrm->formula = formula_id;
+      auto last = ntrm->Last();
+      threads_.push_back(Thread{
+          .offset = last->offset + last->length,
+          .stack = threads_[i].stack,
+          .seens = threads_[i].seens,
+          .inputs = {ntrm},
+      });
+    }
+
     if (state.contexts.empty() || state.contexts.size() == 1) {
       auto& thread = threads_[i];
       auto context = state.contexts.empty() ? 0 : *state.contexts.begin();
@@ -266,8 +336,6 @@ void Parser::ScanAndFork() {
       thread.inputs.push_back(term);
       continue;
     }
-
-    auto const offset = threads_[i].offset;
 
     std::set<std::tuple<SymbolID, size_t, size_t>> seen;  // id, offset, length
     for (auto const& context : state.contexts) {

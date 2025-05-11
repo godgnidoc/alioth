@@ -35,10 +35,11 @@ struct Syntactic {
   class Builder;
 
   Lex lex;
-  std::vector<std::string> ntrms;  // 非终结符，ID从最大词法单元ID开始
-  std::vector<Formula> formulas;   // 产生式，ID与下标一致
-  std::vector<State> states;       // 语法分析状态机
-  std::set<SymbolID> ignores;      // 语法分析过程中应当忽略的符号
+  std::vector<std::string> ntrms;           // 非终结符，ID从最大词法单元ID开始
+  std::vector<Formula> formulas;            // 产生式，ID与下标一致
+  std::vector<State> states;                // 语法分析状态机
+  std::set<SymbolID> ignores;               // 语法分析过程中应当忽略的符号
+  std::map<SymbolID, FormulaID> externals;  // 导入符号与导入产生式映射
 
   /**
    * 获取语言名称
@@ -67,6 +68,13 @@ struct Syntactic {
    * @param id 符号ID
    */
   bool IsTerm(SymbolID id) const;
+
+  /**
+   * 判断符号是否代表导入的语言
+   *
+   * @param id 符号ID
+   */
+  bool IsImported(SymbolID id) const;
 
   /**
    * 判断符号是否被忽略
@@ -134,6 +142,7 @@ struct Syntactic::State {
   std::map<SymbolID, StateID> shift{};     // 移进规则
   std::map<SymbolID, FormulaID> reduce{};  // 规约规则
   std::set<ContextID> contexts{};          // 可能的上下文
+  std::set<SymbolID> externals{};          // 当前状态可能期待的外部符号
 };
 
 /**
@@ -145,6 +154,7 @@ struct Syntactic::Formula {
   SymbolID head{};                    // 目标非终结符ID
   std::vector<Symbol> body{};         // 产生式体
   std::optional<std::string> form{};  // 产生式所属句式
+  std::optional<std::string> lang{};  // 导入语法
 
   /**
    * 符号属性注解表
@@ -165,6 +175,13 @@ struct Syntactic::Formula {
    * 完全展开产生式没有句型名，仅拥有一个展开符号
    */
   bool Unfolded() const;
+
+  /**
+   * 判断产生式是否导入了其他语言
+   *
+   * 导入产生式没有产生式体，使用 lang 字段指定目标语言
+   */
+  bool Imported() const;
 };
 
 /**
@@ -247,6 +264,17 @@ class Syntactic::Builder {
   Builder& Ignore(std::string const& name);
 
   /**
+   * 导入一种语言用作一个非终结符
+   *
+   * 默认情况下使用语言名作为非终结符名，可选地可以为其指定一个别名
+   *
+   * @param lang 语言名称
+   * @param alias 导入非终结符的别名
+   */
+  Builder& Import(std::string const& lang,
+                  std::optional<std::string> const& alias = {});
+
+  /**
    * 创建LALR(1)语法规则
    */
   Syntax Build();
@@ -259,6 +287,16 @@ class Syntactic::Builder {
   struct TermHeadError : public Error {
     TermHeadError(std::string const& name)
         : Error("terminal symbol {} cannot be a head of formula", name) {}
+  };
+
+  struct ExternalHeadError : public Error {
+    ExternalHeadError(std::string const& name)
+        : Error("external symbol {} cannot be a head of formula", name) {}
+  };
+
+  struct AlreadyImportedError : public Error {
+    AlreadyImportedError(std::string const& lang)
+        : Error("language {} is already imported") {}
   };
 
   struct EmptyFirstError : public Error {

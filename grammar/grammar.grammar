@@ -23,8 +23,9 @@ LBRACKET = /\[/
 RBRACKET = /]/
 EMPTY = /%empty/
 IMPORT<keyword> = /import/
-FROM<keyword> = /from/
 AS<keyword> = /as/
+ANNOTATE<keyword> = /annotate/
+WITH<keyword> = /with/
 JNULL<json> = /null/
 TRUE<json> = /true/
 FALSE<json> = /false/
@@ -45,7 +46,7 @@ EMPTY, JNULL, TRUE, FALSE {
   tokenize: { "type": "keyword" }
 }
 
-grammar -> ...options ...imports? ...terms ...ntrms;
+grammar -> ...options ...imports? ...annotate? ...terms ...ntrms;
 
 options -> ...options? option@options;
 
@@ -55,13 +56,11 @@ option -> ID@key COLON json@value {
 
 imports -> ...imports? import@imports;
 
-import -> IMPORT ...import_targets FROM STRING@from;
+import -> IMPORT STRING@lang
+  | IMPORT STRING@lang AS ID@alias;
 
-import_targets -> import_target@targets
-    | ...import_targets COMMA import_target@targets;
-
-import_target -> ID@symbol
-    | ID@symbol AS ID@alias;
+annotate -> ANNOTATE WITH STRING@external_annotations
+ | ...annotate STRING@external_annotations;
 
 terms -> ...terms? term@terms
     | ...terms annotation@annotations;

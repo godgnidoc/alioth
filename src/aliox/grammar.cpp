@@ -2,14 +2,16 @@
 
 #include "alioth/alioth.h"
 #include "alioth/parser.h"
+#include "annotate/syntax.h"
 #include "grammar/syntax.h"
 #include "nlohmann/json.hpp"
 
 namespace alioth {
-using namespace ::grammar;
 using namespace generic;
 
-Syntax Grammar::Compile(Doc grammar, std::vector<Doc>) {
+Syntax Grammar::Compile(Doc grammar) {
+  // std::map<std::string, std::vector<annotate::Annotate>> annotates;
+
   auto root = Parser(SyntaxOf<grammar::Grammar>(), grammar).Parse();
   auto g = ViewOf<grammar::Grammar>(root);
 
@@ -72,13 +74,19 @@ Syntax Grammar::Compile(Doc grammar, std::vector<Doc>) {
     }
   }
 
+  for (auto const& imported : g.imports()) {
+    auto lang = imported.lang()->Text();
+    auto alias = text::maybe(imported.alias());
+    syntax.Import(lang, alias);
+  }
+
   for (auto const& ntrm : g.ntrms()) {
     for (auto const& f : ntrm.formulas()) {
-      if (f->As<EmptyFormula>()) {
+      if (f->As<grammar::EmptyFormula>()) {
         syntax.Formula(ntrm.name()->Text(), ntrm->TextOf("form")).Commit();
         continue;
       }
-      auto formula = f->As<Formula>();
+      auto formula = f->As<grammar::Formula>();
       auto symbols = formula.symbols();
       auto obits = std::accumulate(
           symbols.begin(), symbols.end(), 0UL,

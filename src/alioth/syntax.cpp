@@ -8,6 +8,10 @@ bool Syntactic::IsTerm(SymbolID id) const {
   return id < lex->terms.size() || id == Lexicon::kERR;
 }
 
+bool Syntactic::IsImported(SymbolID id) const {
+  return externals.count(id) > 0;
+}
+
 bool Syntactic::IsIgnored(SymbolID id) const { return ignores.count(id); }
 
 std::string Syntactic::Lang() const { return lex->Lang(); }
@@ -67,6 +71,12 @@ std::string Syntactic::PrintFormula(FormulaID formula,
                                     std::optional<size_t> point) const {
   auto const& f = formulas.at(formula);
   auto result = fmt::format("{} -> ", NameOf(f.head));
+
+  if (f.lang) {
+    result += fmt::format("<imported language {}>", *f.lang);
+    return result;
+  }
+
   auto off = 0UL;
   for (auto const& symbol : f.body) {
     if (point && off++ == *point) {
@@ -87,6 +97,7 @@ nlohmann::json Syntactic::Store() const {
   for (auto const& formula : formulas) {
     nlohmann::json f;
     f["head"] = formula.head;
+    if (formula.lang) f["lang"] = *formula.lang;
     if (formula.form) f["form"] = *formula.form;
     for (auto const& symbol : formula.body) {
       nlohmann::json s;
@@ -109,6 +120,9 @@ nlohmann::json Syntactic::Store() const {
     for (auto const& context : state.contexts) {
       s["contexts"].push_back(context);
     }
+    for (auto const& external : state.externals) {
+      s["externals"].push_back(external);
+    }
     json["states"].push_back(s);
   }
 
@@ -125,6 +139,7 @@ Syntax Syntactic::Load(nlohmann::json const& json) {
   for (auto const& f : json["formulas"]) {
     auto formula = Syntactic::Formula{};
     formula.head = f["head"];
+    if (f.contains("lang")) formula.lang = f["lang"];
     if (f.contains("form")) formula.form = f["form"];
     if (f.contains("body"))
       for (auto const& s : f["body"]) {
@@ -150,6 +165,10 @@ Syntax Syntactic::Load(nlohmann::json const& json) {
     if (s.contains("contexts"))
       for (auto const& context : s["contexts"]) {
         state.contexts.insert(context.get<ContextID>());
+      }
+    if (s.contains("externals"))
+      for (auto const& external : s["externals"]) {
+        state.externals.insert(external.get<SymbolID>());
       }
     syntax->states.push_back(state);
   }
@@ -182,15 +201,18 @@ bool Syntactic::Formula::Unfolded() const {
   return true;
 }
 
+bool Syntactic::Formula::Imported() const { return lang.has_value(); }
+
 bool Syntactic::Formula::Symbol::Unfolded() const {
   return attr && *attr == "...";
 }
 
 Syntactic::Builder::Builder(Lex lex) {
+  auto lang = lex->Lang();
   syntax_ = Syntax{new Syntactic{}};
   syntax_->lex = lex;
   auto start = TouchNtrm("S'");
-  Formula(start).Symbol(start + 1, lex->Lang()).Commit();
+  Formula(start).Symbol(TouchNtrm(lang), lang).Commit();
 }
 
 Syntactic::Builder::FormulaBuilder Syntactic::Builder::Formula(
@@ -202,6 +224,9 @@ Syntactic::Builder::FormulaBuilder Syntactic::Builder::Formula(
 
 Syntactic::Builder::FormulaBuilder Syntactic::Builder::Formula(
     SymbolID head, std::optional<std::string> const& form) {
+  if (syntax_->externals.count(head)) {
+    throw ExternalHeadError{syntax_->NameOf(head)};
+  }
   ntrms_.at(head).formulas.insert(syntax_->formulas.size());
   syntax_->formulas.push_back({.head = head, .form = form});
   return FormulaBuilder{*this, syntax_->formulas.back()};
@@ -217,6 +242,20 @@ Syntactic::Builder& Syntactic::Builder::Ignore(std::string const& name) {
   throw UnknownTermError{name};
 }
 
+Syntactic::Builder& Syntactic::Builder::Import(
+    std::string const& lang, std::optional<std::string> const& alias) {
+  auto name = alias.value_or(lang);
+  auto head = syntax_->lex->terms.size() + syntax_->ntrms.size();
+  if (head != TouchNtrm(name)) {
+    throw AlreadyImportedError(lang);
+  }
+  auto formula = syntax_->formulas.size();
+  Formula(head).Commit();
+  syntax_->formulas.at(formula).lang = lang;
+  syntax_->externals[head] = formula;
+  return *this;
+}
+
 Syntax Syntactic::Builder::Build() {
   CalculateNullable();
   CalculateFirst();
@@ -229,8 +268,9 @@ Syntax Syntactic::Builder::Build() {
 void Syntactic::Builder::CalculateNullable() {
   std::set<SymbolID> nullables;
 
-  /** 先统计能够直接判断的可空符号 */
+  /** 先统计能够直接判断的可空符号，导入产生式被认为不可空 */
   for (auto const& formula : syntax_->formulas) {
+    if (formula.Imported()) continue;
     if (formula.body.empty()) nullables.insert(formula.head);
   }
 
@@ -242,6 +282,9 @@ void Syntactic::Builder::CalculateNullable() {
     /** 遍历所有非终结符 */
     for (auto const& formula : syntax_->formulas) {
       if (nullables.count(formula.head)) continue;
+
+      /** 导入产生式被视为不可空 */
+      if (formula.Imported()) continue;
 
       /** 如果产生式右部所有符号都可空，则产生式左部也可空 */
       bool all_nullable = true;
@@ -271,6 +314,19 @@ void Syntactic::Builder::CalculateFirst() {
   std::set<SymbolID> calculated;
 
   /**
+   * 当 FIRST 集仅包含终结符或导入符号时则计算完毕
+   * 非终结符ID一定大于终结符ID，基于此数字特征减小运算
+   */
+  auto IsCalculated = [this](std::set<alioth::SymbolID> const& first) {
+    for (auto it = first.rbegin(); it != first.rend(); ++it) {
+      if (syntax_->IsImported(*it)) continue;
+      if (syntax_->IsTerm(*it)) return true;
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * 前缀关系表，键为前缀非终结符，值为包含该前缀的非终结符集合
    * prefix -> {ntrm}
    */
@@ -285,12 +341,15 @@ void Syntactic::Builder::CalculateFirst() {
    * 若全部前缀符号均为终结符，则该非终结符的FIRST集合已计算完成
    */
   for (auto& [id, ntrm] : ntrms_) {
+    if (syntax_->IsImported(id)) continue;
+
     for (auto const& formula_id : ntrm.formulas) {
       auto const& formula = syntax_->formulas.at(formula_id);
 
       for (auto const& symbol : formula.body) {
         if (symbol.id != id) ntrm.first.insert(symbol.id);
         if (syntax_->IsTerm(symbol.id)) break;
+        if (syntax_->IsImported(symbol.id)) break;
 
         if (symbol.id != id) {
           prefix_ntrms[symbol.id].insert(id);
@@ -300,7 +359,7 @@ void Syntactic::Builder::CalculateFirst() {
       }
     }
 
-    if (syntax_->IsTerm(*ntrm.first.rbegin())) {
+    if (IsCalculated(ntrm.first)) {
       calculated.insert(id);
     } else {
       inprogress.insert(id);
@@ -326,7 +385,7 @@ void Syntactic::Builder::CalculateFirst() {
 
         if (ntrm.first.empty()) throw EmptyFirstError{ntrm.name};
 
-        if (syntax_->IsTerm(*ntrm.first.rbegin())) {
+        if (IsCalculated(ntrm.first)) {
           calculated.insert(ntrm_id);
           inprogress.erase(ntrm_id);
         }
@@ -353,6 +412,8 @@ void Syntactic::Builder::CalculateFollow() {
    * 依据产生式统计后缀关系和部分FOLLOW
    */
   for (auto formula : syntax_->formulas) {
+    if (formula.Imported()) continue;
+
     bool suffix = true;
     auto const body_size = formula.body.size();
 
@@ -364,14 +425,15 @@ void Syntactic::Builder::CalculateFollow() {
       auto const& symbol = formula.body.at(i - 1);
 
       /** 统计后缀关系 */
-      if (suffix && !syntax_->IsTerm(symbol.id) && symbol.id != formula.head) {
+      if (suffix && !syntax_->IsTerm(symbol.id) &&
+          !syntax_->IsImported(symbol.id) && symbol.id != formula.head) {
         ntrm_suffixes[formula.head].insert(symbol.id);
       }
 
       /**
        * 遇到终结符时，后缀关系结束
        */
-      if (syntax_->IsTerm(symbol.id)) {
+      if (syntax_->IsTerm(symbol.id) || syntax_->IsImported(symbol.id)) {
         suffix = false;
         continue;
       }
@@ -392,7 +454,8 @@ void Syntactic::Builder::CalculateFollow() {
        */
       for (auto j = i; j < body_size; ++j) {
         auto const& follow_symbol = formula.body.at(j);
-        if (syntax_->IsTerm(follow_symbol.id)) {
+        if (syntax_->IsTerm(follow_symbol.id) ||
+            syntax_->IsImported(follow_symbol.id)) {
           focus.follow.insert(follow_symbol.id);
           break;  // 终结符结束后继关系
         }
@@ -505,10 +568,13 @@ void Syntactic::Builder::CalculateStates() {
   for (auto& state : syntax_->states) {
     std::set<SymbolID> terms;
     for (auto const& [symbol, next] : state.shift) {
+      if (syntax_->IsImported(symbol)) state.externals.insert(symbol);
       if (!syntax_->IsTerm(symbol)) continue;
       terms.insert(symbol);
     }
     for (auto const& [symbol, formula] : state.reduce) {
+      if (syntax_->IsImported(symbol)) state.externals.insert(symbol);
+      if (!syntax_->IsTerm(symbol)) continue;
       terms.insert(symbol);
     }
 
@@ -529,13 +595,14 @@ std::set<Syntactic::LR1Item> Syntactic::Builder::Closure(
       if (item.point == formula.body.size()) continue;
 
       auto const& symbol = formula.body.at(item.point);
-      if (syntax_->IsTerm(symbol.id)) continue;
+      if (syntax_->IsTerm(symbol.id) || syntax_->IsImported(symbol.id))
+        continue;
 
       auto all_nullable = true;
       std::set<SymbolID> aheads;
       for (auto it = formula.body.begin() + item.point + 1;
            it != formula.body.end(); ++it) {
-        if (syntax_->IsTerm(it->id)) {
+        if (syntax_->IsTerm(it->id) || syntax_->IsImported(it->id)) {
           all_nullable = false;
           aheads.insert(it->id);
           break;
