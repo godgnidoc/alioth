@@ -3,8 +3,7 @@
 
 lang: grammar
 
-import "./annotation.grammar"
-import "./assignment.grammar"
+import "./json.grammar"
 
 LEAD = /->/
 LT = /</
@@ -20,36 +19,19 @@ DOT = /\./
 UNFOLD = /\.\.\./
 LBRACE = /{/
 RBRACE = /}/
-LPAREN = /\(/
-RPAREN = /\)/
-LBRACKET = /\[/
-RBRACKET = /]/
 EMPTY = /%empty/
 LANG<keyword> = /lang/
 IMPORT<keyword> = /import/
 AS<keyword> = /as/
-JNULL<json> = /null/
-TRUE<json> = /true/
-FALSE<json> = /false/
 STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
-NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ { tokenize: { "type": "number" } }
 ID = /[a-zA-Z_]\w*/
 REGEX = /\/([^\\\/]|\\[^\n])+\// { tokenize: { "type": "regexp" } }
 COMMENT ?= /#[^\n]*\n/ { tokenize: { "type": "comment" } }
 SPACE ?= /\s+/
 
-LANG, IMPORT, AS,
-LEAD, LT, GT, UNION, DEFINE, IGNORE, AT, 
-SEMICOLON, COLON, COMMA, DOT, UNFOLD, LBRACE, 
-RBRACE, LPAREN, RPAREN, LBRACKET, RBRACKET { 
-  tokenize: { "type": "operator" }
-}
+grammar -> ...lang ...imports? ...terms? ...ntrms?;
 
-EMPTY, JNULL, TRUE, FALSE {
-  tokenize: { "type": "keyword" }
-}
-
-grammar -> LANG COLON ID@lang ...imports? ...terms? ...ntrms?;
+lang -> LANG COLON ID@lang;
 
 imports -> ...imports? import@imports;
 
@@ -57,9 +39,9 @@ import -> IMPORT STRING@from
   | IMPORT STRING@from AS ID@alias;
 
 terms -> ...terms? term@terms
-    | ...terms assignment@assignments;
+    | ...terms annotation@annotations;
 
-term -> ID@name ...contexts? IGNORE?@ignore DEFINE REGEX@regex ...annotation? {
+term -> ID@name ...contexts? IGNORE?@ignore DEFINE REGEX@regex ...annotation_body? {
   name.tokenize: { "type": "class", "modifier": ["definition"] }
 };
 
@@ -73,7 +55,7 @@ context_list {
 }
 
 ntrms -> ...ntrms? ntrm@ntrms
-    | ...ntrms assignment@assignments;
+    | ...ntrms annotation@annotations;
 
 ntrm -> ID@name  LEAD ...formula_group SEMICOLON
     | ID@name DOT ID@form LEAD ...formula_group SEMICOLON;
@@ -83,12 +65,23 @@ ntrm {
   form.tokenize: { "type": "decorator", "modifier": ["definition"] }
 }
 
+annotation -> ...selectors ...annotation_body SEMICOLON?;
+selectors -> selector@selectors
+    | ...selectors COMMA selector@selectors;
+selector -> ID@symbol
+    | ID@symbol DOT ID@form;
+
+selector {
+  symbol.tokenize: { "type": "class" },
+  form.tokenize: { "type": "decorator" }
+}
+
 formula_group -> formula@formulas
     | empty_formula@formulas
     | ...formula_group UNION formula@formulas
     | ...formula_group UNION empty_formula@formulas;
 
-formula -> ...formula_body ...annotation?;
+formula -> ...formula_body ...annotation_body?;
 formula_body -> ...formula_body? symbol@symbols;
 
 empty_formula -> EMPTY@empty;
@@ -100,4 +93,17 @@ symbol -> ID@name IGNORE?@optional
 symbol {
   name.tokenize: { "type": "string" },
   attr.tokenize: { "type": "property", "modifier": ["definition"] }
+}
+
+annotation_body -> LBRACE ...attributes RBRACE;
+
+attributes -> attribute@attributes
+    | ...attributes COMMA attribute@attributes;
+
+attribute -> ID@key COLON json@value
+    | ID@of DOT ID@key COLON json@value;
+
+attribute {
+  key.tokenize: { "type": "property", "modifier": ["modification"] },
+  of.tokenize: { "type": "property" }
 }

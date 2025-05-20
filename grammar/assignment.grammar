@@ -1,0 +1,23 @@
+lang: assignment
+
+import "./annotation.grammar"
+
+SEMICOLON = /;/
+COMMA = /,/
+DOT = /\./
+ID = /[a-zA-Z_]\w*/
+COMMENT ?= /#[^\n]*\n/ { tokenize: { "type": "comment" } }
+SPACE ?= /\s+/
+
+assignment -> ...selectors ...annotation SEMICOLON?;
+
+selectors -> selector@selectors
+    | ...selectors COMMA selector@selectors;
+
+selector -> ID@symbol
+    | ID@symbol DOT ID@form;
+
+selector {
+  symbol.tokenize: { "type": "class" },
+  form.tokenize: { "type": "decorator" }
+}

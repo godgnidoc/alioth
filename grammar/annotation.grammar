@@ -1,0 +1,25 @@
+lang: annotation
+
+import "./json.grammar"
+
+COLON = /:/
+COMMA = /,/
+DOT = /\./
+LBRACE = /{/
+RBRACE = /}/
+ID = /[a-zA-Z_]\w*/
+COMMENT ?= /#[^\n]*\n/ { tokenize: { "type": "comment" } }
+SPACE ?= /\s+/
+
+annotation -> LBRACE ...attributes RBRACE;
+
+attributes -> attribute@attributes
+    | ...attributes COMMA attribute@attributes;
+
+attribute -> ID@key COLON json@value
+    | ID@of DOT ID@key COLON json@value;
+
+attribute {
+  key.tokenize: { "type": "property", "modifier": ["modification"] },
+  of.tokenize: { "type": "property" }
+}

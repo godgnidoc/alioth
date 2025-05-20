@@ -13,7 +13,7 @@
   "main": "./build/vscode/extension.js",
   "files": [
     "build/vscode",
-    "build/x64-linux-release/alioth",
+    "build/x64-linux-debug/alioth",
     "grammar",
     "README.md",
     "LICENSE"

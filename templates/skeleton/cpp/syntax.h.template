@@ -12,6 +12,11 @@
 #define __{{uppercase(lang)}}_SYNTAX_H__
 
 #include "alioth/ast.h"
+{{ for formula in syntax.formulas -}}
+{{ if formula.lang -}}
+#include "{{lowercase(formula.lang)}}/syntax.h"
+{{- end if }}
+{{ end for }}
 
 namespace {{lowercase(lang)}} {
 
@@ -20,6 +25,12 @@ constexpr alioth::SymbolID {{ term.name }} = {{id}};
 {{ end if }}{{ end for }}
 {{ for s, name in skeleton -}}
 struct {{ camelcase(name) }}; // SymbolID = {{s.id}}; Accepts: {{s.accepts}}
+{{ end for }}
+
+{{ for formula in syntax.formulas -}}
+{{ if formula.lang -}}
+using {{ camelcase(nameOf(formula.head)) }} = ::{{ lowercase(formula.lang) }}::{{ camelcase(formula.lang) }};
+{{- end if }}
 {{ end for }}
 
 {{ for s, name in skeleton -}}

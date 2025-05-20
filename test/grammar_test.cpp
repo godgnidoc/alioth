@@ -26,7 +26,7 @@ TEST(Grammar, Bootstrap) {
 
 TEST(Grammar, Form) {
   auto gdoc = Document::Create(R"(
-    lang: "formed"
+    lang: formed
 
     ASSIGN = /=/
     INT = /int/

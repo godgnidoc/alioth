@@ -260,6 +260,7 @@ struct Template::Context::Frame {
 };
 
 struct Template::Fragment {
+  AST source{};
   bool trim_start{};
   bool trim_end{};
 
@@ -317,6 +318,7 @@ struct Template::OverwriteFragment : public Fragment {
 };
 
 struct Template::Expression {
+  AST source{};
   virtual ~Expression() = default;
 };
 

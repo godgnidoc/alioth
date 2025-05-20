@@ -12,98 +12,26 @@
 #define __ANNOTATE_SYNTAX_H__
 
 #include "alioth/ast.h"
+#include "assignment/syntax.h"
+
 
 namespace annotate {
 
-constexpr alioth::SymbolID SEMICOLON = 1;
-constexpr alioth::SymbolID COLON = 2;
-constexpr alioth::SymbolID COMMA = 3;
-constexpr alioth::SymbolID DOT = 4;
-constexpr alioth::SymbolID LBRACE = 5;
-constexpr alioth::SymbolID RBRACE = 6;
-constexpr alioth::SymbolID LBRACKET = 7;
-constexpr alioth::SymbolID RBRACKET = 8;
-constexpr alioth::SymbolID JNULL = 9;
-constexpr alioth::SymbolID TRUE = 10;
-constexpr alioth::SymbolID FALSE = 11;
-constexpr alioth::SymbolID STRING = 12;
-constexpr alioth::SymbolID NUMBER = 13;
-constexpr alioth::SymbolID ID = 14;
-constexpr alioth::SymbolID COMMENT = 15;
-constexpr alioth::SymbolID SPACE = 16;
+constexpr alioth::SymbolID COLON = 1;
+constexpr alioth::SymbolID LANG = 2;
+constexpr alioth::SymbolID ID = 3;
+constexpr alioth::SymbolID COMMENT = 4;
+constexpr alioth::SymbolID SPACE = 5;
 
-struct Annotate; // SymbolID = 18; Accepts: [18, 19]
-struct Annotation; // SymbolID = 20; Accepts: [20]
-struct Attribute; // SymbolID = 25; Accepts: [25]
-struct Field; // SymbolID = 34; Accepts: [34]
-struct Json; // SymbolID = 26; Accepts: [26, 27, 28, 29, 30, 31, 32]
-struct Selector; // SymbolID = 23; Accepts: [23]
+struct Annotate; // SymbolID = 7; Accepts: [7]
+
+
+using Assignment = ::assignment::Assignment;
 
 
 struct Annotate {
-  std::vector<Annotation> annotations() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Annotation {
-  std::vector<Attribute> attributes() const;
-  std::vector<Selector> selectors() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Attribute {
-  alioth::AST key() const;
-  alioth::AST of() const;
-  Json value() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Field {
-  alioth::AST key() const;
-  Json value() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Json {
-  std::vector<Json> array() const;
-  alioth::AST boolean() const;
-  alioth::AST empty_array() const;
-  alioth::AST empty_object() const;
-  alioth::AST null() const;
-  alioth::AST number() const;
-  std::vector<Field> object() const;
-  alioth::AST string() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Selector {
-  alioth::AST form() const;
-  alioth::AST symbol() const;
+  std::vector<Assignment> assignments() const;
+  alioth::AST lang() const;
   alioth::AST node{};
 
   operator alioth::AST() const { return node; }
@@ -119,58 +47,8 @@ namespace alioth {
 template<>
 inline annotate::Annotate alioth::ASTNode::As<annotate::Annotate>() {
   switch(id) {
-    case 18:case 19:
+    case 7:
     return annotate::Annotate{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline annotate::Annotation alioth::ASTNode::As<annotate::Annotation>() {
-  switch(id) {
-    case 20:
-    return annotate::Annotation{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline annotate::Attribute alioth::ASTNode::As<annotate::Attribute>() {
-  switch(id) {
-    case 25:
-    return annotate::Attribute{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline annotate::Field alioth::ASTNode::As<annotate::Field>() {
-  switch(id) {
-    case 34:
-    return annotate::Field{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline annotate::Json alioth::ASTNode::As<annotate::Json>() {
-  switch(id) {
-    case 26:case 27:case 28:case 29:case 30:case 31:case 32:
-    return annotate::Json{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline annotate::Selector alioth::ASTNode::As<annotate::Selector>() {
-  switch(id) {
-    case 23:
-    return annotate::Selector{shared_from_this()};
   default:
     return {};
   }
@@ -180,36 +58,11 @@ inline annotate::Selector alioth::ASTNode::As<annotate::Selector>() {
 template<>
 inline Syntax SyntaxOf<annotate::Annotate>() {
   static auto syntax = []{
-    using namespace alioth;
     using namespace nlohmann;
     auto lex = Lexicon::Builder("annotate");
-    lex.Define("SEMICOLON", R"(;)"_regex);
-    
     lex.Define("COLON", R"(:)"_regex);
     
-    lex.Define("COMMA", R"(,)"_regex);
-    
-    lex.Define("DOT", R"(\.)"_regex);
-    
-    lex.Define("LBRACE", R"({)"_regex);
-    
-    lex.Define("RBRACE", R"(})"_regex);
-    
-    lex.Define("LBRACKET", R"(\[)"_regex);
-    
-    lex.Define("RBRACKET", R"(])"_regex);
-    
-    lex.Define("JNULL", R"(null)"_regex, { "json",  });
-    
-    lex.Define("TRUE", R"(true)"_regex, { "json",  });
-    
-    lex.Define("FALSE", R"(false)"_regex, { "json",  });
-    
-    lex.Define("STRING", R"(\"([^\"\n\\]|\\[^\n])*\")"_regex, { "json",  });
-    lex.Annotate("STRING", "tokenize", R"({"type":"string"})"_json);
-    
-    lex.Define("NUMBER", R"(-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?)"_regex, { "json",  });
-    lex.Annotate("NUMBER", "tokenize", R"({"type":"number"})"_json);
+    lex.Define("LANG", R"(lang)"_regex, { "keyword",  });
     
     lex.Define("ID", R"([a-zA-Z_]\w*)"_regex);
     
@@ -223,52 +76,10 @@ inline Syntax SyntaxOf<annotate::Annotate>() {
     syntax.Ignore("COMMENT");
     syntax.Ignore("SPACE");
     
-    syntax.Formula("annotate").Symbol("annotations", "...").Commit();
-    syntax.Formula("annotations").Symbol("annotation", "annotations").Commit();
-    syntax.Formula("annotations").Symbol("annotations", "...").Symbol("annotation", "annotations").Commit();
-    syntax.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Commit();
-    syntax.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Symbol("SEMICOLON").Commit();
-    syntax.Formula("selectors").Symbol("selector", "selectors").Commit();
-    syntax.Formula("selectors").Symbol("selectors", "...").Symbol("COMMA").Symbol("selector", "selectors").Commit();
-    syntax.Formula("selector").Symbol("ID", "symbol")
-      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
-      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
-      .Commit();
-    syntax.Formula("selector").Symbol("ID", "symbol").Symbol("DOT").Symbol("ID", "form")
-      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
-      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
-      .Commit();
-    syntax.Formula("annotation_body").Symbol("LBRACE").Symbol("attributes", "...").Symbol("RBRACE").Commit();
-    syntax.Formula("attributes").Symbol("attribute", "attributes").Commit();
-    syntax.Formula("attributes").Symbol("attributes", "...").Symbol("COMMA").Symbol("attribute", "attributes").Commit();
-    syntax.Formula("attribute").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
-      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
-      .Commit();
-    syntax.Formula("attribute").Symbol("ID", "of").Symbol("DOT").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
-      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
-      .Commit();
-    syntax.Formula("json").Symbol("object", "...").Commit();
-    syntax.Formula("json").Symbol("array", "...").Commit();
-    syntax.Formula("json").Symbol("string", "...").Commit();
-    syntax.Formula("json").Symbol("number", "...").Commit();
-    syntax.Formula("json").Symbol("boolean", "...").Commit();
-    syntax.Formula("json").Symbol("null", "...").Commit();
-    syntax.Formula("object").Symbol("LBRACE", "empty_object").Symbol("RBRACE").Commit();
-    syntax.Formula("object").Symbol("LBRACE").Symbol("fields", "...").Symbol("RBRACE").Commit();
-    syntax.Formula("fields").Symbol("field", "object").Commit();
-    syntax.Formula("fields").Symbol("fields", "...").Symbol("COMMA").Symbol("field", "object").Commit();
-    syntax.Formula("field").Symbol("STRING", "key").Symbol("COLON").Symbol("json", "value").Commit();
-    syntax.Formula("array").Symbol("LBRACKET", "empty_array").Symbol("RBRACKET").Commit();
-    syntax.Formula("array").Symbol("LBRACKET").Symbol("elements", "...").Symbol("RBRACKET").Commit();
-    syntax.Formula("elements").Symbol("json", "array").Commit();
-    syntax.Formula("elements").Symbol("elements", "...").Symbol("COMMA").Symbol("json", "array").Commit();
-    syntax.Formula("string").Symbol("STRING", "string").Commit();
-    syntax.Formula("number").Symbol("NUMBER", "number").Commit();
-    syntax.Formula("boolean").Symbol("TRUE", "boolean").Commit();
-    syntax.Formula("boolean").Symbol("FALSE", "boolean").Commit();
-    syntax.Formula("null").Symbol("JNULL", "null").Commit();
+    syntax.Import(::alioth::Syntax<::assignment::Assignment>(), "assignment");
+    syntax.Formula("annotate").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("assignments", "...").Commit();
+    syntax.Formula("assignments").Symbol("assignment", "assignments").Commit();
+    syntax.Formula("assignments").Symbol("assignments", "...").Symbol("assignment", "assignments").Commit();
     
     return syntax.Build();
   }();
@@ -279,29 +90,17 @@ inline Syntax SyntaxOf<annotate::Annotate>() {
 
 namespace annotate {
 
-inline std::vector<Annotation> Annotate::annotations() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("annotations"), [](auto n) { return n->template As<Annotation>(); }); }
-
-inline std::vector<Attribute> Annotation::attributes() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("attributes"), [](auto n) { return n->template As<Attribute>(); }); }
-inline std::vector<Selector> Annotation::selectors() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("selectors"), [](auto n) { return n->template As<Selector>(); }); }
-
-inline alioth::AST Attribute::key() const { return node->Attr("key"); }
-inline alioth::AST Attribute::of() const { return node->Attr("of"); }
-inline Json Attribute::value() const { return node->Attr("value")->template As<Json>(); }
-
-inline alioth::AST Field::key() const { return node->Attr("key"); }
-inline Json Field::value() const { return node->Attr("value")->template As<Json>(); }
-
-inline std::vector<Json> Json::array() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("array"), [](auto n) { return n->template As<Json>(); }); }
-inline alioth::AST Json::boolean() const { return node->Attr("boolean"); }
-inline alioth::AST Json::empty_array() const { return node->Attr("empty_array"); }
-inline alioth::AST Json::empty_object() const { return node->Attr("empty_object"); }
-inline alioth::AST Json::null() const { return node->Attr("null"); }
-inline alioth::AST Json::number() const { return node->Attr("number"); }
-inline std::vector<Field> Json::object() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("object"), [](auto n) { return n->template As<Field>(); }); }
-inline alioth::AST Json::string() const { return node->Attr("string"); }
-
-inline alioth::AST Selector::form() const { return node->Attr("form"); }
-inline alioth::AST Selector::symbol() const { return node->Attr("symbol"); }
+inline std::vector<Assignment> Annotate::assignments() const { 
+  return alioth::generic::collect<alioth::generic::multiple>(
+    node->Attrs("assignments"), 
+    [](auto n) {
+      return n->template As<Assignment>();
+    }
+  );
+}
+inline alioth::AST Annotate::lang() const { 
+  return node->Attr("lang");
+}
 
 
 

@@ -113,9 +113,9 @@ struct Syntactic {
   /**
    * 从JSON格式加载语法规则
    *
-   * @param json JSON格式的语法规则
+   * @param syntaxs JSON格式的语法规则
    */
-  static Syntax Load(nlohmann::json const& json);
+  static Syntax Load(nlohmann::json const& syntaxs);
 };
 
 struct Syntactic::LR0Item {
@@ -154,7 +154,7 @@ struct Syntactic::Formula {
   SymbolID head{};                    // 目标非终结符ID
   std::vector<Symbol> body{};         // 产生式体
   std::optional<std::string> form{};  // 产生式所属句式
-  std::optional<std::string> lang{};  // 导入语法
+  Syntax lang{};                      // 导入语法
 
   /**
    * 符号属性注解表
@@ -268,11 +268,10 @@ class Syntactic::Builder {
    *
    * 默认情况下使用语言名作为非终结符名，可选地可以为其指定一个别名
    *
-   * @param lang 语言名称
+   * @param synatx 语法规则
    * @param alias 导入非终结符的别名
    */
-  Builder& Import(std::string const& lang,
-                  std::optional<std::string> const& alias = {});
+  Builder& Import(Syntax synatx, std::optional<std::string> const& alias = {});
 
   /**
    * 创建LALR(1)语法规则

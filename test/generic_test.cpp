@@ -16,7 +16,7 @@ TEST(Generic, Ambiguous) {
   auto gdoc = Document::Create(R"(
     # Ambiguous grammar
 
-    lang: "lang"
+    lang: lang
     
     SEMI = /;/
     COMMA = /,/

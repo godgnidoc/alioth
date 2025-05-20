@@ -73,7 +73,7 @@ std::string Syntactic::PrintFormula(FormulaID formula,
   auto result = fmt::format("{} -> ", NameOf(f.head));
 
   if (f.lang) {
-    result += fmt::format("<imported language {}>", *f.lang);
+    result += fmt::format("<imported language {}>", f.lang->Lang());
     return result;
   }
 
@@ -91,91 +91,119 @@ std::string Syntactic::PrintFormula(FormulaID formula,
 }
 
 nlohmann::json Syntactic::Store() const {
-  nlohmann::json json;
-  json["lex"] = lex->Store();
-  json["ntrms"] = ntrms;
-  for (auto const& formula : formulas) {
-    nlohmann::json f;
-    f["head"] = formula.head;
-    if (formula.lang) f["lang"] = *formula.lang;
-    if (formula.form) f["form"] = *formula.form;
-    for (auto const& symbol : formula.body) {
+  auto syntaxs = nlohmann::json::array();
+  std::map<std::string, Syntactic const*> pending;
+  std::set<std::string> done;
+  pending[Lang()] = this;
+
+  while (!pending.empty()) {
+    auto syntax = pending.begin()->second;
+    pending.erase(pending.begin());
+    done.insert(syntax->Lang());
+
+    nlohmann::json json;
+    json["lang"] = syntax->Lang();
+    json["lex"] = syntax->lex->Store();
+    json["ntrms"] = syntax->ntrms;
+    for (auto const& formula : syntax->formulas) {
+      nlohmann::json f;
+      f["head"] = formula.head;
+      if (formula.lang) {
+        auto lang = formula.lang->Lang();
+        f["lang"] = lang;
+        if (!done.count(lang) && !pending.count(lang)) {
+          pending.emplace(lang, formula.lang.get());
+        }
+      }
+      if (formula.form) f["form"] = *formula.form;
+      for (auto const& symbol : formula.body) {
+        nlohmann::json s;
+        s["id"] = symbol.id;
+        if (symbol.attr) s["attr"] = *symbol.attr;
+        f["body"].push_back(s);
+      }
+      if (!formula.attributes.empty()) f["attrs"] = formula.attributes;
+      json["formulas"].push_back(f);
+    }
+
+    for (auto const& state : syntax->states) {
       nlohmann::json s;
-      s["id"] = symbol.id;
-      if (symbol.attr) s["attr"] = *symbol.attr;
-      f["body"].push_back(s);
+      for (auto const& shift : state.shift) {
+        s["shift"][std::to_string(shift.first)] = shift.second;
+      }
+      for (auto const& reduce : state.reduce) {
+        s["reduce"][std::to_string(reduce.first)] = reduce.second;
+      }
+      for (auto const& context : state.contexts) {
+        s["contexts"].push_back(context);
+      }
+      for (auto const& external : state.externals) {
+        s["externals"].push_back(external);
+      }
+      json["states"].push_back(s);
     }
-    if (!formula.attributes.empty()) f["attrs"] = formula.attributes;
-    json["formulas"].push_back(f);
+
+    json["ignores"] = syntax->ignores;
+    syntaxs.push_back(json);
   }
 
-  for (auto const& state : states) {
-    nlohmann::json s;
-    for (auto const& shift : state.shift) {
-      s["shift"][std::to_string(shift.first)] = shift.second;
-    }
-    for (auto const& reduce : state.reduce) {
-      s["reduce"][std::to_string(reduce.first)] = reduce.second;
-    }
-    for (auto const& context : state.contexts) {
-      s["contexts"].push_back(context);
-    }
-    for (auto const& external : state.externals) {
-      s["externals"].push_back(external);
-    }
-    json["states"].push_back(s);
-  }
-
-  json["ignores"] = ignores;
-
-  return json;
+  return syntaxs;
 }
 
-Syntax Syntactic::Load(nlohmann::json const& json) {
-  auto syntax = std::make_shared<Syntactic>();
-  syntax->lex = Lexicon::Load(json["lex"]);
-  syntax->ntrms = json["ntrms"].get<std::vector<std::string>>();
+Syntax Syntactic::Load(nlohmann::json const& syntaxs) {
+  std::map<std::string, Syntax> known;
 
-  for (auto const& f : json["formulas"]) {
-    auto formula = Syntactic::Formula{};
-    formula.head = f["head"];
-    if (f.contains("lang")) formula.lang = f["lang"];
-    if (f.contains("form")) formula.form = f["form"];
-    if (f.contains("body"))
-      for (auto const& s : f["body"]) {
-        Syntactic::Formula::Symbol symbol;
-        symbol.id = s["id"];
-        if (s.contains("attr")) symbol.attr = s["attr"];
-        formula.body.push_back(symbol);
-      }
-    if (f.contains("attrs")) formula.attributes = f["attrs"];
-    syntax->formulas.push_back(formula);
+  for (auto const& json : syntaxs) {
+    auto shared = std::make_shared<Syntactic>();
+    known[json["lang"]] = shared;
   }
 
-  for (auto const& s : json["states"]) {
-    auto state = Syntactic::State{};
-    if (s.contains("shift"))
-      for (auto const& [symbol, id] : s["shift"].items()) {
-        state.shift[std::stoul(symbol)] = id;
-      }
-    if (s.contains("reduce"))
-      for (auto const& [symbol, id] : s["reduce"].items()) {
-        state.reduce[std::stoul(symbol)] = id;
-      }
-    if (s.contains("contexts"))
-      for (auto const& context : s["contexts"]) {
-        state.contexts.insert(context.get<ContextID>());
-      }
-    if (s.contains("externals"))
-      for (auto const& external : s["externals"]) {
-        state.externals.insert(external.get<SymbolID>());
-      }
-    syntax->states.push_back(state);
+  for (auto const& json : syntaxs) {
+    auto syntax = known.at(json["lang"]);
+    syntax->lex = Lexicon::Load(json["lex"]);
+    syntax->ntrms = json["ntrms"].get<std::vector<std::string>>();
+
+    for (auto const& f : json["formulas"]) {
+      auto formula = Syntactic::Formula{};
+      formula.head = f["head"];
+      if (f.contains("lang")) formula.lang = known.at(f["lang"]);
+      if (f.contains("form")) formula.form = f["form"];
+      if (f.contains("body"))
+        for (auto const& s : f["body"]) {
+          Syntactic::Formula::Symbol symbol;
+          symbol.id = s["id"];
+          if (s.contains("attr")) symbol.attr = s["attr"];
+          formula.body.push_back(symbol);
+        }
+      if (f.contains("attrs")) formula.attributes = f["attrs"];
+      syntax->formulas.push_back(formula);
+    }
+
+    for (auto const& s : json["states"]) {
+      auto state = Syntactic::State{};
+      if (s.contains("shift"))
+        for (auto const& [symbol, id] : s["shift"].items()) {
+          state.shift[std::stoul(symbol)] = id;
+        }
+      if (s.contains("reduce"))
+        for (auto const& [symbol, id] : s["reduce"].items()) {
+          state.reduce[std::stoul(symbol)] = id;
+        }
+      if (s.contains("contexts"))
+        for (auto const& context : s["contexts"]) {
+          state.contexts.insert(context.get<ContextID>());
+        }
+      if (s.contains("externals"))
+        for (auto const& external : s["externals"]) {
+          state.externals.insert(external.get<SymbolID>());
+        }
+      syntax->states.push_back(state);
+    }
+
+    syntax->ignores = json["ignores"].get<std::set<SymbolID>>();
   }
 
-  syntax->ignores = json["ignores"].get<std::set<SymbolID>>();
-
-  return syntax;
+  return known.at(syntaxs[0]["lang"]);
 }
 
 bool Syntactic::LR0Item::operator<(LR0Item const& other) const {
@@ -201,7 +229,7 @@ bool Syntactic::Formula::Unfolded() const {
   return true;
 }
 
-bool Syntactic::Formula::Imported() const { return lang.has_value(); }
+bool Syntactic::Formula::Imported() const { return lang != nullptr; }
 
 bool Syntactic::Formula::Symbol::Unfolded() const {
   return attr && *attr == "...";
@@ -243,15 +271,15 @@ Syntactic::Builder& Syntactic::Builder::Ignore(std::string const& name) {
 }
 
 Syntactic::Builder& Syntactic::Builder::Import(
-    std::string const& lang, std::optional<std::string> const& alias) {
-  auto name = alias.value_or(lang);
+    Syntax syntax, std::optional<std::string> const& alias) {
+  auto name = alias.value_or(syntax->Lang());
   auto head = syntax_->lex->terms.size() + syntax_->ntrms.size();
   if (head != TouchNtrm(name)) {
-    throw AlreadyImportedError(lang);
+    throw AlreadyImportedError(syntax->Lang());
   }
   auto formula = syntax_->formulas.size();
   Formula(head).Commit();
-  syntax_->formulas.at(formula).lang = lang;
+  syntax_->formulas.at(formula).lang = syntax;
   syntax_->externals[head] = formula;
   return *this;
 }

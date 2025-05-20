@@ -1,7 +1,6 @@
 template<>
 inline Syntax SyntaxOf<{{lowercase(lang)}}::{{ camelcase(lang) }}>() {
   static auto syntax = []{
-    using namespace alioth;
     using namespace nlohmann;
     auto lex = Lexicon::Builder("{{lang}}");
     {{ for@terms term in syntax.lex.terms -}}{{ if nonfirst@terms }}
@@ -15,14 +14,16 @@ inline Syntax SyntaxOf<{{lowercase(lang)}}::{{ camelcase(lang) }}>() {
     {{ if syntax.ignores }}{{ for ignore in syntax.ignores -}}
     syntax.Ignore("{{ syntax.lex.terms[ignore].name }}");
     {{ end for }}{{ end if }}
-    {{ for@formulas formula in syntax.formulas -}}{{ if nonfirst@formulas }}
+    {{ for@formulas formula in syntax.formulas -}}{{ if nonfirst@formulas }}{{ if isImported(formula.head) }}
+    syntax.Import(::alioth::Syntax<::{{ lowercase(formula.lang) }}::{{ camelcase(formula.lang) }}>(), "{{nameOf(formula.head)}}");
+    {{ else then -}}
     syntax.Formula("{{nameOf(formula.head)}}"{{ if formula.form }}, "{{formula.form}}"{{ end if }}){{ for symbol in formula.body -}}
       .Symbol("{{nameOf(symbol.id)}}"{{ if symbol.attr }}, "{{symbol.attr}}"{{end if }})
     {{- end for }}{{ if formula.attrs }}
       {{ for attrs, attr in formula.attrs -}}{{ for value, key in attrs -}}
       .Annotate("{{attr}}", "{{key}}", R"({{ json(value) }})"_json)
       {{ end for }}{{ end for }}{{ end if }}.Commit();
-    {{ end if }}{{ end for }}
+    {{ end if }}{{ end if }}{{ end for }}
     return syntax.Build();
   }();
 

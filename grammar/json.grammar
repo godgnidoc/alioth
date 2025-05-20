@@ -1,0 +1,44 @@
+lang: json
+
+COLON = /:/
+COMMA = /,/
+LBRACE = /{/
+RBRACE = /}/
+LBRACKET = /\[/
+RBRACKET = /]/
+JNULL<json> = /null/
+TRUE<json> = /true/
+FALSE<json> = /false/
+STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
+NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ { tokenize: { "type": "number" } }
+SPACE ?= /\s+/
+
+json -> ...object
+    | ...array
+    | ...string
+    | ...number
+    | ...boolean
+    | ...null;
+
+object -> LBRACE@empty_object RBRACE
+    | LBRACE ...fields RBRACE;
+
+fields -> field@object
+    | ...fields COMMA field@object;
+
+field -> STRING@key COLON json@value;
+
+array -> LBRACKET@empty_array RBRACKET
+    | LBRACKET ...elements RBRACKET;
+
+elements ->  json@array
+    | ...elements COMMA json@array;
+
+string -> STRING@string;
+
+number -> NUMBER@number;
+
+boolean -> TRUE@boolean
+    | FALSE@boolean;
+
+null -> JNULL@null;

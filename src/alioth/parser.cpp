@@ -8,11 +8,8 @@ Parser::Parser(Syntax syntax, Doc doc, ParseOptions options)
     : starting_{options.starting},
       truncate_{options.truncate},
       lazy_{options.lazy},
-      syntaxes_{options.syntaxes},
       doc_{doc},
-      syntax_{syntax} {
-  syntaxes_.emplace(syntax->Lang(), syntax);
-}
+      syntax_{syntax} {}
 
 ASTNtrm Parser::Parse() {
   threads_.push_back(Thread{
@@ -302,14 +299,11 @@ void Parser::ScanAndFork() {
     for (auto external : state.externals) {
       auto formula_id = syntax_->externals.at(external);
       auto const& formula = syntax_->formulas.at(formula_id);
-      auto lang = *formula.lang;
-      auto syntax = syntaxes_.at(lang);
-      auto parser = Parser(syntax, doc_,
+      auto parser = Parser(formula.lang, doc_,
                            ParseOptions{
                                .starting = offset,
                                .truncate = true,
                                .lazy = true,
-                               .syntaxes = syntaxes_,
                            });
       ASTNtrm ntrm;
       try {

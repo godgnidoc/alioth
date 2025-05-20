@@ -122,29 +122,32 @@ Template::Frag Template::LoadFrag(AST node) {
     f = frag;
   }
 
+  f->source = node;
   if (node->Attr("trim_start")) f->trim_start = true;
   if (node->Attr("trim_end")) f->trim_end = true;
   return f;
 }
 
 Template::Expr Template::LoadExpr(AST node) {
+  Expr e;
+
   if (auto variable = node->Attr("variable"); variable) {
     auto expr = std::make_shared<VariableExpr>();
     expr->variable = variable->Text();
     if (auto anchor = node->Attr("anchor"); anchor) {
       expr->anchor = anchor->Text();
     }
-    return expr;
+    e = expr;
   } else if (auto field = node->Attr("field"); field) {
     auto expr = std::make_shared<FieldExpr>();
     expr->of = LoadExpr(node->Attr("of"));
     expr->field = field->Text();
-    return expr;
+    e = expr;
   } else if (auto index = node->Attr("index"); index) {
     auto expr = std::make_shared<IndexExpr>();
     expr->of = LoadExpr(node->Attr("of"));
     expr->index = LoadExpr(node->Attr("index"));
-    return expr;
+    e = expr;
   } else if (auto number = node->Attr("number"); number) {
     auto text = number->Text();
     if (text.find('.') == std::string::npos &&
@@ -152,31 +155,34 @@ Template::Expr Template::LoadExpr(AST node) {
         text.find('E') == std::string::npos) {
       auto expr = std::make_shared<IntegerExpr>();
       expr->integer = nlohmann::json::parse(text).get<Integer>();
-      return expr;
+      e = expr;
     } else {
       auto expr = std::make_shared<NumberExpr>();
       expr->number = nlohmann::json::parse(text).get<Number>();
-      return expr;
+      e = expr;
     }
   } else if (auto string = node->Attr("string"); string) {
     auto expr = std::make_shared<StringExpr>();
     expr->string = nlohmann::json::parse(string->Text()).get<String>();
-    return expr;
+    e = expr;
   } else if (auto invoke = node->Attr("invoke"); invoke) {
     auto expr = std::make_shared<InvokeExpr>();
     expr->invoke = LoadExpr(node->Attr("invoke"));
     for (auto param : node->Attrs("params")) {
       expr->params.push_back(LoadExpr(param));
     }
-    return expr;
+    e = expr;
   } else if (auto pipe = node->Attr("pipe"); pipe) {
     auto expr = std::make_shared<PipeExpr>();
     expr->pipe = LoadExpr(node->Attr("pipe"));
     expr->expr = LoadExpr(node->Attr("expr"));
-    return expr;
+    e = expr;
+  } else {
+    throw std::runtime_error("invalid expression");
   }
 
-  throw std::runtime_error("invalid expression");
+  e->source = node;
+  return e;
 }
 
 Template::Filter Template::Compile(Tmpl tmpl) {
@@ -195,47 +201,74 @@ Template::Filter Template::Compile(Tmpl tmpl) {
 }
 
 Template::Filter Template::Compile(Frag frag) {
+  Filter f;
   if (auto text = std::dynamic_pointer_cast<TextFragment>(frag)) {
-    return Compile(text);
+    f = Compile(text);
   } else if (auto call = std::dynamic_pointer_cast<CallFragment>(frag)) {
-    return Compile(call);
+    f = Compile(call);
   } else if (auto eval = std::dynamic_pointer_cast<EvalFragment>(frag)) {
-    return Compile(eval);
+    f = Compile(eval);
   } else if (auto iter = std::dynamic_pointer_cast<IterFragment>(frag)) {
-    return Compile(iter);
+    f = Compile(iter);
   } else if (auto branch = std::dynamic_pointer_cast<BranchFragment>(frag)) {
-    return Compile(branch);
+    f = Compile(branch);
   } else if (auto block = std::dynamic_pointer_cast<BlockFragment>(frag)) {
-    return Compile(block);
+    f = Compile(block);
   } else if (auto extends = std::dynamic_pointer_cast<ExtendsFragment>(frag)) {
-    return Compile(extends);
+    f = Compile(extends);
   } else if (auto ovwrt = std::dynamic_pointer_cast<OverwriteFragment>(frag)) {
-    return Compile(ovwrt);
+    f = Compile(ovwrt);
+  } else {
+    throw std::runtime_error("invalid fragment");
   }
 
-  throw std::runtime_error("invalid fragment");
+  return [f, frag](Context& ctx, Array const& args) {
+    try {
+      return f(ctx, args);
+    } catch (...) {
+      auto range = frag->source->Range();
+      fmt::println(stderr, "error: failed to render fragment at {}:{}:{}",
+                   frag->source->doc->path.value_or("<unknown-path>").string(),
+                   range.start.line, range.start.column);
+      throw;
+    }
+  };
 }
 
 Template::Filter Template::Compile(Expr expr) {
+  Filter f;
+
   if (auto variable = std::dynamic_pointer_cast<VariableExpr>(expr)) {
-    return Compile(variable);
+    f = Compile(variable);
   } else if (auto field = std::dynamic_pointer_cast<FieldExpr>(expr)) {
-    return Compile(field);
+    f = Compile(field);
   } else if (auto index = std::dynamic_pointer_cast<IndexExpr>(expr)) {
-    return Compile(index);
+    f = Compile(index);
   } else if (auto integer = std::dynamic_pointer_cast<IntegerExpr>(expr)) {
-    return Compile(integer);
+    f = Compile(integer);
   } else if (auto number = std::dynamic_pointer_cast<NumberExpr>(expr)) {
-    return Compile(number);
+    f = Compile(number);
   } else if (auto string = std::dynamic_pointer_cast<StringExpr>(expr)) {
-    return Compile(string);
+    f = Compile(string);
   } else if (auto invoke = std::dynamic_pointer_cast<InvokeExpr>(expr)) {
-    return Compile(invoke);
+    f = Compile(invoke);
   } else if (auto pipe = std::dynamic_pointer_cast<PipeExpr>(expr)) {
-    return Compile(pipe);
+    f = Compile(pipe);
+  } else {
+    throw std::runtime_error("invalid expression");
   }
 
-  throw std::runtime_error("invalid expression");
+  return [f, expr](Context& ctx, Array const& args) {
+    try {
+      return f(ctx, args);
+    } catch (...) {
+      auto range = expr->source->Range();
+      fmt::println(stderr, "error: failed to evaluate expression at {}:{}:{}",
+                   expr->source->doc->path.value_or("<unknown-path>").string(),
+                   range.start.line, range.start.column);
+      throw;
+    }
+  };
 }
 
 Template::Filter Template::Compile(std::shared_ptr<TextFragment> frag) {

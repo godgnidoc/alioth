@@ -1,6 +1,6 @@
 # 模板语法
 # 参考 doc/template模板引擎介绍.md 了解使用方法
-lang: "template"
+lang: template
 
 TXT<template> = /{|[^{]+/ { tokenize: { "type": "string" } }
 COMMENT<comment> = /}|[^}]+/ { tokenize: { "type": "comment" } }

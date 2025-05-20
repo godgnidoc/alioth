@@ -9,18 +9,21 @@
 namespace alioth {
 using namespace generic;
 
-Syntax Grammar::Compile(Doc grammar) {
-  // std::map<std::string, std::vector<annotate::Annotate>> annotates;
+struct Compiling {
+  grammar::Grammar g;
+  Lexicon::Builder lex;
+  Syntactic::Builder syntax;
+};
 
+Syntax Grammar::Compile(Doc grammar, std::map<std::string, Syntax> known) {
   auto root = Parser(SyntaxOf<grammar::Grammar>(), grammar).Parse();
   auto g = ViewOf<grammar::Grammar>(root);
 
-  auto options = associate(collect<multiple>(g.options(), [](auto const& it) {
-    return std::pair{
-        it.key()->Text(),
-        nlohmann::json::parse(it.value()->Text()),
-    };
-  }));
+  auto lang = g.lang()->Text();
+  {
+    auto it = known.find(lang);
+    if (it != known.end()) return it->second;
+  }
 
   auto annotations = associate<multiple>(
       collect<multiple>(g.annotations(), [](auto const& it) {
@@ -35,7 +38,7 @@ Syntax Grammar::Compile(Doc grammar) {
             };
       }));
 
-  auto lex = Lexicon::Builder(options.at("lang"));
+  auto lex = Lexicon::Builder(lang);
   for (auto const& term : g.terms()) {
     auto src = term.regex()->Text();
     auto regex = RegexTree::Compile(src.substr(1, src.size() - 2));
@@ -75,9 +78,16 @@ Syntax Grammar::Compile(Doc grammar) {
   }
 
   for (auto const& imported : g.imports()) {
-    auto lang = imported.lang()->Text();
+    std::filesystem::path path = nlohmann::json::parse(imported.from()->Text());
+    if (path.is_relative()) {
+      path = grammar->path->parent_path() / path;
+    }
+    auto external = Compile(Document::Read(path), known);
+    if (!known.count(external->Lang())) {
+      known[external->Lang()] = external;
+    }
     auto alias = text::maybe(imported.alias());
-    syntax.Import(lang, alias);
+    syntax.Import(external, alias);
   }
 
   for (auto const& ntrm : g.ntrms()) {

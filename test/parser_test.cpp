@@ -80,34 +80,6 @@ TEST(Parser, Simple) {
 }
 
 TEST(Parser, Importing) {
-  auto mark = [] {
-    auto lex = Lexicon::Builder("mark");
-    lex.Define("TEXT", "\\w+"_regex);
-    lex.Define("CODE_START", "{"_regex);
-    lex.Define("CODE_END", "}"_regex);
-    lex.Define("SPACES", "\\s+"_regex);
-    auto syntax = Syntactic::Builder(lex.Build());
-    syntax.Ignore("SPACES");
-    syntax.Import("json");
-    syntax.Formula("mark").Symbol("TEXT", "frags").Commit();
-    syntax.Formula("mark")
-        .Symbol("CODE_START")
-        .Symbol("json", "frags")
-        .Symbol("CODE_END")
-        .Commit();
-    syntax.Formula("mark")
-        .Symbol("mark", "...")
-        .Symbol("TEXT", "frags")
-        .Commit();
-    syntax.Formula("mark")
-        .Symbol("mark", "...")
-        .Symbol("CODE_START")
-        .Symbol("json", "frags")
-        .Symbol("CODE_END")
-        .Commit();
-    return syntax.Build();
-  }();
-
   auto json = [] {
     auto lex = Lexicon::Builder("json");
     lex.Define("STRING", "\"[^\"]*\""_regex);
@@ -173,6 +145,34 @@ TEST(Parser, Importing) {
     return syntax.Build();
   }();
 
+  auto mark = [&] {
+    auto lex = Lexicon::Builder("mark");
+    lex.Define("TEXT", "\\w+"_regex);
+    lex.Define("CODE_START", "{"_regex);
+    lex.Define("CODE_END", "}"_regex);
+    lex.Define("SPACES", "\\s+"_regex);
+    auto syntax = Syntactic::Builder(lex.Build());
+    syntax.Ignore("SPACES");
+    syntax.Import(json);
+    syntax.Formula("mark").Symbol("TEXT", "frags").Commit();
+    syntax.Formula("mark")
+        .Symbol("CODE_START")
+        .Symbol("json", "frags")
+        .Symbol("CODE_END")
+        .Commit();
+    syntax.Formula("mark")
+        .Symbol("mark", "...")
+        .Symbol("TEXT", "frags")
+        .Commit();
+    syntax.Formula("mark")
+        .Symbol("mark", "...")
+        .Symbol("CODE_START")
+        .Symbol("json", "frags")
+        .Symbol("CODE_END")
+        .Commit();
+    return syntax.Build();
+  }();
+
   auto source = R"(
         outer text prefix{
           {
@@ -189,14 +189,15 @@ TEST(Parser, Importing) {
   )";
 
   auto doc = Document::Create(source);
-  auto parser = Parser(mark, doc,
-                       Parser::ParseOptions{
-                           .syntaxes{
-                               {"json", json},
-                           },
-                       });
+  auto parser = Parser(mark, doc);
   auto root = parser.Parse();
-  fmt::println("{}", root->Store({}).dump(2));
+  auto frags = root->Attr("mark")->AsNtrm()->Attrs("frags");
+  EXPECT_EQ(frags[0]->Text(), "outer");
+  EXPECT_EQ(frags[1]->Text(), "text");
+  EXPECT_EQ(frags[2]->Text(), "prefix");
+  EXPECT_EQ(frags[4]->Text(), "outer");
+  EXPECT_EQ(frags[5]->Text(), "text");
+  EXPECT_EQ(frags[6]->Text(), "suffix");
 }
 
 }  // namespace test

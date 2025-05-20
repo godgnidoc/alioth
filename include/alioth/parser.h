@@ -104,7 +104,6 @@ class Parser {
   size_t starting_;                         // 开始分析的偏移量
   bool truncate_;                           // 遭遇分析错误时尝试截断
   bool lazy_;                               // 开篇遭遇可忽略符号时判定为分析失败
-  std::map<std::string, Syntax> syntaxes_;  // 语法规则集合
 
   Doc doc_;                          // 正在分析的源码
   Syntax syntax_;                    // 语法规则
@@ -127,7 +126,6 @@ struct Parser::ParseOptions {
   size_t starting{};  // 开始分析的偏移量
   bool truncate{};    // 遭遇分析错误时尝试截断
   bool lazy{};        // 在开篇遭遇可忽略符号时判定为分析失败
-  std::map<std::string, Syntax> syntaxes{};  // 语法规则
 };
 
 }  // namespace alioth

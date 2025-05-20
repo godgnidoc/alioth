@@ -12,6 +12,9 @@
 #define __GRAMMAR_SYNTAX_H__
 
 #include "alioth/ast.h"
+#include "annotation/syntax.h"
+#include "assignment/syntax.h"
+
 
 namespace grammar {
 
@@ -34,57 +37,31 @@ constexpr alioth::SymbolID RPAREN = 16;
 constexpr alioth::SymbolID LBRACKET = 17;
 constexpr alioth::SymbolID RBRACKET = 18;
 constexpr alioth::SymbolID EMPTY = 19;
-constexpr alioth::SymbolID IMPORT = 20;
-constexpr alioth::SymbolID AS = 21;
-constexpr alioth::SymbolID ANNOTATE = 22;
-constexpr alioth::SymbolID WITH = 23;
-constexpr alioth::SymbolID JNULL = 24;
-constexpr alioth::SymbolID TRUE = 25;
-constexpr alioth::SymbolID FALSE = 26;
-constexpr alioth::SymbolID STRING = 27;
-constexpr alioth::SymbolID NUMBER = 28;
-constexpr alioth::SymbolID ID = 29;
-constexpr alioth::SymbolID REGEX = 30;
-constexpr alioth::SymbolID COMMENT = 31;
-constexpr alioth::SymbolID SPACE = 32;
+constexpr alioth::SymbolID LANG = 20;
+constexpr alioth::SymbolID IMPORT = 21;
+constexpr alioth::SymbolID AS = 22;
+constexpr alioth::SymbolID JNULL = 23;
+constexpr alioth::SymbolID TRUE = 24;
+constexpr alioth::SymbolID FALSE = 25;
+constexpr alioth::SymbolID STRING = 26;
+constexpr alioth::SymbolID NUMBER = 27;
+constexpr alioth::SymbolID ID = 28;
+constexpr alioth::SymbolID REGEX = 29;
+constexpr alioth::SymbolID COMMENT = 30;
+constexpr alioth::SymbolID SPACE = 31;
 
-struct Annotation; // SymbolID = 44; Accepts: [44]
-struct Attribute; // SymbolID = 66; Accepts: [66]
-struct EmptyFormula; // SymbolID = 53; Accepts: [53]
-struct Field; // SymbolID = 63; Accepts: [63]
-struct Formula; // SymbolID = 52; Accepts: [52, 54]
-struct Grammar; // SymbolID = 34; Accepts: [34]
-struct Import; // SymbolID = 42; Accepts: [42]
-struct Json; // SymbolID = 41; Accepts: [41, 56, 57, 58, 59, 60, 61]
-struct Ntrm; // SymbolID = 48; Accepts: [48]
-struct Option; // SymbolID = 40; Accepts: [40]
-struct Selector; // SymbolID = 51; Accepts: [51]
-struct Symbol; // SymbolID = 55; Accepts: [55]
-struct Term; // SymbolID = 43; Accepts: [43]
+struct EmptyFormula; // SymbolID = 46; Accepts: [46]
+struct Formula; // SymbolID = 45; Accepts: [45, 47]
+struct Grammar; // SymbolID = 33; Accepts: [33]
+struct Import; // SymbolID = 39; Accepts: [39]
+struct Ntrm; // SymbolID = 43; Accepts: [43]
+struct Symbol; // SymbolID = 48; Accepts: [48]
+struct Term; // SymbolID = 40; Accepts: [40]
 
 
-struct Annotation {
-  std::vector<Attribute> attributes() const;
-  std::vector<Selector> selectors() const;
-  alioth::AST node{};
+using Annotation = ::annotation::Annotation;
+using Assignment = ::assignment::Assignment;
 
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Attribute {
-  alioth::AST key() const;
-  alioth::AST of() const;
-  Json value() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
 
 struct EmptyFormula {
   alioth::AST empty() const;
@@ -96,19 +73,7 @@ struct EmptyFormula {
   alioth::ASTNode& operator*() const { return *node; }
 };
 
-struct Field {
-  alioth::AST key() const;
-  Json value() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
 struct Formula {
-  std::vector<Attribute> attributes() const;
   std::vector<Symbol> symbols() const;
   alioth::AST node{};
 
@@ -119,11 +84,10 @@ struct Formula {
 };
 
 struct Grammar {
-  std::vector<Annotation> annotations() const;
-  std::vector<alioth::AST> external_annotations() const;
+  std::vector<Assignment> assignments() const;
   std::vector<Import> imports() const;
+  alioth::AST lang() const;
   std::vector<Ntrm> ntrms() const;
-  std::vector<Option> options() const;
   std::vector<Term> terms() const;
   alioth::AST node{};
 
@@ -135,24 +99,7 @@ struct Grammar {
 
 struct Import {
   alioth::AST alias() const;
-  alioth::AST lang() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Json {
-  std::vector<Json> array() const;
-  alioth::AST boolean() const;
-  alioth::AST empty_array() const;
-  alioth::AST empty_object() const;
-  alioth::AST null() const;
-  alioth::AST number() const;
-  std::vector<Field> object() const;
-  alioth::AST string() const;
+  alioth::AST from() const;
   alioth::AST node{};
 
   operator alioth::AST() const { return node; }
@@ -165,28 +112,6 @@ struct Ntrm {
   alioth::AST form() const;
   std::vector<alioth::AST> formulas() const;
   alioth::AST name() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Option {
-  alioth::AST key() const;
-  Json value() const;
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
-};
-
-struct Selector {
-  alioth::AST form() const;
-  alioth::AST symbol() const;
   alioth::AST node{};
 
   operator alioth::AST() const { return node; }
@@ -208,7 +133,6 @@ struct Symbol {
 };
 
 struct Term {
-  std::vector<Attribute> attributes() const;
   std::vector<alioth::AST> contexts() const;
   alioth::AST ignore() const;
   alioth::AST name() const;
@@ -226,40 +150,10 @@ struct Term {
 
 namespace alioth {
 template<>
-inline grammar::Annotation alioth::ASTNode::As<grammar::Annotation>() {
-  switch(id) {
-    case 44:
-    return grammar::Annotation{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline grammar::Attribute alioth::ASTNode::As<grammar::Attribute>() {
-  switch(id) {
-    case 66:
-    return grammar::Attribute{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
 inline grammar::EmptyFormula alioth::ASTNode::As<grammar::EmptyFormula>() {
   switch(id) {
-    case 53:
+    case 46:
     return grammar::EmptyFormula{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline grammar::Field alioth::ASTNode::As<grammar::Field>() {
-  switch(id) {
-    case 63:
-    return grammar::Field{shared_from_this()};
   default:
     return {};
   }
@@ -268,7 +162,7 @@ inline grammar::Field alioth::ASTNode::As<grammar::Field>() {
 template<>
 inline grammar::Formula alioth::ASTNode::As<grammar::Formula>() {
   switch(id) {
-    case 52:case 54:
+    case 45:case 47:
     return grammar::Formula{shared_from_this()};
   default:
     return {};
@@ -278,7 +172,7 @@ inline grammar::Formula alioth::ASTNode::As<grammar::Formula>() {
 template<>
 inline grammar::Grammar alioth::ASTNode::As<grammar::Grammar>() {
   switch(id) {
-    case 34:
+    case 33:
     return grammar::Grammar{shared_from_this()};
   default:
     return {};
@@ -288,18 +182,8 @@ inline grammar::Grammar alioth::ASTNode::As<grammar::Grammar>() {
 template<>
 inline grammar::Import alioth::ASTNode::As<grammar::Import>() {
   switch(id) {
-    case 42:
+    case 39:
     return grammar::Import{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline grammar::Json alioth::ASTNode::As<grammar::Json>() {
-  switch(id) {
-    case 41:case 56:case 57:case 58:case 59:case 60:case 61:
-    return grammar::Json{shared_from_this()};
   default:
     return {};
   }
@@ -308,28 +192,8 @@ inline grammar::Json alioth::ASTNode::As<grammar::Json>() {
 template<>
 inline grammar::Ntrm alioth::ASTNode::As<grammar::Ntrm>() {
   switch(id) {
-    case 48:
+    case 43:
     return grammar::Ntrm{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline grammar::Option alioth::ASTNode::As<grammar::Option>() {
-  switch(id) {
-    case 40:
-    return grammar::Option{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-template<>
-inline grammar::Selector alioth::ASTNode::As<grammar::Selector>() {
-  switch(id) {
-    case 51:
-    return grammar::Selector{shared_from_this()};
   default:
     return {};
   }
@@ -338,7 +202,7 @@ inline grammar::Selector alioth::ASTNode::As<grammar::Selector>() {
 template<>
 inline grammar::Symbol alioth::ASTNode::As<grammar::Symbol>() {
   switch(id) {
-    case 55:
+    case 48:
     return grammar::Symbol{shared_from_this()};
   default:
     return {};
@@ -348,7 +212,7 @@ inline grammar::Symbol alioth::ASTNode::As<grammar::Symbol>() {
 template<>
 inline grammar::Term alioth::ASTNode::As<grammar::Term>() {
   switch(id) {
-    case 43:
+    case 40:
     return grammar::Term{shared_from_this()};
   default:
     return {};
@@ -359,7 +223,6 @@ inline grammar::Term alioth::ASTNode::As<grammar::Term>() {
 template<>
 inline Syntax SyntaxOf<grammar::Grammar>() {
   static auto syntax = []{
-    using namespace alioth;
     using namespace nlohmann;
     auto lex = Lexicon::Builder("grammar");
     lex.Define("LEAD", R"(->)"_regex);
@@ -419,13 +282,14 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
     lex.Define("EMPTY", R"(%empty)"_regex);
     lex.Annotate("EMPTY", "tokenize", R"({"type":"keyword"})"_json);
     
+    lex.Define("LANG", R"(lang)"_regex, { "keyword",  });
+    lex.Annotate("LANG", "tokenize", R"({"type":"operator"})"_json);
+    
     lex.Define("IMPORT", R"(import)"_regex, { "keyword",  });
+    lex.Annotate("IMPORT", "tokenize", R"({"type":"operator"})"_json);
     
     lex.Define("AS", R"(as)"_regex, { "keyword",  });
-    
-    lex.Define("ANNOTATE", R"(annotate)"_regex, { "keyword",  });
-    
-    lex.Define("WITH", R"(with)"_regex, { "keyword",  });
+    lex.Annotate("AS", "tokenize", R"({"type":"operator"})"_json);
     
     lex.Define("JNULL", R"(null)"_regex, { "json",  });
     lex.Annotate("JNULL", "tokenize", R"({"type":"keyword"})"_json);
@@ -457,24 +321,23 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
     syntax.Ignore("COMMENT");
     syntax.Ignore("SPACE");
     
-    syntax.Formula("grammar").Symbol("options", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax.Formula("grammar").Symbol("options", "...").Symbol("imports", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax.Formula("grammar").Symbol("options", "...").Symbol("annotate", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax.Formula("grammar").Symbol("options", "...").Symbol("imports", "...").Symbol("annotate", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax.Formula("options").Symbol("option", "options").Commit();
-    syntax.Formula("options").Symbol("options", "...").Symbol("option", "options").Commit();
-    syntax.Formula("option").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["definition"],"type":"variable"})"_json)
-      .Commit();
+    syntax.Import(::alioth::Syntax<::annotation::Annotation>(), "annotation");
+    syntax.Import(::alioth::Syntax<::assignment::Assignment>(), "assignment");
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("imports", "...").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("terms", "...").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("imports", "...").Symbol("terms", "...").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("ntrms", "...").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("imports", "...").Symbol("ntrms", "...").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
+    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("imports", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
     syntax.Formula("imports").Symbol("import", "imports").Commit();
     syntax.Formula("imports").Symbol("imports", "...").Symbol("import", "imports").Commit();
-    syntax.Formula("import").Symbol("IMPORT").Symbol("STRING", "lang").Commit();
-    syntax.Formula("import").Symbol("IMPORT").Symbol("STRING", "lang").Symbol("AS").Symbol("ID", "alias").Commit();
-    syntax.Formula("annotate").Symbol("ANNOTATE").Symbol("WITH").Symbol("STRING", "external_annotations").Commit();
-    syntax.Formula("annotate").Symbol("annotate", "...").Symbol("STRING", "external_annotations").Commit();
+    syntax.Formula("import").Symbol("IMPORT").Symbol("STRING", "from").Commit();
+    syntax.Formula("import").Symbol("IMPORT").Symbol("STRING", "from").Symbol("AS").Symbol("ID", "alias").Commit();
     syntax.Formula("terms").Symbol("term", "terms").Commit();
     syntax.Formula("terms").Symbol("terms", "...").Symbol("term", "terms").Commit();
-    syntax.Formula("terms").Symbol("terms", "...").Symbol("annotation", "annotations").Commit();
+    syntax.Formula("terms").Symbol("terms", "...").Symbol("assignment", "assignments").Commit();
     syntax.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex")
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
@@ -487,16 +350,16 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
     syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex")
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
-    syntax.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+    syntax.Formula("term").Symbol("ID", "name").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation", "...")
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
-    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation", "...")
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
-    syntax.Formula("term").Symbol("ID", "name").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+    syntax.Formula("term").Symbol("ID", "name").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation", "...")
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
-    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation_body", "...")
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("IGNORE", "ignore").Symbol("DEFINE").Symbol("REGEX", "regex").Symbol("annotation", "...")
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
     syntax.Formula("contexts").Symbol("LT").Symbol("context_list", "...").Symbol("GT").Commit();
@@ -508,7 +371,7 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
       .Commit();
     syntax.Formula("ntrms").Symbol("ntrm", "ntrms").Commit();
     syntax.Formula("ntrms").Symbol("ntrms", "...").Symbol("ntrm", "ntrms").Commit();
-    syntax.Formula("ntrms").Symbol("ntrms", "...").Symbol("annotation", "annotations").Commit();
+    syntax.Formula("ntrms").Symbol("ntrms", "...").Symbol("assignment", "assignments").Commit();
     syntax.Formula("ntrm").Symbol("ID", "name").Symbol("LEAD").Symbol("formula_group", "...").Symbol("SEMICOLON")
       .Annotate("form", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
@@ -517,24 +380,12 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
       .Annotate("form", "tokenize", R"({"modifier":["definition"],"type":"decorator"})"_json)
       .Annotate("name", "tokenize", R"({"modifier":["definition"],"type":"class"})"_json)
       .Commit();
-    syntax.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Commit();
-    syntax.Formula("annotation").Symbol("selectors", "...").Symbol("annotation_body", "...").Symbol("SEMICOLON").Commit();
-    syntax.Formula("selectors").Symbol("selector", "selectors").Commit();
-    syntax.Formula("selectors").Symbol("selectors", "...").Symbol("COMMA").Symbol("selector", "selectors").Commit();
-    syntax.Formula("selector").Symbol("ID", "symbol")
-      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
-      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
-      .Commit();
-    syntax.Formula("selector").Symbol("ID", "symbol").Symbol("DOT").Symbol("ID", "form")
-      .Annotate("form", "tokenize", R"({"type":"decorator"})"_json)
-      .Annotate("symbol", "tokenize", R"({"type":"class"})"_json)
-      .Commit();
     syntax.Formula("formula_group").Symbol("formula", "formulas").Commit();
     syntax.Formula("formula_group").Symbol("empty_formula", "formulas").Commit();
     syntax.Formula("formula_group").Symbol("formula_group", "...").Symbol("UNION").Symbol("formula", "formulas").Commit();
     syntax.Formula("formula_group").Symbol("formula_group", "...").Symbol("UNION").Symbol("empty_formula", "formulas").Commit();
     syntax.Formula("formula").Symbol("formula_body", "...").Commit();
-    syntax.Formula("formula").Symbol("formula_body", "...").Symbol("annotation_body", "...").Commit();
+    syntax.Formula("formula").Symbol("formula_body", "...").Symbol("annotation", "...").Commit();
     syntax.Formula("formula_body").Symbol("symbol", "symbols").Commit();
     syntax.Formula("formula_body").Symbol("formula_body", "...").Symbol("symbol", "symbols").Commit();
     syntax.Formula("empty_formula").Symbol("EMPTY", "empty").Commit();
@@ -562,37 +413,6 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
       .Annotate("attr", "tokenize", R"({"modifier":["definition"],"type":"property"})"_json)
       .Annotate("name", "tokenize", R"({"type":"string"})"_json)
       .Commit();
-    syntax.Formula("json").Symbol("object", "...").Commit();
-    syntax.Formula("json").Symbol("array", "...").Commit();
-    syntax.Formula("json").Symbol("string", "...").Commit();
-    syntax.Formula("json").Symbol("number", "...").Commit();
-    syntax.Formula("json").Symbol("boolean", "...").Commit();
-    syntax.Formula("json").Symbol("null", "...").Commit();
-    syntax.Formula("object").Symbol("LBRACE", "empty_object").Symbol("RBRACE").Commit();
-    syntax.Formula("object").Symbol("LBRACE").Symbol("fields", "...").Symbol("RBRACE").Commit();
-    syntax.Formula("fields").Symbol("field", "object").Commit();
-    syntax.Formula("fields").Symbol("fields", "...").Symbol("COMMA").Symbol("field", "object").Commit();
-    syntax.Formula("field").Symbol("STRING", "key").Symbol("COLON").Symbol("json", "value").Commit();
-    syntax.Formula("array").Symbol("LBRACKET", "empty_array").Symbol("RBRACKET").Commit();
-    syntax.Formula("array").Symbol("LBRACKET").Symbol("elements", "...").Symbol("RBRACKET").Commit();
-    syntax.Formula("elements").Symbol("json", "array").Commit();
-    syntax.Formula("elements").Symbol("elements", "...").Symbol("COMMA").Symbol("json", "array").Commit();
-    syntax.Formula("string").Symbol("STRING", "string").Commit();
-    syntax.Formula("number").Symbol("NUMBER", "number").Commit();
-    syntax.Formula("boolean").Symbol("TRUE", "boolean").Commit();
-    syntax.Formula("boolean").Symbol("FALSE", "boolean").Commit();
-    syntax.Formula("null").Symbol("JNULL", "null").Commit();
-    syntax.Formula("annotation_body").Symbol("LBRACE").Symbol("attributes", "...").Symbol("RBRACE").Commit();
-    syntax.Formula("attributes").Symbol("attribute", "attributes").Commit();
-    syntax.Formula("attributes").Symbol("attributes", "...").Symbol("COMMA").Symbol("attribute", "attributes").Commit();
-    syntax.Formula("attribute").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
-      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
-      .Commit();
-    syntax.Formula("attribute").Symbol("ID", "of").Symbol("DOT").Symbol("ID", "key").Symbol("COLON").Symbol("json", "value")
-      .Annotate("key", "tokenize", R"({"modifier":["modification"],"type":"property"})"_json)
-      .Annotate("of", "tokenize", R"({"type":"property"})"_json)
-      .Commit();
     
     return syntax.Build();
   }();
@@ -603,59 +423,94 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
 
 namespace grammar {
 
-inline std::vector<Attribute> Annotation::attributes() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("attributes"), [](auto n) { return n->template As<Attribute>(); }); }
-inline std::vector<Selector> Annotation::selectors() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("selectors"), [](auto n) { return n->template As<Selector>(); }); }
+inline alioth::AST EmptyFormula::empty() const { 
+  return node->Attr("empty");
+}
 
-inline alioth::AST Attribute::key() const { return node->Attr("key"); }
-inline alioth::AST Attribute::of() const { return node->Attr("of"); }
-inline Json Attribute::value() const { return node->Attr("value")->template As<Json>(); }
+inline std::vector<Symbol> Formula::symbols() const { 
+  return alioth::generic::collect<alioth::generic::multiple>(
+    node->Attrs("symbols"), 
+    [](auto n) {
+      return alioth::ViewOf<Symbol>(n);
+    }
+  );
+}
 
-inline alioth::AST EmptyFormula::empty() const { return node->Attr("empty"); }
+inline std::vector<Assignment> Grammar::assignments() const { 
+  return alioth::generic::collect<alioth::generic::multiple>(
+    node->Attrs("assignments"), 
+    [](auto n) {
+      return n->template As<Assignment>();
+    }
+  );
+}
+inline std::vector<Import> Grammar::imports() const { 
+  return alioth::generic::collect<alioth::generic::multiple>(
+    node->Attrs("imports"), 
+    [](auto n) {
+      return alioth::ViewOf<Import>(n);
+    }
+  );
+}
+inline alioth::AST Grammar::lang() const { 
+  return node->Attr("lang");
+}
+inline std::vector<Ntrm> Grammar::ntrms() const { 
+  return alioth::generic::collect<alioth::generic::multiple>(
+    node->Attrs("ntrms"), 
+    [](auto n) {
+      return alioth::ViewOf<Ntrm>(n);
+    }
+  );
+}
+inline std::vector<Term> Grammar::terms() const { 
+  return alioth::generic::collect<alioth::generic::multiple>(
+    node->Attrs("terms"), 
+    [](auto n) {
+      return alioth::ViewOf<Term>(n);
+    }
+  );
+}
 
-inline alioth::AST Field::key() const { return node->Attr("key"); }
-inline Json Field::value() const { return node->Attr("value")->template As<Json>(); }
+inline alioth::AST Import::alias() const { 
+  return node->Attr("alias");
+}
+inline alioth::AST Import::from() const { 
+  return node->Attr("from");
+}
 
-inline std::vector<Attribute> Formula::attributes() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("attributes"), [](auto n) { return n->template As<Attribute>(); }); }
-inline std::vector<Symbol> Formula::symbols() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("symbols"), [](auto n) { return n->template As<Symbol>(); }); }
+inline alioth::AST Ntrm::form() const { 
+  return node->Attr("form");
+}
+inline std::vector<alioth::AST> Ntrm::formulas() const { 
+  return node->Attrs("formulas"); 
+}
+inline alioth::AST Ntrm::name() const { 
+  return node->Attr("name");
+}
 
-inline std::vector<Annotation> Grammar::annotations() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("annotations"), [](auto n) { return n->template As<Annotation>(); }); }
-inline std::vector<alioth::AST> Grammar::external_annotations() const { return node->Attrs("external_annotations"); }
-inline std::vector<Import> Grammar::imports() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("imports"), [](auto n) { return n->template As<Import>(); }); }
-inline std::vector<Ntrm> Grammar::ntrms() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("ntrms"), [](auto n) { return n->template As<Ntrm>(); }); }
-inline std::vector<Option> Grammar::options() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("options"), [](auto n) { return n->template As<Option>(); }); }
-inline std::vector<Term> Grammar::terms() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("terms"), [](auto n) { return n->template As<Term>(); }); }
+inline alioth::AST Symbol::attr() const { 
+  return node->Attr("attr");
+}
+inline alioth::AST Symbol::name() const { 
+  return node->Attr("name");
+}
+inline alioth::AST Symbol::optional() const { 
+  return node->Attr("optional");
+}
 
-inline alioth::AST Import::alias() const { return node->Attr("alias"); }
-inline alioth::AST Import::lang() const { return node->Attr("lang"); }
-
-inline std::vector<Json> Json::array() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("array"), [](auto n) { return n->template As<Json>(); }); }
-inline alioth::AST Json::boolean() const { return node->Attr("boolean"); }
-inline alioth::AST Json::empty_array() const { return node->Attr("empty_array"); }
-inline alioth::AST Json::empty_object() const { return node->Attr("empty_object"); }
-inline alioth::AST Json::null() const { return node->Attr("null"); }
-inline alioth::AST Json::number() const { return node->Attr("number"); }
-inline std::vector<Field> Json::object() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("object"), [](auto n) { return n->template As<Field>(); }); }
-inline alioth::AST Json::string() const { return node->Attr("string"); }
-
-inline alioth::AST Ntrm::form() const { return node->Attr("form"); }
-inline std::vector<alioth::AST> Ntrm::formulas() const { return node->Attrs("formulas"); }
-inline alioth::AST Ntrm::name() const { return node->Attr("name"); }
-
-inline alioth::AST Option::key() const { return node->Attr("key"); }
-inline Json Option::value() const { return node->Attr("value")->template As<Json>(); }
-
-inline alioth::AST Selector::form() const { return node->Attr("form"); }
-inline alioth::AST Selector::symbol() const { return node->Attr("symbol"); }
-
-inline alioth::AST Symbol::attr() const { return node->Attr("attr"); }
-inline alioth::AST Symbol::name() const { return node->Attr("name"); }
-inline alioth::AST Symbol::optional() const { return node->Attr("optional"); }
-
-inline std::vector<Attribute> Term::attributes() const { return alioth::generic::collect<alioth::generic::multiple>(node->Attrs("attributes"), [](auto n) { return n->template As<Attribute>(); }); }
-inline std::vector<alioth::AST> Term::contexts() const { return node->Attrs("contexts"); }
-inline alioth::AST Term::ignore() const { return node->Attr("ignore"); }
-inline alioth::AST Term::name() const { return node->Attr("name"); }
-inline alioth::AST Term::regex() const { return node->Attr("regex"); }
+inline std::vector<alioth::AST> Term::contexts() const { 
+  return node->Attrs("contexts"); 
+}
+inline alioth::AST Term::ignore() const { 
+  return node->Attr("ignore");
+}
+inline alioth::AST Term::name() const { 
+  return node->Attr("name");
+}
+inline alioth::AST Term::regex() const { 
+  return node->Attr("regex");
+}
 
 
 

@@ -90,6 +90,8 @@ void Skeleton::DeduceStructures(Skeleton& lang) {
     growing = false;
     for (auto formula = 0UL; formula < syntax->formulas.size(); ++formula) {
       auto const& f = syntax->formulas[formula];
+      if (f.lang) continue;
+
       auto& structure = lang.structures[f.head];
 
       /**
@@ -161,8 +163,10 @@ void Skeleton::DeduceForms(Skeleton& lang) {
    */
   std::vector<Attributes> formula_attributes(syntax->formulas.size());
   for (auto formula = 0UL; formula < syntax->formulas.size(); ++formula) {
-    auto& attrs = formula_attributes.at(formula);
     auto const& f = syntax->formulas.at(formula);
+    if (f.lang) continue;
+
+    auto& attrs = formula_attributes.at(formula);
 
     std::set<std::string> seen{};
     for (auto const& symbol : f.body) {
@@ -198,6 +202,8 @@ void Skeleton::DeduceForms(Skeleton& lang) {
    */
   for (auto formula = 0UL; formula < syntax->formulas.size(); ++formula) {
     auto const& f = syntax->formulas.at(formula);
+    if (f.lang) continue;
+
     auto& structure = lang.structures[f.head];
 
     if (!f.form) continue;
@@ -237,6 +243,7 @@ void Skeleton::PropagateForms(Skeleton& lang) {
   std::map<SymbolID, std::set<FormulaID>> unfolding;
   for (auto formula = 0UL; formula < syntax->formulas.size(); ++formula) {
     auto& f = syntax->formulas.at(formula);
+    if (f.lang) continue;
     if (f.form) continue;
     if (f.body.size() != 1) continue;
     if (f.body.front().attr.value_or("") != "...") continue;
@@ -316,6 +323,7 @@ void Skeleton::ReplaceEquivalentCandidates(Skeleton& lang) {
   std::map<SymbolID, SymbolID> mappings;  // lower -> higher
   for (auto formula = 0UL; formula < syntax->formulas.size(); ++formula) {
     auto& f = syntax->formulas.at(formula);
+    if (f.lang) continue;
     if (f.form) continue;
     if (f.body.size() != 1) continue;
     if (f.body.front().attr.value_or("") != "...") continue;

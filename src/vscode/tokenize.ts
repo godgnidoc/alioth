@@ -26,7 +26,7 @@ export function tokenizer(context: vscode.ExtensionContext) {
         console.log("Tokenizing document: " + document.fileName);
         const aliothHome = context.extensionPath;
 
-        const proc = spawnSync(join(aliothHome, "build/x64-linux-release/alioth"), [
+        const proc = spawnSync(join(aliothHome, "build/x64-linux-debug/alioth"), [
             "parse",
             "-u",
             "-f",
