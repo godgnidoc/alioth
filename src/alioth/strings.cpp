@@ -7,6 +7,7 @@
 
 #include "alioth/error.h"
 #include "alioth/strings.h"
+#include "nlohmann/json.hpp"
 
 namespace alioth {
 
@@ -161,6 +162,18 @@ std::string Strings::Titlecase(std::string const& str) {
     }
   }
   return result;
+}
+
+std::string Strings::Parse(std::string const& str) {
+  auto json = nlohmann::json::parse(str);
+  return json.get<std::string>();
+}
+
+std::filesystem::path Paths::RelativeTo(std::filesystem::path const& file,
+                                        std::filesystem::path target) {
+  if (target.is_absolute()) return target;
+
+  return file.parent_path() / target;
 }
 
 std::set<char>& operator+=(std::set<char>& lhs, std::string const& rhs) {

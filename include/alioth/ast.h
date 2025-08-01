@@ -258,6 +258,22 @@ inline Lang ViewOf(ASTNtrm root) {
   return root->Attr(SyntaxOf<Lang>()->Lang())->template As<Lang>();
 }
 
+/**
+ * 语法树视图基本结构
+ */
+struct ASTView : public AST {
+  ASTView(AST const& node = {}) : AST{node} {}
+
+  ASTView& operator=(AST const& node) {
+    static_cast<AST&>(*this) = node;
+    return *this;
+  }
+
+  operator AST const&() const { return static_cast<AST const&>(*this); }
+
+  operator AST&() { return static_cast<AST&>(*this); }
+};
+
 }  // namespace alioth
 
 #endif

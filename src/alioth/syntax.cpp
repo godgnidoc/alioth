@@ -270,13 +270,13 @@ Syntactic::Builder& Syntactic::Builder::Ignore(std::string const& name) {
   throw UnknownTermError{name};
 }
 
-Syntactic::Builder& Syntactic::Builder::Import(
-    Syntax syntax, std::optional<std::string> const& alias) {
-  auto name = alias.value_or(syntax->Lang());
-  auto head = syntax_->lex->terms.size() + syntax_->ntrms.size();
-  if (head != TouchNtrm(name)) {
+Syntactic::Builder& Syntactic::Builder::Import(Syntax syntax,
+                                               std::string const& name) {
+  auto head = TouchNtrm(name);
+  if (!ntrms_.at(head).formulas.empty()) {
     throw AlreadyImportedError(syntax->Lang());
   }
+
   auto formula = syntax_->formulas.size();
   Formula(head).Commit();
   syntax_->formulas.at(formula).lang = syntax;

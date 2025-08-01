@@ -17,7 +17,6 @@
 #include "{{lowercase(formula.lang)}}/syntax.h"
 {{- end if }}
 {{ end for }}
-
 namespace {{lowercase(lang)}} {
 
 {{ for@terms term, id in syntax.lex.terms -}}{{ if nonfirst@terms }}
@@ -34,7 +33,7 @@ using {{ camelcase(nameOf(formula.head)) }} = ::{{ lowercase(formula.lang) }}::{
 {{ end for }}
 
 {{ for s, name in skeleton -}}
-struct {{ camelcase(name) }} {
+struct {{ camelcase(name) }} : public alioth::ASTView {
   {{ if s.forms -}}{{ -- 产生式有句型分组 }}
   {{--}}{{ for f, fname in s.forms -}}
   {{--  }}struct {{camelcase(fname)}};
@@ -46,12 +45,7 @@ struct {{ camelcase(name) }} {
   }}{{ if s.common_attributes -}}
   {{ call "declare_attributes.template" with s.common_attributes as model }}
   {{- end if }}
-  alioth::AST node{};
-
-  operator alioth::AST() const { return node; }
-  operator bool() const { return node != nullptr; }
-  alioth::ASTNode* operator->() const { return node.get(); }
-  alioth::ASTNode& operator*() const { return *node; }
+  using ASTView::ASTView;
 };
 {{ if s.forms -}}
 {{ for f, fname in s.forms -}}
@@ -102,20 +96,19 @@ inline {{lowercase(lang)}}::{{ camelcase(name) }}::{{camelcase(fname)}} alioth::
 namespace {{lowercase(lang)}} {
 
 {{ for s, name in skeleton -}}
-{{ if s.attributes -}}{{ -- 产生式没有句型分组 }}
+{{ if s.forms -}}{{ -- 产生式有句型分组 }}
+{{ for f, fname in s.forms -}}
+{{ if f.attributes -}}
+{{ call "implement_attributes.template" with f.attributes as model, name as name, fname as form }}
+{{- end if }}
+{{ end for }}
+{{ else if s.attributes -}}{{ -- 产生式没有句型分组 }}
 {{ call "implement_attributes.template" with s.attributes as model, name as name }}
 {{- end if }}{{
 -----------------
 }}{{ if s.common_attributes -}}
 {{ call "implement_attributes.template" with s.common_attributes as model, name as name }}
 {{- end if }}
-{{ if s.forms -}}
-{{ for f, fname in s.forms -}}
-{{ if f.attributes -}}
-{{ call "implement_attributes.template" with f.attributes as model, name as name, fname as form }}
-{{- end if }}
-{{ end for }}
-{{ end if }}
 {{ end for }}
 
 }

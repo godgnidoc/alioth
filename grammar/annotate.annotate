@@ -1,3 +1,0 @@
-lang: annotate
-
-COMMENT { tokenize: { "type": "comment" } }

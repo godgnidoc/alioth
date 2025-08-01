@@ -264,14 +264,12 @@ class Syntactic::Builder {
   Builder& Ignore(std::string const& name);
 
   /**
-   * 导入一种语言用作一个非终结符
-   *
-   * 默认情况下使用语言名作为非终结符名，可选地可以为其指定一个别名
+   * 导入一种语言用作一个非终结符指定一个本地别名
    *
    * @param synatx 语法规则
-   * @param alias 导入非终结符的别名
+   * @param name 导入非终结符的别名
    */
-  Builder& Import(Syntax synatx, std::optional<std::string> const& alias = {});
+  Builder& Import(Syntax synatx, std::string const& name);
 
   /**
    * 创建LALR(1)语法规则

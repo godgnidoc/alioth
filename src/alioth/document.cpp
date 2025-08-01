@@ -30,7 +30,10 @@ Point Document::PointAt(size_t offset) const {
 
 Doc Document::Create(std::string const& content,
                      std::optional<std::filesystem::path> const& path) {
-  return std::make_shared<Document>(Document{content, path});
+  if (!path) return std::make_shared<Document>(Document{content});
+
+  return std::make_shared<Document>(
+      Document{content, std::filesystem::canonical(*path)});
 }
 
 Doc Document::Read(std::filesystem::path const& path,
@@ -47,7 +50,7 @@ Doc Document::Read(std::filesystem::path const& path,
 Doc Document::Read() {
   std::string text;
   std::getline(std::cin, text, '\0');
-  return Create(std::move(text), "<stdin>");
+  return Create(std::move(text));
 }
 
 nlohmann::json Point::Store() const {

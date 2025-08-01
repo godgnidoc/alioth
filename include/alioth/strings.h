@@ -1,6 +1,7 @@
 #ifndef __ALIOTH_STRINGS_H__
 #define __ALIOTH_STRINGS_H__
 
+#include <filesystem>
 #include <set>
 #include <string>
 
@@ -55,6 +56,25 @@ struct Strings {
   static std::string Lowercase(std::string const& str);
   static std::string Camelcase(std::string const& str);
   static std::string Titlecase(std::string const& str);
+
+  /**
+   * 解析Json格式字符串
+   * 
+   * @param str 字符串
+   */
+  static std::string Parse(std::string const& str);
+};
+
+struct Paths {
+  /**
+   * 基于`file`所在路径查找`target`路径 `file/../target`
+   * 若`target`是绝对路径，则直接返回
+   * 
+   * @param file 文件路径
+   * @param target 目标路径
+   */
+  static std::filesystem::path RelativeTo(std::filesystem::path const& file,
+                                          std::filesystem::path target);
 };
 
 std::set<char>& operator+=(std::set<char>& lhs, std::string const& rhs);

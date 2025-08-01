@@ -139,6 +139,20 @@ inline auto associate(auto const& container) {
   }
 }
 
+inline bool every(auto const& container, auto const& predicate) {
+  for (auto const& it : container) {
+    if (!predicate(it)) return false;
+  }
+  return true;
+}
+
+inline bool some(auto const& container, auto const& predicate) {
+  for (auto const& it : container) {
+    if (predicate(it)) return true;
+  }
+  return false;
+}
+
 struct text {
   template <typename T>
   auto operator()(T const& it) const {
