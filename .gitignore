@@ -3,7 +3,10 @@
 /build/
 /release/
 /.vscode/
+/vcpkg_installed/
 
 CMakeUserPresets.json
 node_modules
 tsconfig.tsbuildinfo
+_codeql_detected_source_root
+package-lock.json

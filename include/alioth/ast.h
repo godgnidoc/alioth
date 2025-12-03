@@ -268,10 +268,6 @@ struct ASTView : public AST {
     static_cast<AST&>(*this) = node;
     return *this;
   }
-
-  operator AST const&() const { return static_cast<AST const&>(*this); }
-
-  operator AST&() { return static_cast<AST&>(*this); }
 };
 
 }  // namespace alioth

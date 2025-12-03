@@ -9,8 +9,8 @@ RBRACKET = /]/
 JNULL<json> = /null/
 TRUE<json> = /true/
 FALSE<json> = /false/
-STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/ { tokenize: { "type": "string" } }
-NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/ { tokenize: { "type": "number" } }
+STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/
+NUMBER<json> = /-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/
 SPACE ?= /\s+/
 
 json -> ...object

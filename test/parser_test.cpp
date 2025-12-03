@@ -153,7 +153,7 @@ TEST(Parser, Importing) {
     lex.Define("SPACES", "\\s+"_regex);
     auto syntax = Syntactic::Builder(lex.Build());
     syntax.Ignore("SPACES");
-    syntax.Import(json);
+    syntax.Import(json, "json");
     syntax.Formula("mark").Symbol("TEXT", "frags").Commit();
     syntax.Formula("mark")
         .Symbol("CODE_START")
