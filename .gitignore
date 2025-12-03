@@ -3,6 +3,7 @@
 /build/
 /release/
 /.vscode/
+/vcpkg_installed/
 
 CMakeUserPresets.json
 node_modules
