@@ -3,6 +3,7 @@
 #include "alioth-cli/syntax.h"
 #include "alioth/document.h"
 #include "alioth/parser.h"
+#include "alioth/println_compat.h"
 #include "aliox/grammar.h"
 #include "aliox/skeleton.h"
 

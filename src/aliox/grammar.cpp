@@ -40,6 +40,10 @@ std::optional<std::string> GetForm(grammar::Ntrm const& ntrm) {
 }  // namespace
 
 Syntax Grammar::Compile(Doc grammar) {
+  return Compile(grammar, {});
+}
+
+Syntax Grammar::Compile(Doc grammar, ExternalLoader loader) {
   auto root = Parser(SyntaxOf<grammar::Grammar>(), grammar).Parse();
   auto g = ViewOf<grammar::Grammar>(root);
 
@@ -49,48 +53,36 @@ Syntax Grammar::Compile(Doc grammar) {
   
   // 处理终结符定义
   for (auto const& term : g.terms()) {
-    // 跳过 term.using，它是复用其他语言的终结符
-    // 在简化版中，我们不支持这个功能
-    auto use = term->As<grammar::Term::Using>();
-    if (use) {
-      continue;
-    }
-    
-    auto define = term->As<grammar::Term::Define>();
-    if (!define) continue;
-    
-    auto src = define.regex()->Text();
+    auto src = term.regex()->Text();
     auto regex = RegexTree::Compile(src.substr(1, src.size() - 2));
 
-    lex.Define(define.name()->Text(), regex, collect(define.contexts(), text()));
+    lex.Define(term.name()->Text(), regex, collect(term.contexts(), text()));
   }
 
   auto syntax = Syntactic::Builder(lex.Build());
 
   // 标记可忽略的终结符
   for (auto const& term : g.terms()) {
-    auto define = term->As<grammar::Term::Define>();
-    if (!define) continue;
-    
-    if (define.optional()) {
-      syntax.Ignore(define.name()->Text());
+    if (term.optional()) {
+      syntax.Ignore(term.name()->Text());
     }
   }
 
   // 处理非终结符定义
   for (auto const& ntrm : g.ntrms()) {
-    // 跳过 ntrm.external，它是引用外部文法
-    // 保留对外部符号机制的支持，但在这个简化版中只是跳过
+    // 处理外部符号: 导入其他语言作为外部符号
     auto external = ntrm->As<grammar::Ntrm::External>();
     if (external) {
-      // TODO: 外部非终结符需要从其他语言加载
-      continue;
-    }
-    
-    // 跳过 ntrm.using，它是复用其他语言的非终结符
-    // 在简化版中，我们不支持这个功能
-    auto use = ntrm->As<grammar::Ntrm::Using>();
-    if (use) {
+      auto grammarPath = external.grammar()->Text();
+      // 去除引号
+      grammarPath = grammarPath.substr(1, grammarPath.size() - 2);
+      
+      if (loader) {
+        auto externalSyntax = loader(grammarPath);
+        if (externalSyntax) {
+          syntax.Import(externalSyntax, external.name()->Text());
+        }
+      }
       continue;
     }
     

@@ -29,20 +29,18 @@ constexpr alioth::SymbolID DOT = 11;
 constexpr alioth::SymbolID ELLIPSES = 12;
 constexpr alioth::SymbolID EMPTY = 13;
 constexpr alioth::SymbolID LANG = 14;
-constexpr alioth::SymbolID USING = 15;
-constexpr alioth::SymbolID STRING = 16;
-constexpr alioth::SymbolID ID = 17;
-constexpr alioth::SymbolID REGEX = 18;
-constexpr alioth::SymbolID COMMENT = 19;
-constexpr alioth::SymbolID SPACE = 20;
+constexpr alioth::SymbolID STRING = 15;
+constexpr alioth::SymbolID ID = 16;
+constexpr alioth::SymbolID REGEX = 17;
+constexpr alioth::SymbolID COMMENT = 18;
+constexpr alioth::SymbolID SPACE = 19;
 
-struct EmptyFormula; // SymbolID = 33; Accepts: [33]
-struct Formula; // SymbolID = 32; Accepts: [32, 34]
-struct Grammar; // SymbolID = 22; Accepts: [22]
-struct Ntrm; // SymbolID = 28; Accepts: [28]
-struct Symbol; // SymbolID = 35; Accepts: [35]
-struct Term; // SymbolID = 27; Accepts: [27]
-struct Using; // SymbolID = 26; Accepts: [26]
+struct EmptyFormula; // SymbolID = 30
+struct Formula; // SymbolID = 29
+struct Grammar; // SymbolID = 21
+struct Ntrm; // SymbolID = 25
+struct Symbol; // SymbolID = 32
+struct Term; // SymbolID = 24
 
 
 
@@ -61,7 +59,6 @@ struct Grammar : public alioth::ASTView {
   alioth::AST lang() const;
   std::vector<Ntrm> ntrms() const;
   std::vector<Term> terms() const;
-  std::vector<Using> usings() const;
   using ASTView::ASTView;
 };
 
@@ -69,7 +66,6 @@ struct Ntrm : public alioth::ASTView {
   struct Define;
   struct External;
   struct Formed;
-  struct Using;
   
   alioth::AST name() const;
   using ASTView::ASTView;
@@ -93,12 +89,6 @@ struct Ntrm::Formed: public Ntrm {
   std::vector<alioth::AST> formulas() const;
   alioth::AST name() const;
 };
-struct Ntrm::Using: public Ntrm {
-  using Ntrm::Ntrm;
-
-  alioth::AST lang() const;
-  alioth::AST name() const;
-};
 
 
 struct Symbol : public alioth::ASTView {
@@ -109,30 +99,10 @@ struct Symbol : public alioth::ASTView {
 };
 
 struct Term : public alioth::ASTView {
-  struct Define;
-  struct Using;
-  
-  alioth::AST name() const;
-  using ASTView::ASTView;
-};
-struct Term::Define: public Term {
-  using Term::Term;
-
   std::vector<alioth::AST> contexts() const;
   alioth::AST name() const;
   alioth::AST optional() const;
   alioth::AST regex() const;
-};
-struct Term::Using: public Term {
-  using Term::Term;
-
-  alioth::AST lang() const;
-  alioth::AST name() const;
-};
-
-
-struct Using : public alioth::ASTView {
-  alioth::AST grammar() const;
   using ASTView::ASTView;
 };
 
@@ -143,7 +113,7 @@ namespace alioth {
 template<>
 inline grammar::EmptyFormula alioth::ASTNode::As<grammar::EmptyFormula>() {
   switch(id) {
-    case 33:
+    case 30:
     return grammar::EmptyFormula{shared_from_this()};
   default:
     return {};
@@ -153,7 +123,7 @@ inline grammar::EmptyFormula alioth::ASTNode::As<grammar::EmptyFormula>() {
 template<>
 inline grammar::Formula alioth::ASTNode::As<grammar::Formula>() {
   switch(id) {
-    case 32:case 34:
+    case 29: case 31:
     return grammar::Formula{shared_from_this()};
   default:
     return {};
@@ -163,7 +133,7 @@ inline grammar::Formula alioth::ASTNode::As<grammar::Formula>() {
 template<>
 inline grammar::Grammar alioth::ASTNode::As<grammar::Grammar>() {
   switch(id) {
-    case 22:
+    case 21:
     return grammar::Grammar{shared_from_this()};
   default:
     return {};
@@ -173,7 +143,7 @@ inline grammar::Grammar alioth::ASTNode::As<grammar::Grammar>() {
 template<>
 inline grammar::Ntrm alioth::ASTNode::As<grammar::Ntrm>() {
   switch(id) {
-    case 28:
+    case 25:
     return grammar::Ntrm{shared_from_this()};
   default:
     return {};
@@ -182,7 +152,7 @@ inline grammar::Ntrm alioth::ASTNode::As<grammar::Ntrm>() {
 template<>
 inline grammar::Ntrm::Define alioth::ASTNode::As<grammar::Ntrm::Define>() {
   switch(OriginFormula()) {
-    case 24:
+    case 16:
     return grammar::Ntrm::Define{shared_from_this()};
   default:
     return {};
@@ -191,7 +161,7 @@ inline grammar::Ntrm::Define alioth::ASTNode::As<grammar::Ntrm::Define>() {
 template<>
 inline grammar::Ntrm::External alioth::ASTNode::As<grammar::Ntrm::External>() {
   switch(OriginFormula()) {
-    case 26:case 27:
+    case 18:
     return grammar::Ntrm::External{shared_from_this()};
   default:
     return {};
@@ -200,17 +170,8 @@ inline grammar::Ntrm::External alioth::ASTNode::As<grammar::Ntrm::External>() {
 template<>
 inline grammar::Ntrm::Formed alioth::ASTNode::As<grammar::Ntrm::Formed>() {
   switch(OriginFormula()) {
-    case 25:
+    case 17:
     return grammar::Ntrm::Formed{shared_from_this()};
-  default:
-    return {};
-  }
-}
-template<>
-inline grammar::Ntrm::Using alioth::ASTNode::As<grammar::Ntrm::Using>() {
-  switch(OriginFormula()) {
-    case 28:
-    return grammar::Ntrm::Using{shared_from_this()};
   default:
     return {};
   }
@@ -220,7 +181,7 @@ inline grammar::Ntrm::Using alioth::ASTNode::As<grammar::Ntrm::Using>() {
 template<>
 inline grammar::Symbol alioth::ASTNode::As<grammar::Symbol>() {
   switch(id) {
-    case 35:
+    case 32:
     return grammar::Symbol{shared_from_this()};
   default:
     return {};
@@ -230,37 +191,8 @@ inline grammar::Symbol alioth::ASTNode::As<grammar::Symbol>() {
 template<>
 inline grammar::Term alioth::ASTNode::As<grammar::Term>() {
   switch(id) {
-    case 27:
+    case 24:
     return grammar::Term{shared_from_this()};
-  default:
-    return {};
-  }
-}
-template<>
-inline grammar::Term::Define alioth::ASTNode::As<grammar::Term::Define>() {
-  switch(OriginFormula()) {
-    case 16:case 17:case 18:case 19:
-    return grammar::Term::Define{shared_from_this()};
-  default:
-    return {};
-  }
-}
-template<>
-inline grammar::Term::Using alioth::ASTNode::As<grammar::Term::Using>() {
-  switch(OriginFormula()) {
-    case 20:
-    return grammar::Term::Using{shared_from_this()};
-  default:
-    return {};
-  }
-}
-
-
-template<>
-inline grammar::Using alioth::ASTNode::As<grammar::Using>() {
-  switch(id) {
-    case 26:
-    return grammar::Using{shared_from_this()};
   default:
     return {};
   }
@@ -273,87 +205,83 @@ inline Syntax SyntaxOf<grammar::Grammar>() {
     using namespace nlohmann;
     auto lex = Lexicon::Builder("grammar");
     lex.Define("ARROW", R"(->)"_regex);
-    
     lex.Define("LT", R"(<)"_regex);
-    
     lex.Define("GT", R"(>)"_regex);
-    
     lex.Define("OR", R"(\|)"_regex);
-    
     lex.Define("ASSIGN", R"(=)"_regex);
-    
     lex.Define("OPTIONAL", R"(\?)"_regex);
-    
     lex.Define("AT", R"(@)"_regex);
-    
     lex.Define("SEMICOLON", R"(;)"_regex);
-    
     lex.Define("COLON", R"(:)"_regex);
-    
     lex.Define("COMMA", R"(,)"_regex);
-    
     lex.Define("DOT", R"(\.)"_regex);
-    
     lex.Define("ELLIPSES", R"(\.\.\.)"_regex);
-    
     lex.Define("EMPTY", R"(%empty)"_regex);
-    
     lex.Define("LANG", R"(lang)"_regex, { "keyword",  });
-    
-    lex.Define("USING", R"(using)"_regex, { "keyword",  });
-    
     lex.Define("STRING", R"(\"([^\"\n\\]|\\[^\n])*\")"_regex, { "json",  });
-    
     lex.Define("ID", R"([a-zA-Z_]\w*)"_regex);
-    
     lex.Define("REGEX", R"(\/([^\\\/]|\\[^\n])+\/)"_regex);
-    
     lex.Define("COMMENT", R"(#[^\n]*\n)"_regex);
-    
     lex.Define("SPACE", R"(\s+)"_regex);
-    
     
     auto syntax = Syntactic::Builder(lex.Build());
     syntax.Ignore("SEMICOLON");
     syntax.Ignore("COMMENT");
     syntax.Ignore("SPACE");
     
+    // grammar -> LANG COLON ID@lang ...terms? ...ntrms?;
     syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Commit();
-    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("usings", "...").Commit();
     syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("terms", "...").Commit();
-    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("usings", "...").Symbol("terms", "...").Commit();
     syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("ntrms", "...").Commit();
-    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("usings", "...").Symbol("ntrms", "...").Commit();
     syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax.Formula("grammar").Symbol("LANG").Symbol("COLON").Symbol("ID", "lang").Symbol("usings", "...").Symbol("terms", "...").Symbol("ntrms", "...").Commit();
-    syntax.Formula("usings").Symbol("using", "usings").Commit();
-    syntax.Formula("usings").Symbol("usings", "...").Symbol("using", "usings").Commit();
+    
+    // terms -> ...terms? term@terms;
     syntax.Formula("terms").Symbol("term", "terms").Commit();
     syntax.Formula("terms").Symbol("terms", "...").Symbol("term", "terms").Commit();
+    
+    // ntrms -> ...ntrms? ntrm@ntrms;
     syntax.Formula("ntrms").Symbol("ntrm", "ntrms").Commit();
     syntax.Formula("ntrms").Symbol("ntrms", "...").Symbol("ntrm", "ntrms").Commit();
-    syntax.Formula("using").Symbol("USING").Symbol("STRING", "grammar").Commit();
-    syntax.Formula("term", "define").Symbol("ID", "name").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
-    syntax.Formula("term", "define").Symbol("ID", "name").Symbol("contexts", "...").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
-    syntax.Formula("term", "define").Symbol("ID", "name").Symbol("OPTIONAL", "optional").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
-    syntax.Formula("term", "define").Symbol("ID", "name").Symbol("contexts", "...").Symbol("OPTIONAL", "optional").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
-    syntax.Formula("term", "using").Symbol("ELLIPSES").Symbol("ASSIGN").Symbol("ID", "lang").Symbol("DOT").Symbol("ID", "name").Commit();
+    
+    // term -> ID@name ...contexts? OPTIONAL?@optional ASSIGN REGEX@regex;
+    syntax.Formula("term").Symbol("ID", "name").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("OPTIONAL", "optional").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
+    syntax.Formula("term").Symbol("ID", "name").Symbol("contexts", "...").Symbol("OPTIONAL", "optional").Symbol("ASSIGN").Symbol("REGEX", "regex").Commit();
+    
+    // contexts -> LT ...context_list GT;
     syntax.Formula("contexts").Symbol("LT").Symbol("context_list", "...").Symbol("GT").Commit();
+    
+    // context_list -> ID@contexts | ...context_list COMMA ID@contexts;
     syntax.Formula("context_list").Symbol("ID", "contexts").Commit();
     syntax.Formula("context_list").Symbol("context_list", "...").Symbol("COMMA").Symbol("ID", "contexts").Commit();
+    
+    // ntrm.define -> ID@name ARROW ...formula_group SEMICOLON;
     syntax.Formula("ntrm", "define").Symbol("ID", "name").Symbol("ARROW").Symbol("formula_group", "...").Symbol("SEMICOLON").Commit();
+    
+    // ntrm.formed -> ID@name DOT ID@form ARROW ...formula_group SEMICOLON;
     syntax.Formula("ntrm", "formed").Symbol("ID", "name").Symbol("DOT").Symbol("ID", "form").Symbol("ARROW").Symbol("formula_group", "...").Symbol("SEMICOLON").Commit();
+    
+    // ntrm.external -> ID@name ARROW STRING@grammar SEMICOLON;
     syntax.Formula("ntrm", "external").Symbol("ID", "name").Symbol("ARROW").Symbol("STRING", "grammar").Symbol("SEMICOLON").Commit();
-    syntax.Formula("ntrm", "external").Symbol("ELLIPSES").Symbol("ARROW").Symbol("STRING", "grammar").Symbol("SEMICOLON").Commit();
-    syntax.Formula("ntrm", "using").Symbol("ELLIPSES").Symbol("ARROW").Symbol("ID", "lang").Symbol("DOT").Symbol("ID", "name").Symbol("SEMICOLON").Commit();
+    
+    // formula_group -> formula@formulas | empty_formula@formulas | ...formula_group OR formula@formulas | ...formula_group OR empty_formula@formulas;
     syntax.Formula("formula_group").Symbol("formula", "formulas").Commit();
     syntax.Formula("formula_group").Symbol("empty_formula", "formulas").Commit();
     syntax.Formula("formula_group").Symbol("formula_group", "...").Symbol("OR").Symbol("formula", "formulas").Commit();
     syntax.Formula("formula_group").Symbol("formula_group", "...").Symbol("OR").Symbol("empty_formula", "formulas").Commit();
+    
+    // formula -> ...formula_body;
     syntax.Formula("formula").Symbol("formula_body", "...").Commit();
+    
+    // formula_body -> ...formula_body? symbol@symbols;
     syntax.Formula("formula_body").Symbol("symbol", "symbols").Commit();
     syntax.Formula("formula_body").Symbol("formula_body", "...").Symbol("symbol", "symbols").Commit();
+    
+    // empty_formula -> EMPTY@empty;
     syntax.Formula("empty_formula").Symbol("EMPTY", "empty").Commit();
+    
+    // symbol -> ID@name OPTIONAL?@optional | ID@name OPTIONAL?@optional AT ID@attr | ELLIPSES@attr ID@name OPTIONAL?@optional;
     syntax.Formula("symbol").Symbol("ID", "name").Commit();
     syntax.Formula("symbol").Symbol("ID", "name").Symbol("OPTIONAL", "optional").Commit();
     syntax.Formula("symbol").Symbol("ID", "name").Symbol("AT").Symbol("ID", "attr").Commit();
@@ -400,14 +328,6 @@ inline std::vector<Term> Grammar::terms() const {
     }
   );
 }
-inline std::vector<Using> Grammar::usings() const { 
-  return alioth::generic::collect<alioth::generic::multiple>(
-    (*this)->Attrs("usings"), 
-    [](auto n) {
-      return n->template As<Using>();
-    }
-  );
-}
 inline std::vector<alioth::AST> Ntrm::Define::formulas() const { 
   return (*this)->Attrs("formulas"); 
 }
@@ -429,12 +349,6 @@ inline std::vector<alioth::AST> Ntrm::Formed::formulas() const {
 inline alioth::AST Ntrm::Formed::name() const { 
   return (*this)->Attr("name");
 }
-inline alioth::AST Ntrm::Using::lang() const { 
-  return (*this)->Attr("lang");
-}
-inline alioth::AST Ntrm::Using::name() const { 
-  return (*this)->Attr("name");
-}
 
 inline alioth::AST Ntrm::name() const { 
   return (*this)->Attr("name");
@@ -448,30 +362,17 @@ inline alioth::AST Symbol::name() const {
 inline alioth::AST Symbol::optional() const { 
   return (*this)->Attr("optional");
 }
-inline std::vector<alioth::AST> Term::Define::contexts() const { 
+inline std::vector<alioth::AST> Term::contexts() const { 
   return (*this)->Attrs("contexts"); 
 }
-inline alioth::AST Term::Define::name() const { 
-  return (*this)->Attr("name");
-}
-inline alioth::AST Term::Define::optional() const { 
-  return (*this)->Attr("optional");
-}
-inline alioth::AST Term::Define::regex() const { 
-  return (*this)->Attr("regex");
-}
-inline alioth::AST Term::Using::lang() const { 
-  return (*this)->Attr("lang");
-}
-inline alioth::AST Term::Using::name() const { 
-  return (*this)->Attr("name");
-}
-
 inline alioth::AST Term::name() const { 
   return (*this)->Attr("name");
 }
-inline alioth::AST Using::grammar() const { 
-  return (*this)->Attr("grammar");
+inline alioth::AST Term::optional() const { 
+  return (*this)->Attr("optional");
+}
+inline alioth::AST Term::regex() const { 
+  return (*this)->Attr("regex");
 }
 
 

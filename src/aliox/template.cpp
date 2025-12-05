@@ -4,6 +4,7 @@
 
 #include "alioth/alioth.h"
 #include "alioth/parser.h"
+#include "alioth/println_compat.h"
 #include "aliox/grammar.h"
 #include "fmt/format.h"
 #include "nlohmann/json.hpp"

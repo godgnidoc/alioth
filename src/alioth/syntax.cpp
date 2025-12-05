@@ -2,6 +2,8 @@
 
 #include <tuple>
 
+#include "alioth/println_compat.h"
+
 namespace alioth {
 
 bool Syntactic::IsTerm(SymbolID id) const {

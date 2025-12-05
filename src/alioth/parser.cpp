@@ -1,5 +1,7 @@
 #include "alioth/parser.h"
 
+#include "alioth/println_compat.h"
+
 namespace alioth {
 
 Parser::Parser(Syntax syntax, Doc doc) : Parser(syntax, doc, {}) {}
