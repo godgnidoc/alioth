@@ -17,31 +17,24 @@ DOT = /\./
 ELLIPSES = /\.\.\./
 EMPTY = /%empty/
 LANG<keyword> = /lang/
-USING<keyword> = /using/
 STRING<json> = /\"([^\"\n\\]|\\[^\n])*\"/
 ID = /[a-zA-Z_]\w*/
 REGEX = /\/([^\\\/]|\\[^\n])+\//
 COMMENT ?= /#[^\n]*\n/
 SPACE ?= /\s+/
 
-grammar -> LANG COLON ID@lang ...usings? ...terms? ...ntrms?;
-usings -> ...usings? using@usings;
+grammar -> LANG COLON ID@lang ...terms? ...ntrms?;
 terms -> ...terms? term@terms;
 ntrms -> ...ntrms? ntrm@ntrms;
 
-using -> USING STRING@grammar;
-
-term.define -> ID@name ...contexts? OPTIONAL?@optional ASSIGN REGEX@regex;
-term.using -> ELLIPSES ASSIGN ID@lang DOT ID@name;
+term -> ID@name ...contexts? OPTIONAL?@optional ASSIGN REGEX@regex;
 contexts -> LT ...context_list GT;
 context_list -> ID@contexts
     | ...context_list COMMA ID@contexts;
 
-ntrm.define -> ID@name  ARROW ...formula_group SEMICOLON;
+ntrm.define -> ID@name ARROW ...formula_group SEMICOLON;
 ntrm.formed -> ID@name DOT ID@form ARROW ...formula_group SEMICOLON;
 ntrm.external -> ID@name ARROW STRING@grammar SEMICOLON;
-ntrm.external -> ELLIPSES ARROW STRING@grammar SEMICOLON;
-ntrm.using -> ELLIPSES ARROW ID@lang DOT ID@name SEMICOLON;
 
 formula_group -> formula@formulas
     | empty_formula@formulas
