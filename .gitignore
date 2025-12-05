@@ -4,6 +4,7 @@
 /release/
 /.vscode/
 /vcpkg_installed/
+/_codeql_build_dir/
 
 CMakeUserPresets.json
 node_modules

@@ -1,5 +1,0 @@
-if(EXISTS "/home/runner/work/alioth/alioth/_codeql_build_dir/test/alioth-test[1]_tests.cmake")
-  include("/home/runner/work/alioth/alioth/_codeql_build_dir/test/alioth-test[1]_tests.cmake")
-else()
-  add_test(alioth-test_NOT_BUILT alioth-test_NOT_BUILT)
-endif()
