@@ -7,3 +7,7 @@
 CMakeUserPresets.json
 node_modules
 tsconfig.tsbuildinfo
+
+# Added by cargo
+
+/target
